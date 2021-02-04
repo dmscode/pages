@@ -1,6 +1,8 @@
 Super simple Ink screen Clock.
 ===
 
+点此进入：[Ink Clock](https://pages.izyx.xyz/ink-clock/)
+
 正如标题，这是一个非常简单的针对墨水屏的数字时钟。
 
 它的设计目标是希望让我们吃灰的泡面盖儿（Kindle）可以发挥余热。所以真的就只是一个数字时钟，没有一点点裤穿的效果。
