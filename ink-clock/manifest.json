@@ -1,11 +1,16 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Ink Clock",
+  "name": "Super simple Ink screen Clock.",
   "icons": [
     {
       "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
+    },
+    {
+      "src": "logo64.png",
+      "type": "image/png",
+      "sizes": "64x64"
     },
     {
       "src": "logo192.png",
@@ -18,8 +23,8 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
+  "start_url": "./ink-clock/",
+  "display": "fullscreen",
+  "theme_color": "#666668",
   "background_color": "#ffffff"
 }
