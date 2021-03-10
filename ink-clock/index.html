@@ -1,1 +1,116 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><link rel="icon" href="/ink-clock/favicon.ico"/><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/><meta name="theme-color" content="#000000"/><meta name="description" content="Super simple Ink screen Clock."/><link rel="apple-touch-icon" href="/ink-clock/logo192.png"/><link rel="manifest" href="/ink-clock/manifest.json"/><title>Super simple Ink screen Clock.</title><link href="/ink-clock/static/css/main.ffe23474.chunk.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div><script>!function(e){function r(r){for(var n,i,c=r[0],a=r[1],l=r[2],p=0,f=[];p<c.length;p++)i=c[p],Object.prototype.hasOwnProperty.call(o,i)&&o[i]&&f.push(o[i][0]),o[i]=0;for(n in a)Object.prototype.hasOwnProperty.call(a,n)&&(e[n]=a[n]);for(s&&s(r);f.length;)f.shift()();return u.push.apply(u,l||[]),t()}function t(){for(var e,r=0;r<u.length;r++){for(var t=u[r],n=!0,c=1;c<t.length;c++){var a=t[c];0!==o[a]&&(n=!1)}n&&(u.splice(r--,1),e=i(i.s=t[0]))}return e}var n={},o={1:0},u=[];function i(r){if(n[r])return n[r].exports;var t=n[r]={i:r,l:!1,exports:{}};return e[r].call(t.exports,t,t.exports,i),t.l=!0,t.exports}i.e=function(e){var r=[],t=o[e];if(0!==t)if(t)r.push(t[2]);else{var n=new Promise((function(r,n){t=o[e]=[r,n]}));r.push(t[2]=n);var u,c=document.createElement("script");c.charset="utf-8",c.timeout=120,i.nc&&c.setAttribute("nonce",i.nc),c.src=function(e){return i.p+"static/js/"+({}[e]||e)+"."+{3:"65ae35b1"}[e]+".chunk.js"}(e);var a=new Error;u=function(r){c.onerror=c.onload=null,clearTimeout(l);var t=o[e];if(0!==t){if(t){var n=r&&("load"===r.type?"missing":r.type),u=r&&r.target&&r.target.src;a.message="Loading chunk "+e+" failed.\n("+n+": "+u+")",a.name="ChunkLoadError",a.type=n,a.request=u,t[1](a)}o[e]=void 0}};var l=setTimeout((function(){u({type:"timeout",target:c})}),12e4);c.onerror=c.onload=u,document.head.appendChild(c)}return Promise.all(r)},i.m=e,i.c=n,i.d=function(e,r,t){i.o(e,r)||Object.defineProperty(e,r,{enumerable:!0,get:t})},i.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},i.t=function(e,r){if(1&r&&(e=i(e)),8&r)return e;if(4&r&&"object"==typeof e&&e&&e.__esModule)return e;var t=Object.create(null);if(i.r(t),Object.defineProperty(t,"default",{enumerable:!0,value:e}),2&r&&"string"!=typeof e)for(var n in e)i.d(t,n,function(r){return e[r]}.bind(null,n));return t},i.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return i.d(r,"a",r),r},i.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},i.p="/ink-clock/",i.oe=function(e){throw console.error(e),e};var c=this.webpackJsonpsuper_simple_ink_screen_clock=this.webpackJsonpsuper_simple_ink_screen_clock||[],a=c.push.bind(c);c.push=r,c=c.slice();for(var l=0;l<c.length;l++)r(c[l]);var s=a;t()}([])</script><script src="/ink-clock/static/js/2.eab6910b.chunk.js"></script><script src="/ink-clock/static/js/main.5929e40e.chunk.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Simple ink Clock.</title>
+  <style>
+    @font-face {
+      font-family: 'UnicaOne';
+      src: url(./UnicaOne-Regular.ttf);
+    }
+    body {
+      margin: 0;
+      font-family: 'UnicaOne', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      font-size: 36px;
+      text-align: center;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow: hidden;
+    }
+    #main,
+    #clock {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    #clock {
+      background-color: white;
+      font-weight: 200;
+    }
+    #clock > .num {
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div id="main">
+    <div id="clock" style="font-size: 36px; font-weight: 400">
+      <div class="num m-1"></div><div class="num m-2"></div><br>
+      <div class="num s-3"></div><div class="num s-4"></div>
+    </div>
+  </div>
+  
+  <script>
+    /* Debug tool */
+    function log(msg){
+      var log = document.createElement('div')
+      log.innerHTML = msg
+      document.body.appendChild(log)
+    }
+    /* 基础参数设定 */
+    var numsPicUrl = './default.png'
+    var search = window.location.search
+
+    var elClock = document.getElementById('clock')
+    var nums = elClock.getElementsByClassName('num')
+    var timeElArr = []
+    for(var i=0; i<nums.length; i++){
+      timeElArr.push({
+        el: nums[i],
+        num: ''
+      })
+    }
+    var ratio = 0
+
+    function dbNum(num){
+      return num<10 ? '0'+num : String(num)
+    }
+    function clockRefresh(){
+      var now = new Date()
+      var hours = now.getHours()
+      var minutes = now.getMinutes()
+      var clockNums = (dbNum(hours)+''+dbNum(minutes)).split('')
+      for(var i=0; i<4; i++){
+        if(timeElArr[i].num !== +clockNums[i]){
+          timeElArr[i].num = clockNums[i]
+          timeElArr[i].el.style.backgroundPositionX = -(+clockNums[i]*numW*ratio)+'px'
+        }
+      }
+      window.setTimeout(clockRefresh, (new Date())%6e4)
+    }
+    function resize(){
+      if(!imgW || !imgH) return
+      var WRatio = window.innerWidth/2/numW
+      var HRatio = window.innerHeight/2/numH
+      ratio = Math.min(WRatio, HRatio)*0.96
+      for(var i=0; i<nums.length; i++){
+        nums[i].style.width = numW * ratio +'px'
+        nums[i].style.height = numH * ratio +'px'
+        nums[i].style.backgroundImage = 'url("'+numsPicUrl+'")'
+        nums[i].style.backgroundSize = imgW*ratio + 'px, ' + imgH*ratio + 'px'
+        if(i>1){
+          nums[i].style.backgroundPositionY = -numH*ratio+'px'
+        }
+      }
+    }
+    resize()
+    window.resize = resize
+    var img = new Image()
+    var imgW = 0
+    var imgH = 0
+    var numW = 0
+    var numH = 0
+    img.onload = function(){
+      imgW = img.width
+      imgH = img.height
+      numW = imgW/10
+      numH = imgH*0.4
+      resize()
+      clockRefresh()
+    }
+    img.src = numsPicUrl
+  </script>
+</body>
+</html>
