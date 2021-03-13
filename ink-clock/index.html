@@ -6,15 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Super Simple ink Clock.</title>
   <style>
-    @font-face {
-      font-family: 'UnicaOne';
-      src: url(./UnicaOne-Regular.ttf);
-    }
     body {
       margin: 0;
-      font-family: 'UnicaOne', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
       font-size: 36px;
       text-align: center;
+      margin: 0;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       overflow: hidden;
@@ -25,11 +22,11 @@
       height: 100%;
       overflow: hidden;
     }
-    #clock {
-      background-color: white;
-      font-weight: 200;
-    }
-    #clock > .num {
+    #clock .num,
+    #clock #year,
+    #clock #month,
+    #clock #date,
+    #clock #ampm {
       display: inline-block;
     }
   </style>
@@ -37,78 +34,296 @@
 <body>
   <div id="main">
     <div id="clock" style="font-size: 36px; font-weight: 400">
-      <div class="num m-1"></div><div class="num m-2"></div><br>
-      <div class="num s-3"></div><div class="num s-4"></div>
+      <div class="line"><div class="num num_1_1"></div><div class="num num_1_2"></div></div>
+      <div class="line"><div class="num num_2_1"></div><div class="num num_2_2"></div></div>
+      <div class="line"><div class="num num_3_1"></div><div class="num num_3_2"></div></div>
     </div>
   </div>
-  
+  <div id="refresh"></div>
   <script>
     /* Debug tool */
     function log(msg){
       var log = document.createElement('div')
       log.innerHTML = msg
+      log.classList.add('log')
       document.body.appendChild(log)
+      return log
     }
+    /* 获取 get 参数的方法 */
+    function getUrlParam(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+      var r = window.location.search.substr(1).match(reg);
+      if(r != null) {
+        return decodeURIComponent(r[2]);
+      }
+      return null;
+    }
+
     /* 基础参数设定 */
-    var numsPicUrl = './default.png'
-    var search = window.location.search
-
+    /* 获取素材图片地址 */
+    var bgImgUrl = getUrlParam('img')
+    var numsPicUrl = bgImgUrl ? bgImgUrl : './default.png'
+    /* 获取朝向，并获取对应方向的素材图片地址 */
+    var hash = window.location.hash
+    var nowDirection = hash.length ? hash.replace('#', '').toLowerCase() : 'top'
+    numsPicUrl = nowDirection === 'top' ? numsPicUrl : numsPicUrl.replace(/(\.\w+)$/,'-'+nowDirection+'$1')
+    /* hash 更新，则刷新页面*/
+    window.onhashchange = function(){
+      if(hash !== window.location.hash){
+        window.location.reload()
+      }
+    }
+    /* 页面元素变量的声明 */
     var elClock = document.getElementById('clock')
-    var nums = elClock.getElementsByClassName('num')
-    var timeElArr = []
-    for(var i=0; i<nums.length; i++){
-      timeElArr.push({
-        el: nums[i],
-        num: ''
-      })
-    }
-    var ratio = 0
-
-    function dbNum(num){
-      return num<10 ? '0'+num : String(num)
-    }
-    function clockRefresh(){
-      var now = new Date()
-      var hours = now.getHours()
-      var minutes = now.getMinutes()
-      var clockNums = (dbNum(hours)+''+dbNum(minutes)).split('')
-      for(var i=0; i<4; i++){
-        if(timeElArr[i].num !== +clockNums[i]){
-          timeElArr[i].num = clockNums[i]
-          timeElArr[i].el.style.backgroundPositionX = -(+clockNums[i]*numW*ratio)+'px'
-        }
-      }
-      window.setTimeout(clockRefresh, (new Date())%6e4)
-    }
-    function resize(){
-      if(!imgW || !imgH) return
-      var WRatio = window.innerWidth/2/numW
-      var HRatio = window.innerHeight/2/numH
-      ratio = Math.min(WRatio, HRatio)*0.96
-      for(var i=0; i<nums.length; i++){
-        nums[i].style.width = numW * ratio +'px'
-        nums[i].style.height = numH * ratio +'px'
-        nums[i].style.backgroundImage = 'url("'+numsPicUrl+'")'
-        nums[i].style.backgroundSize = imgW*ratio + 'px, ' + imgH*ratio + 'px'
-        if(i>1){
-          nums[i].style.backgroundPositionY = -numH*ratio+'px'
-        }
-      }
-    }
-    resize()
-    window.resize = resize
+    var elLines = document.body.getElementsByClassName('line')
+    var elNums = elClock.getElementsByClassName('num')
+    var elRefresh = document.getElementById('refresh')
+    var elYear
+    var elYears
+    var elMonths
+    var elDates
+    var elAP
+    /* 当前计时器标记 */
+    var nowTimer
+    var lines = (nowDirection === 'left' || nowDirection === 'right') ? 3 : 2
     var img = new Image()
     var imgW = 0
     var imgH = 0
     var numW = 0
     var numH = 0
+    /* 年月日期等元素的代码 */
+    var yearCode = '<div id="year">'
+                 + '  <div class="year-num"></div>'
+                 + '  <div class="year-num"></div>'
+                 + '  <div class="year-num"></div>'
+                 + '  <div class="year-num"></div>'
+                 + '</div>'
+    var monthCode = '<div id="month">'
+                  + '  <div class="month-num"></div>'
+                  + '  <div class="month-num"></div>'
+                  + '</div>'
+    var dateCode = '<div id="date">'
+                 + '  <div class="date-num"></div>'
+                 + '  <div class="date-num"></div>'
+                 + '</div>'
+    var apCode = '<div id="ampm"></div>'
+    /* 不同朝向下的布局方案 */
+    var numPosPreset = {
+      'top': [
+        'h-1', 'h-2',
+        'm-1', 'm-2'
+      ],
+      'right': [
+        'date', 'month',
+        'm-1', 'h-1',
+        'm-2', 'h-2',
+      ],
+      'bottom': [
+        'm-2', 'm-1',
+        'h-2', 'h-1'
+      ],
+      'left': [
+        'h-2', 'm-2',
+        'h-1', 'm-1',
+        'month', 'date',
+      ]
+    }
+    /* 获取当前布局方案，并整理至时间元素数组 */
+    var layout = numPosPreset[nowDirection]
+    var timeElArr = []
+    for(var i=0; i<elNums.length; i++){
+      if(!layout[i]){ // 当元素未被使用
+        elNums[i].style.display = 'none'
+        continue
+      }
+      if(/^h-\d$/.test(layout[i])){ // 此元素用以显示小时
+        timeElArr.push({
+          el: elNums[i],
+          num: '',
+          dataName: layout[i],
+          scale: 1,
+          line: 0
+        })
+        continue
+      }
+      if(/^m-\d$/.test(layout[i])){ // 此元素用以显示分钟
+        timeElArr.push({
+          el: elNums[i],
+          num: '',
+          dataName: layout[i],
+          scale: 1,
+          line: 1
+        })
+        continue
+      }
+      if(layout[i]==='month'){      // 此元素用以显示年月
+        elNums[i].innerHTML = nowDirection === 'left' ? yearCode+monthCode : monthCode+yearCode
+        elYear = document.getElementById('year')
+        elYears = elNums[i].getElementsByClassName('year-num')
+        for(var j=0; j<elYears.length; j++){
+          timeElArr.push({
+            el: elYears[j],
+            num: '',
+            dataName: 'year-'+(nowDirection==='left' ? elYears.length-1-j : j),
+            scale: 0.25,
+            line: 1
+          })
+        }
+        elMonths = elNums[i].getElementsByClassName('month-num')
+        for(var j=0; j<elMonths.length; j++){
+          timeElArr.push({
+            el: elMonths[j],
+            num: '',
+            dataName: 'month-'+(nowDirection==='left' ? elMonths.length-1-j : j),
+            scale: 0.5,
+            line: 0
+          })
+        }
+        continue
+      }
+      if(layout[i]==='date'){       // 此元素用以显示日期
+        elNums[i].innerHTML = nowDirection === 'left' ? dateCode+apCode : apCode+dateCode
+        elDates = elNums[i].getElementsByClassName('date-num')
+        for(var j=0; j<elDates.length; j++){
+          timeElArr.push({
+            el: elDates[j],
+            num: '',
+            dataName: 'date-'+(nowDirection==='left' ? elDates.length-1-j : j),
+            scale: 0.5,
+            line: 1
+          })
+        }
+        elAP = document.getElementById('ampm')
+        timeElArr.push({
+          el: elAP,
+          num: '',
+          dataName: 'ampm',
+          scale: 1,
+          line: 2
+        })
+        continue
+      }
+      elNums[i].dataset.layout = layout[i]
+    }
+    var ratio = 0
+    /* 两位数字 */
+    function dbNum(num){
+      return num<10 ? '0'+num : String(num)
+    }
+    /* 元素数字变化方法，根据不同的方向计算出相应的偏移量 */
+    function changeNum(item, newVal){
+      if(item.num === newVal){ return }
+      var el = item.el
+      var x = item.num = newVal
+      var line = item.line
+      var elRatio = ratio*item.scale
+      switch (nowDirection) {
+        case 'right':
+          var tempX = -(imgW-(line+1)*numW)*elRatio
+          el.style.backgroundPositionX = (tempX>0 ? 0 : tempX)+'px'
+          el.style.backgroundPositionY = -numH*x*elRatio+'px'
+          break;
+        case 'bottom':
+          el.style.backgroundPositionX = -(imgW-(x+1)*numW)*elRatio+'px'
+          el.style.backgroundPositionY = (numH*(line-1.5)-imgH)*ratio+'px'
+          break;
+        case 'left':
+          el.style.backgroundPositionX = -numW*line*elRatio+'px'
+          el.style.backgroundPositionY = ((x+1)*numH-imgH)*elRatio+'px'
+          break;
+
+        default:
+          el.style.backgroundPositionX = -x*numW*elRatio+'px'
+          el.style.backgroundPositionY = -numH*line*elRatio+'px'
+          break;
+      }
+    }
+    /* 时钟刷新，主功能函数 */
+    function clockRefresh(){
+      var now = new Date()
+      var hours = now.getHours()
+      var minutes = now.getMinutes()
+      var clockNums = (dbNum(hours)+''+dbNum(minutes)).split('')
+      var clockObj = {
+        'h-1': clockNums[0],
+        'h-2': clockNums[1],
+        'm-1': clockNums[2],
+        'm-2': clockNums[3],
+      }
+      if(elYear){
+        var year =  String(now.getFullYear()).split('')
+        for(var i=0; i<year.length; i++){ clockObj['year-'+i] = year[i] }
+        var month =  dbNum(now.getMonth()+1).split('')
+        for(var i=0; i<month.length; i++){ clockObj['month-'+i] = month[i] }
+        var date =  dbNum(now.getDate()).split('')
+        for(var i=0; i<date.length; i++){ clockObj['date-'+i] = date[i] }
+        clockObj.ampm = hours>=12 ? '1' : '0'
+      }
+      for(var i=0; i<timeElArr.length; i++){
+        const timeItem = timeElArr[i]
+        var newVal = +clockObj[timeItem.dataName]
+        changeNum(timeItem, newVal)
+      }
+      nowTimer = window.setTimeout(clockRefresh, (new Date())%6e4)
+    }
+    /* 元素尺寸计算 */
+    function resizeClock(){
+      elRefresh.innerHTML = 'Loading……'
+      elRefresh.style.display = 'block'
+      if(!imgW || !imgH) { return }
+      var WRatio = window.innerWidth/2/numW
+      var HRatio = window.innerHeight/lines/numH
+      ratio = Math.min(WRatio, HRatio)*0.96
+      for(var i=0; i<elNums.length; i++){
+        var el = elNums[i]
+        el.style.width = numW * ratio +'px'
+        el.style.height = numH * ratio +'px'
+      }
+      for(var i=0; i<elLines.length; i++){
+        var el = elLines[i]
+        el.style.width = '100%'
+        el.style.height = numH * ratio +'px'
+      }
+      for(var i=0; i<timeElArr.length; i++){
+        var el = timeElArr[i].el
+        var scale = timeElArr[i].scale
+        el.style.width = numW * scale * ratio +'px'
+        el.style.height = numH * scale * ratio +'px'
+        el.style.backgroundImage = 'url("'+numsPicUrl+'")'
+        el.style.backgroundSize = imgW*scale * ratio + 'px, ' + imgH*scale * ratio + 'px'
+      }
+      if(elYear){
+        if(nowDirection === 'right'){
+          elYear.style.paddingLeft = numW * 0.25 * ratio / 2 +'px'
+        }else{
+          elYear.style.paddingRight = numW * 0.25 * ratio / 2 +'px'
+        }
+      }
+      if(elAP){
+        elAP.style.width = numW * ratio / 2 +'px'
+      }
+      elClock.style.marginTop = (window.innerHeight - numH * ratio * lines)/2 + 'px'
+      elRefresh.innerHTML = ''
+      elRefresh.style.display = 'none'
+      if(nowTimer){ window.clearTimeout(nowTimer) }
+      for(var i=0; i<timeElArr.length; i++){
+        timeElArr[i].num = ''
+      }
+      clockRefresh()
+    }
+    window.onresize = resizeClock
+    /* 载入图片资源 */
     img.onload = function(){
       imgW = img.width
       imgH = img.height
-      numW = imgW/10
-      numH = imgH*0.4
-      resize()
-      clockRefresh()
+      if(nowDirection === 'top' || nowDirection === 'bottom'){
+        numW = imgW/10
+        numH = imgH*0.4
+      }else{
+        numW = imgW*0.4
+        numH = imgH/10
+      }
+      resizeClock()
     }
     img.src = numsPicUrl
   </script>
