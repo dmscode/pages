@@ -244,7 +244,7 @@
     /* 时钟刷新，主功能函数 */
     function clockRefresh(){
       var now = new Date(Date.now()+timeOffset)
-      var hours = (nowDirection === 'left' || nowDirection === 'right') ? now.getHours() : (now.getHours()<=12 ? now.getHours() : now.getHours()-12)
+      var hours = (nowDirection === 'top' || nowDirection === 'bottom') ? now.getHours() : (now.getHours()<=12 ? now.getHours() : now.getHours()-12)
       var minutes = now.getMinutes()
       var clockNums = (dbNum(hours)+''+dbNum(minutes)).split('')
       var clockObj = {
