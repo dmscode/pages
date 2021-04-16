@@ -63,6 +63,9 @@
     /* 获取素材图片地址 */
     var bgImgUrl = getUrlParam('img')
     var numsPicUrl = bgImgUrl ? bgImgUrl : './default.png'
+    /* 获取时间偏移量 */
+    var timeOffset = getUrlParam('offset')
+    timeOffset = timeOffset ? Number(timeOffset)*6e4 : 0
     /* 获取朝向，并获取对应方向的素材图片地址 */
     var hash = window.location.hash
     var nowDirection = hash.length ? hash.replace('#', '').toLowerCase() : 'top'
@@ -240,8 +243,8 @@
     }
     /* 时钟刷新，主功能函数 */
     function clockRefresh(){
-      var now = new Date()
-      var hours = now.getHours()
+      var now = new Date(Date.now()+timeOffset)
+      var hours = (nowDirection === 'left' || nowDirection === 'right') ? now.getHours() : (now.getHours()<=12 ? now.getHours() : now.getHours()-12)
       var minutes = now.getMinutes()
       var clockNums = (dbNum(hours)+''+dbNum(minutes)).split('')
       var clockObj = {
