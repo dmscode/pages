@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clock.</title>
+  <style>
+    @font-face {
+      font-family: 'Unica One';
+      font-style: normal;
+      font-weight: 400;
+      src: url(./UnicaOne.woff2) format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: calc(100vh - 48px);
+      font-family: "Unica One";
+    }
+    body {
+      background-color: #282C34;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #time {
+      display: flex;
+      justify-content: center;
+      color: #ECECF3;
+      text-shadow: 0 0 6px rgba(0, 0, 0, .2);
+    }
+    #time > * {
+      display: flex;
+      justify-content: center;
+      margin: 0 2vh;
+    }
+    #time > .second {
+      align-items: flex-end;
+    }
+    .num, .small-num {
+      border: 1px solid rgba(255, 255, 255, .3);
+      border-radius: 3vh;
+      margin: 0 .5vh;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, .2), 0 3px 36px rgba(0, 0, 0, .2);
+    }
+    .num {
+      font-size: 30vh;
+      font-weight: 200;
+      line-height: 30vh;
+      width: 20vh;
+      text-align: center;
+    }
+    .small-num {
+      font-size: 15vh;
+      font-weight: 200;
+      line-height: 15vh;
+      width: 10vh;
+      height: 15vh;
+      text-align: center;
+    }
+    #time > .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="time">
+    <div class="hour">
+      <div class="num"></div>
+      <div class="num"></div>
+    </div>
+    <div class="minute">
+      <div class="num"></div>
+      <div class="num"></div>
+    </div>
+    <div class="second">
+      <div class="num small-num"></div>
+      <div class="num small-num"></div>
+    </div>
+  </div>
+  <script>
+    let lastTime = 0
+    const showSecond = !window.location.hash
+    if(!showSecond) document.body.querySelector('#time > .second').classList.add('hidden')
+    const refreshInterval = showSecond ? 1e3 : 6e4
+    /**
+     * 数字两位化
+     *
+     * @param {number} num 输入的数字
+     * @returns {string} 两位数字的字符串
+     */
+    const dbNum = num => num>9 ? String(num) : '0'+num
+    /**
+     * 将新的时间值更新的元素
+     *
+     * @param {string} text 时间的值，因为需要对比新旧的时间值，所以必须为字符串类型
+     */
+
+    const updateTime = text=>{
+      document.body.querySelectorAll('#time .num').forEach((num, index)=>{
+        const n = text[index]
+        if(num.innerText !== n) num.innerText = n
+      })
+    }
+    /**
+     * 获取当前时间，并触发时间更新
+     *
+     */
+    const getTime = ()=>{
+      const now      = new Date()
+
+      const hours    = dbNum(now.getHours())
+      const minutes  = dbNum(now.getMinutes())
+      const seconds  = dbNum(now.getSeconds())
+
+      updateTime(hours+minutes+seconds)
+    }
+    const timeDaemon = ()=>{
+      const now = +new Date()
+      if(now-lastTime > refreshInterval || now%refreshInterval < 20){
+        console.log(now)
+        getTime()
+        lastTime = now
+      }
+    }
+    window.addEventListener('load', ()=>{
+      window.setInterval(timeDaemon, 10)
+    })
+  </script>
+</body>
+</html>
