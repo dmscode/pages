@@ -18,7 +18,7 @@
       margin: 0;
       padding: 0;
       width: 100vw;
-      height: calc(100vh - 48px);
+      height: 100vh;
       font-family: "Unica One";
     }
     body {
@@ -26,6 +26,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow: hidden;
     }
     #time {
       display: flex;
@@ -36,30 +37,31 @@
     #time > * {
       display: flex;
       justify-content: center;
-      margin: 0 2vh;
     }
     #time > .second {
       align-items: flex-end;
     }
-    .num, .small-num {
-      border: 1px solid rgba(255, 255, 255, .3);
-      border-radius: 3vh;
-      margin: 0 .5vh;
-      box-shadow: 0 3px 12px rgba(0, 0, 0, .2), 0 3px 36px rgba(0, 0, 0, .2);
+    .hour,
+    .minute {
+      height: 100%;
+    }
+    .second {
+      width: 17%;
+      height: 100%;
     }
     .num {
-      font-size: 30vh;
+      width: 49%;
+      height: 100%;
       font-weight: 200;
-      line-height: 30vh;
-      width: 20vh;
+      line-height: 0.875em;
       text-align: center;
+      margin: 0;
+      border: 1px solid rgba(255, 255, 255, .3);
+      box-shadow: 0 3px 12px rgba(0, 0, 0, .2), 0 3px 36px rgba(0, 0, 0, .2);
     }
     .small-num {
-      font-size: 15vh;
-      font-weight: 200;
-      line-height: 15vh;
-      width: 10vh;
-      height: 15vh;
+      height: 50%;
+      font-size: .5em;
       text-align: center;
     }
     #time > .hidden {
@@ -83,10 +85,19 @@
     </div>
   </div>
   <script>
-    let lastTime = 0
-    const showSecond = !window.location.hash
-    if(!showSecond) document.body.querySelector('#time > .second').classList.add('hidden')
-    const refreshInterval = showSecond ? 1e3 : 6e4
+    /**
+    * 获取网址中的 get 请求参数
+    *
+    * @param {string} key 要查询的参数名称
+    * @param {string} defaultVal 默认值,当未获取到指定参数时返回默认值
+    * @param {string} [url=window.location.search] 输入的网址，默认是当前页面的查询部分。输入的格式和网址查询部分的格式相同（不是完整网址）
+    * @return {*} 
+    */
+    const getValinURL = (key, defaultVal, url=window.location.search)=>{
+      const searchParams = new URLSearchParams(url)
+      const val = searchParams.get(key)
+      return val ? val : defaultVal
+    }
     /**
      * 数字两位化
      *
@@ -94,16 +105,22 @@
      * @returns {string} 两位数字的字符串
      */
     const dbNum = num => num>9 ? String(num) : '0'+num
+    /** @type {object} 设置时间数据存储代理，当时间发生改变更新对应的元素 */
+    const timeTemp = new Proxy({}, {
+      set: function(time, key, val){
+        if(time[key]===val) return
+        time[key] = val
+        config.nums[key].innerText = val
+      }
+    })
     /**
      * 将新的时间值更新的元素
      *
      * @param {string} text 时间的值，因为需要对比新旧的时间值，所以必须为字符串类型
      */
-
     const updateTime = text=>{
-      document.body.querySelectorAll('#time .num').forEach((num, index)=>{
-        const n = text[index]
-        if(num.innerText !== n) num.innerText = n
+      text.split('').forEach((num, index)=>{
+        timeTemp[index] = num
       })
     }
     /**
@@ -117,19 +134,61 @@
       const minutes  = dbNum(now.getMinutes())
       const seconds  = dbNum(now.getSeconds())
 
-      updateTime(hours+minutes+seconds)
+      updateTime(hours+minutes+(config.showSecond ? seconds : ''))
     }
+    /**
+     * 时间更新守护函数
+     * 如果与上次更新的时间之间的间隔超过预设值，或者接近更新时间间隔的整倍数（这个条件是为了更新的时间更加精准）
+     * 则触发时间更新
+     */
     const timeDaemon = ()=>{
       const now = +new Date()
-      if(now-lastTime > refreshInterval || now%refreshInterval < 20){
-        console.log(now)
+      if(now-config.lastTime > config.refreshInterval || now%config.refreshInterval < 20){
         getTime()
-        lastTime = now
+        config.lastTime = now
       }
     }
+    /**
+     * 元素尺寸重设函数
+     * 宽高比只是一个大概的比例，计算出一个基准尺寸，并且乘以缩放系数
+     * 修改整体容器的宽、高、字号
+     * 设定小时、分钟的宽度，右侧外补。（这里主要是因为是否显示秒钟而带来的变化）
+     * 设定数字容器的圆角，每一组第 1 个数字元素的右侧外补
+     */
+    const resize = ()=>{
+      const widthFactor = config.showSecond ? 100 : 78
+      const winW = window.innerWidth
+      const winH = window.innerHeight
+      const baseLength = (winW/winH >= widthFactor/32 ? winH/32 : winW/widthFactor)*config.zoom/100
+
+      document.body.querySelector('#time').style.width = baseLength * widthFactor + 'px'
+      document.body.querySelector('#time').style.height = baseLength * 28 + 'px'
+      document.body.querySelector('#time').style.fontSize = baseLength * 32 + 'px'
+
+      document.body.querySelectorAll('#time>.hour, #time>.minute').forEach(e => e.style.with = baseLength*33+ 'px')
+      document.body.querySelector('#time>.hour').style.marginRight = baseLength*5 + 'px'
+      document.body.querySelector('#time>.minute').style.marginRight = config.showSecond ? baseLength*5 + 'px' : 0
+
+      document.body.querySelectorAll('#time .num').forEach(e => e.style.borderRadius = baseLength + 'px')
+      document.body.querySelectorAll('#time .num:first-child').forEach(e => e.style.marginRight = baseLength + 'px')
+    }
+    /** 程序运行时要用到的一些变量 */
+    const config = {
+      lastTime: 0,
+      zoom: Number(getValinURL('zoom', 60)),
+      showSecond: Number(getValinURL('second', 1)),
+      nums: document.body.querySelectorAll('#time .num'),
+    }
+    /** 如果设定不显示秒钟，则将对应的元素隐藏 */
+    if(!config.showSecond) document.body.querySelector('#time > .second').classList.add('hidden')
+    /** 根据是否显示秒钟，设定不同的更新间隔 */
+    config.refreshInterval = config.showSecond ? 1e3 : 6e4
+
+    resize()
     window.addEventListener('load', ()=>{
       window.setInterval(timeDaemon, 10)
     })
+    window.addEventListener('resize', resize)
   </script>
 </body>
 </html>
