@@ -42,11 +42,19 @@
     </div>
   </div>
   <script>
+    /** 用来显示时钟的各种数字。如果无此参数或者序号为零，则均显示阿拉伯数字。 */
     var nums = [
       ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
       ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'],
       ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖']
     ]
+    /**
+     * 获取链接中的 get 参数。
+     *
+     * @param {string} key 要获取的键值
+     * @param {string|undefined} defVal 默认值
+     * @return {string} 
+     */
     var getQuery = function(key, defVal){
       var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
       if(window.location.search && reg.test(window.location.search)){
@@ -54,8 +62,14 @@
       }
       return defVal
     }
+    /** @type {string} 要显示的文字 */
     var queryStr = getQuery('s')
+    /** @type {string} 时钟使用的文字类型 */
     var numType = getQuery('t')
+    /**
+     * 计算窗口中元素的尺寸属性
+     *
+     */
     var resize = function(){
       var winW = document.body.offsetWidth
       var winH = document.body.offsetHeight
@@ -85,20 +99,36 @@
         td.style.borderLeft = (vmin).toFixed(2)+'px solid #CC0000'
       }
     }
+    /** @type {*} 当前显示在元素中的文字内容 */
     var nowStr = []
+    /**
+     * 将文字内容设置到元素中。
+     *
+     * @param {array} str 文字内容数组。
+     */
     var setStr = function(str){
       var tds = document.body.getElementsByClassName('td')
       for(var i=0; i<tds.length; i++){
-        if(i>=str.length) { break }
-        if(nowStr[i] !== str[i]){
-          tds[i].innerText = str[i]
-          nowStr[i] = str[i]
+        var s = i>=str.length ? '' : str[i]
+        if(nowStr[i] !== s){
+          tds[i].innerText = s
+          nowStr[i] = s
         }
       }
     }
+    /**
+     * 将数字两位化输出。
+     *
+     * @param {number} num
+     * @return {string} 
+     */
     var dbNum = function(num){
       return num>9 ? ''+num : '0'+num
     }
+    /**
+     * 获取时间并设置到元素。
+     *
+     */
     const setTime = function(){
       var now = new Date()
       var hour = dbNum(now.getHours())
@@ -111,6 +141,10 @@
       }
       setStr(numStr)
     }
+    /**
+     * 时钟启动函数。
+     *
+     */
     var clockStart = function(){
       setTime()
       window.setInterval(setTime, 6e4)
@@ -125,7 +159,6 @@
       window.setTimeout(clockStart, 6e4-(+new Date())%6e4)
     })
     window.addEventListener('resize', resize)
-    // resize()
   </script>
 </body>
 </html>
