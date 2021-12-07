@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>四个字吖</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      overflow: hidden;
+    }
+    #table {
+      box-sizing: border-box;
+    }
+    .tr:first-child {
+      border-bottom: none !important;
+    }
+    .td {
+      float: left;
+      text-align: center;
+    }
+    .td:first-child {
+      border: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="table">
+    <div class="tr">
+      <div class="td"></div>
+      <div class="td"></div>
+    </div>
+    <div class="tr">
+      <div class="td"></div>
+      <div class="td"></div>
+    </div>
+  </div>
+  <script>
+    var nums = [
+      ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+      ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'],
+      ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖']
+    ]
+    var getQuery = function(key, defVal){
+      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
+      if(window.location.search && reg.test(window.location.search)){
+        return decodeURIComponent(window.location.search.replace(reg, '$1'))
+      }
+      return defVal
+    }
+    var queryStr = getQuery('s')
+    var numType = getQuery('t')
+    var resize = function(){
+      var winW = document.body.offsetWidth
+      var winH = document.body.offsetHeight
+      var vmin = (winW >= winH ? winH : winW)/100
+
+      var table = document.getElementById('table')
+      table.style.width = (vmin*81).toFixed(2)+'px'
+      table.style.height = (vmin*81).toFixed(2)+'px'
+      table.style.margin = ((winH-vmin*81)/2).toFixed(2)+'px auto'
+      table.style.border = (3*vmin).toFixed(2)+'px solid #CC0000'
+      table.style.padding = (vmin).toFixed(2)+'px'
+      table.style.fontSize = (35*0.8*vmin).toFixed(2)+'px'
+      table.style.lineHeight = (35*vmin).toFixed(2)+'px'
+
+      var trs = document.body.getElementsByClassName('tr')
+      for(var i=0; i<trs.length; i++){
+        var tr = trs[i]
+        tr.style.height = (35*vmin).toFixed(2)+'px'
+        tr.style.border = (vmin).toFixed(2)+'px solid #CC0000'
+      }
+
+      var tds = document.body.getElementsByClassName('td')
+      for(var i=0; i<tds.length; i++){
+        var td = tds[i]
+        td.style.width = (35*vmin).toFixed(2)+'px'
+        td.style.height = (35*vmin).toFixed(2)+'px'
+        td.style.borderLeft = (vmin).toFixed(2)+'px solid #CC0000'
+      }
+    }
+    var nowStr = []
+    var setStr = function(str){
+      var tds = document.body.getElementsByClassName('td')
+      for(var i=0; i<tds.length; i++){
+        if(i>=str.length) { break }
+        if(nowStr[i] !== str[i]){
+          tds[i].innerText = str[i]
+          nowStr[i] = str[i]
+        }
+      }
+    }
+    var dbNum = function(num){
+      return num>9 ? ''+num : '0'+num
+    }
+    const setTime = function(){
+      var now = new Date()
+      var hour = dbNum(now.getHours())
+      var minute = dbNum(now.getMinutes())
+      var numStr = (hour+minute).split('')
+      if(numType){
+        for(var i=0; i<numStr.length; i++){
+          numStr[i] = nums[numType][+numStr[i]]
+        }
+      }
+      setStr(numStr)
+    }
+    var clockStart = function(){
+      setTime()
+      window.setInterval(setTime, 6e4)
+    }
+    window.addEventListener('load', function(){
+      resize()
+      if(queryStr){
+        setStr(queryStr.split(''))
+        return
+      }
+      setTime()
+      window.setTimeout(clockStart, 6e4-(+new Date())%6e4)
+    })
+    window.addEventListener('resize', resize)
+    // resize()
+  </script>
+</body>
+</html>
