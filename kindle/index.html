@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>导航页哦</title>
+  <style>
+    body {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h3>四个字吖</h3>
+  <p>在下面输入 1~4 个字，然后显示它们。不输入就显示时钟，这时候你可以在下面选择时钟的数字格式。</p>
+  <form action="./four-words.html" method="get">
+    <input id="four-letters-content" name="s" type="text" placeholder="老鼠最萌"><br>
+    <strong>时钟文字样式</strong><br>
+    <input type="radio" name="t" id="type-0" value="0" checked><label for="type-0">0123</label><br>
+    <input type="radio" name="t" id="type-1" value="1"><label for="type-1">〇一二三</label><br>
+    <input type="radio" name="t" id="type-2" value="2"><label for="type-2">零壹贰仨</label><br>
+    <input type="submit" value="Go">
+  </form>
+  <hr>
+  <h3>只言片语</h3>
+  <p>在下面输入一句话，自行换行，然后显示它们，不输入就显示时钟。</p>
+  <form action="./some-words.html" method="get">
+    <textarea name="s" id="" cols="30" rows="10" placeholder="聪明伶俐小老鼠"></textarea>
+    <br>
+    <input type="submit" value="Go">
+  </form>
+</body>
+</html>
