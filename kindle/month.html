@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>这个月吖</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      overflow: hidden;
+    }
+    #table {
+      text-align: center;
+    }
+    .tr:last-child {
+      border-bottom: none !important;
+    }
+    .td {
+      float: left;
+    }
+    .td:first-child {
+      border: none !important;
+    }
+    .td.today {
+      background-color: #666668;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <style id="resize"></style>
+  <div id="table">
+
+  </div>
+  <script>
+    /** 用来显示时钟的各种数字。如果无此参数或者序号为零，则均显示阿拉伯数字。 */
+    var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    var weekNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+    /**
+     * 获取链接中的 get 参数。
+     *
+     * @param {string} key 要获取的键值
+     * @param {string|undefined} defVal 默认值
+     * @return {string} 
+     */
+    var getQuery = function(key, defVal){
+      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
+      if(window.location.search && reg.test(window.location.search)){
+        return decodeURIComponent(window.location.search.replace(reg, '$1'))
+      }
+      return defVal
+    }
+    /**
+     * 计算窗口中元素的尺寸属性
+     *
+     */
+    var table = document.getElementById('table')
+    var style = document.getElementById('resize')
+    var resize = function(){
+      var winW = document.body.offsetWidth
+      var winH = document.body.offsetHeight
+      var vmin = (winW >= winH ? winH : winW)/100
+
+      var baseLong = (12*vmin).toFixed()
+      var styleSource = '#table {'
+                      + 'width: '+(baseLong*7+12)+'px;'
+                      + 'height: '+(baseLong*7+12)+'px;'
+                      + 'margin: '+((winH-baseLong*7-20)/2)+'px '+((winW-baseLong*7-20)/2)+'px;'
+                      + 'border: 4px solid #666668;'
+                      + 'font-size: '+baseLong/2+'px;'
+                      + 'line-height: '+baseLong+'px;'
+                      + '}'
+      styleSource += '.tr {'
+                   + 'height: '+baseLong+'px;'
+                   + 'border-bottom: 2px solid #666668;'
+                   + '}'
+      styleSource += '.td {'
+                   + 'width: '+baseLong+'px;'
+                   + 'height: 100%;'
+                   + 'border-left: 2px solid #666668;'
+                   + '}'
+
+      style.innerHTML = styleSource
+    }
+    /**
+     * 将文字内容设置到元素中。
+     *
+     * @param {array} str 文字内容数组。
+     */
+    var setStr = function(str){
+      table.innerHTML = str
+      resize()
+    }
+    /**
+     * 将数字两位化输出。
+     *
+     * @param {number} num
+     * @return {string} 
+     */
+    var dbNum = function(num){
+      return num>9 ? ''+num : '0'+num
+    }
+    /**
+     * 获取时间并设置到元素。
+     *
+     */
+    var today = {}
+    const setTime = function(){
+      var now = new Date()
+      var year = now.getFullYear()
+      var month = now.getMonth()
+      var day = now.getDate()
+
+      if(year===today.year && month===today.month && day===today.day){ return }
+      today.year = year
+      today.month = month
+      today.day = day
+
+      var monthStart = new Date(year, month, 1)
+      var monthEnd = new Date(year, month+1, 1)
+      var monthDays = (monthEnd-monthStart)/86400e3
+      var monthStartWeekDay = monthStart.getDay()
+
+      monthStr = '<div class="tr">'+year+' '+months[month]+'</div>'
+               + '<div class="tr"><div class="td">'+weekNames.join('</div><div class="td">')+'</div></div>'
+      var daysArr = new Array(35)
+      for(var i=0; i<monthDays; i++){
+        daysArr[(i+monthStartWeekDay)%35] = i+1
+      }
+      for(var i=0; i<35; i++){
+        if(i%7===0){ monthStr+= '<div class="tr">' }
+          monthStr+= '<div class="td'+(daysArr[i]===day ? ' today' : '')+'">'+(daysArr[i] ? daysArr[i] : '' )+'</div>'
+        if(i%7===6){ monthStr+= '</div>' }
+      }
+      setStr(monthStr)
+    }
+    /**
+     * 时钟启动函数。
+     *
+     */
+    var clockStart = function(){
+      setTime()
+      window.setInterval(setTime, 6e4)
+    }
+    window.addEventListener('load', function(){
+      setTime()
+      window.setTimeout(clockStart, 6e4-(+new Date())%6e4)
+    })
+    window.addEventListener('resize', resize)
+  </script>
+</body>
+</html>
