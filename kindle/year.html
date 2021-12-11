@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>这一年吖</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      overflow: hidden;
+    }
+    #table {
+      text-align: center;
+    }
+    .month-tr:last-child,
+    .month:last-child {
+      margin: 0 !important;
+    }
+    .tr,
+    .td {
+      float: left;
+    }
+    .td.today {
+      background-color: #666668;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <style id="resize"></style>
+  <div id="table">
+
+  </div>
+  <script>
+    /** 用来显示时钟的各种数字。如果无此参数或者序号为零，则均显示阿拉伯数字。 */
+    var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    var weekNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+    /**
+     * 获取链接中的 get 参数。
+     *
+     * @param {string} key 要获取的键值
+     * @param {string|undefined} defVal 默认值
+     * @return {string} 
+     */
+    var getQuery = function(key, defVal){
+      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
+      if(window.location.search && reg.test(window.location.search)){
+        return decodeURIComponent(window.location.search.replace(reg, '$1'))
+      }
+      return defVal
+    }
+    /**
+     * 计算窗口中元素的尺寸属性
+     *
+     */
+    var table = document.getElementById('table')
+    var style = document.getElementById('resize')
+    var colCount, rowCount
+    var resize = function(){
+      var winW = document.body.offsetWidth-40
+      var winH = document.body.offsetHeight-40
+
+      switch (true) {
+        case winW/winH >= 95/9: // 12*8-1 / 7+2
+          colCount = 12
+          rowCount = 1
+          break;
+        case winW/winH >= 47/17:  // 6*8-1 / 2*8-1+2
+          colCount = 6
+          rowCount = 2
+          break;
+        case winW/winH >= 31/25:  // 4*8-1 / 3*8-1+2
+          colCount = 4
+          rowCount = 3
+          break;
+        case winW/winH >= 23/33:  // 3*8-1 / 4*8-1+2
+          colCount = 4
+          rowCount = 3
+          break;
+        case winW/winH >= 15/49:  // 2*8-1 / 6*8-1+2
+          colCount = 2
+          rowCount = 6
+          break;
+
+        default:  // 1*8-1 / 12*8-1+2
+          colCount = 1
+          rowCount = 12
+          break;
+      }
+
+      var gridX = (colCount*8)-1
+      var gridY = (rowCount*8)-1+2
+      var baseByW = winW/gridX
+      var baseByH = winH/gridY
+      var vmin = baseByW<=baseByH ? baseByW : baseByH
+
+      var baseLong = (12*vmin).toFixed()
+      var styleSource = '#table {'
+                      + 'width: ' +(vmin*gridX).toFixed(2)+'px;'
+                      + 'height: '+(vmin*gridY).toFixed(2)+'px;'
+                      + 'margin: '+((winH-(vmin*gridY).toFixed(2))/2+20)+'px auto;'
+                      + 'font-size: '+(vmin/2).toFixed(2)+'px;'
+                      + 'line-height: '+(vmin).toFixed(2)+'px;'
+                      + '}'
+      styleSource += '.title {'
+                   + 'height: '+(vmin*2).toFixed(2)+'px;'
+                   + 'font-size: '+(vmin).toFixed(2)+'px;'
+                   + 'line-height: '+(vmin*2).toFixed(2)+'px;'
+                   + '}'
+      styleSource += '.month-tr {'
+                   + 'height: '+(vmin*7).toFixed(2)+'px;'
+                   + 'margin-bottom: '+(vmin).toFixed(2)+'px;'
+                   + '}'
+      styleSource += '.month {'
+                   + 'float: left;'
+                   + 'width: '+(vmin*7).toFixed(2)+'px;'
+                   + 'margin-right: '+(vmin).toFixed(2)+'px;'
+                   + '}'
+      styleSource += '.tr {'
+                   + 'height: '+(vmin).toFixed(2)+'px;'
+                   + '}'
+      styleSource += '.td {'
+                   + 'width: '+(vmin).toFixed(2)+'px;'
+                   + 'height: 100%;'
+                   + '}'
+
+      style.innerHTML = styleSource
+    }
+
+    /**
+     * 将数字两位化输出。
+     *
+     * @param {number} num
+     * @return {string} 
+     */
+    var dbNum = function(num){
+      return num>9 ? ''+num : '0'+num
+    }
+    /**
+     * 获取时间并设置到元素。
+     *
+     */
+    var today = {}
+    var getMonthCode = function(month){
+      var monthStart = new Date(today.year, month, 1)
+      var monthEnd = new Date(today.year, month+1, 1)
+      var monthDays = (monthEnd-monthStart)/86400e3
+      var monthStartWeekDay = monthStart.getDay()
+
+      var daysArr = new Array(35)
+      for(var i=0; i<daysArr.length; i++){
+        daysArr[i] = { name: '' }
+      }
+      for(var i=0; i<monthDays; i++){
+        daysArr[(i+monthStartWeekDay)%35].name = i+1
+        if(today.month===month && today.day===i+1){ daysArr[(i+monthStartWeekDay)%35].today = true }
+      }
+
+      var monthStr = '<div class="tr">'+months[month]+'</div>'
+               + '<div class="tr"><div class="td">'+weekNames.join('</div><div class="td">')+'</div></div>'
+      for(var i=0; i<35; i++){
+        if(i%7===0){ monthStr+= '<div class="tr">' }
+          monthStr+= '<div class="td'+(daysArr[i].today? ' today' : '')+'">'+daysArr[i].name+'</div>'
+        if(i%7===6){ monthStr+= '</div>' }
+      }
+      return monthStr
+    }
+
+    const setTime = function(isResize){
+      resize()
+      var now = new Date()
+      var year = +getQuery('y', now.getFullYear())
+      var month = +getQuery('m', now.getMonth())
+      var day = +getQuery('d', now.getDate())
+
+      if(year===today.year && month===today.month && day===today.day && !isResize){ return }
+      today.year = year
+      today.month = month
+      today.day = day
+
+      var calCode = '<div class="title">'+year+'</div>'
+      for(var i=0; i<rowCount; i++){
+        calCode += '<div class="month-tr">'
+        for(var j=0; j<colCount; j++){
+          calCode += '<div class="month">'
+          calCode += getMonthCode(i*colCount+j)
+          calCode += '</div>'
+        }
+        calCode += '</div>'
+      }
+      table.innerHTML = calCode
+    }
+    /**
+     * 时钟启动函数。
+     *
+     */
+    var clockStart = function(){
+      setTime()
+      window.setInterval(setTime, 6e4)
+    }
+    window.addEventListener('load', function(){
+      setTime()
+      window.setTimeout(clockStart, 6e4-(+new Date())%6e4)
+    })
+    window.addEventListener('resize', function(){setTime(true)})
+  </script>
+</body>
+</html>
