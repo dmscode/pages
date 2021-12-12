@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>过日子呀</title>
+  <script src="./calendar.js"></script>
+  <script src="./hitokoto-i.js" id="hitokoto"></script>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      overflow: hidden;
+    }
+    #table {
+      position: relative;
+      text-align: center;
+      border: 2px solid #666668;
+    }
+    .tr,
+    .td {
+      float: left;
+    }
+    .tr {
+      width: 100%;
+    }
+    .tr.border {
+      border-bottom: 2px solid #666668;
+    }
+    .td.border {
+      border-right: 2px solid #666668;
+    }
+    .tr.header {
+      height: 4em;
+    }
+    #date,
+    #year {
+      height: 1.33em;
+      width: 2.5em;
+      font-size: 3em;
+      line-height: 1.33em;
+      text-align: left;
+      padding: 0 .2em;
+    }
+    .td.solar {
+      height: 4em;
+      width: 8em;
+      padding: .8em .2em;
+      text-align: left;
+    }
+    .td.solar > .tr {
+      font-size: 1.2em;
+      line-height: 1em;
+    }
+    #year {
+      float: right;
+      text-align: right;
+    }
+    .tr.content {
+      height: 1.5em;
+      font-size: 18em;
+      line-height: 1.5em;
+      font-weight: bold;
+    }
+    .tr.footer {
+      height: 18em;
+      padding: .5em;
+    }
+    #note {
+      height: 16em;
+      width: 18em;
+      padding: 1em 2em;
+    }
+    #lunar {
+      width: 6em;
+      font-size: 1.2em;
+      line-height: 1.8em;
+      text-align: center;
+      padding-left: .417em;
+    }
+    .tr.note-content {
+      font-size: 1.4em;
+      line-height: 1.8em;
+      text-align: left;
+    }
+    .tr.note-from {
+      text-align: right;
+      line-height: 1.8em;
+    }
+  </style>
+</head>
+<body>
+  <style id="resize"></style>
+  <div id="table">
+    <div class="tr border header">
+      <div class="td" id="date"></div>
+      <div class="td solar">
+        <div class="tr" id="month"></div>
+        <div class="tr" id="weekname"></div>
+      </div>
+
+      <div class="td" id="year"></div>
+    </div>
+    <div class="tr border content" id="day"></div>
+    <div class="tr footer">
+      <div class="td border" id="note"></div>
+      <div class="td" id="lunar"></div>
+    </div>
+  </div>
+  <script>
+    /** 用来显示时钟的各种数字。如果无此参数或者序号为零，则均显示阿拉伯数字。 */
+    var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    var weekNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    /**
+     * 获取链接中的 get 参数。
+     *
+     * @param {string} key 要获取的键值
+     * @param {string|undefined} defVal 默认值
+     * @return {string} 
+     */
+    var getQuery = function(key, defVal){
+      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
+      if(window.location.search && reg.test(window.location.search)){
+        return decodeURIComponent(window.location.search.replace(reg, '$1'))
+      }
+      return defVal
+    }
+    /**
+     * 计算窗口中元素的尺寸属性
+     *
+     */
+    var table = document.getElementById('table')
+    var style = document.getElementById('resize')
+    var today = {}
+    var resize = function(){
+      var winW = document.body.offsetWidth
+      var winH = document.body.offsetHeight
+      var baseByW = (winW-44)/61.8
+      var baseByH = (winH-44)/100
+      var vmin = baseByW<=baseByH ? baseByW : baseByH
+
+      var styleSource = '#table {'
+                      + 'width: ' +(vmin*61.8).toFixed(2)+'px;'
+                      + 'height: '+(vmin*100).toFixed(2)+'px;'
+                      + 'margin: '+((winH-(vmin*100).toFixed(2)-4)/2)+'px auto;'
+                      + 'font-size: '+(vmin*2).toFixed(2)+'px;'
+                      + 'line-height: '+(vmin*2).toFixed(2)+'px;'
+                      + '}'
+      style.innerHTML = styleSource
+    }
+    /**
+     * 将数字两位化输出。
+     *
+     * @param {number} num
+     * @return {string} 
+     */
+     var dbNum = function(num){
+      return num>9 ? ''+num : '0'+num
+    }
+    var setNote = function(note){
+      var index = Math.round(Math.random()*hitokoto.length)
+      note = hitokoto[index]
+      var noteCont = note.hitokoto.replace(/.*?[。！？；]/g, function(m, s){
+        return (m.length > 12 ? m.replace(/，/g, '，<br>') : m)+'<br>'
+      })
+      document.getElementById('note').innerHTML = '<div class="tr note-content">'+noteCont+'</div>'
+                                                + '<div class="tr note-from">——'+(note.from ? '《'+note.from+'》':'')
+                                                + (note.from&&note.from_who ? '<br>' : '')
+                                                + (note.from_who ? ' by '+note.from_who:'')+'</div>'
+    }
+    /**
+     * 将文字内容设置到元素中。
+     *
+     * @param {array} str 文字内容数组。
+     */
+    var setStr = function(){
+      document.getElementById('date').innerText = dbNum(today.month+1)+'.'+dbNum(today.day)
+      document.getElementById('month').innerText = today.monthName
+      document.getElementById('weekname').innerText = today.dayName
+      document.getElementById('year').innerText = today.year
+      document.getElementById('day').innerText = today.day
+      document.getElementById('lunar').innerHTML = today.gzYear+' '+today.Animal+'年<br>'
+                                                 + today.IMonthCn+' '+today.IDayCn+'<br>'
+                                                 + (today.isTerm ? today.Term+'<br>' : '')
+                                                 + today.ncWeek+'<br>'
+                                                 + today.astro+'<br>'
+                                                 + (today.festival ? today.festival+'<br>' : '')
+                                                 + (today.lunarFestival ? today.lunarFestival+'<br>' : '')
+      setNote()
+      resize()
+    }
+    /**
+     * 获取时间并设置到元素。
+     *
+     */
+    const setTime = function(){
+      var now = new Date()
+      var year = +getQuery('y', now.getFullYear())
+      var month = +getQuery('m', now.getMonth())
+      var day = +getQuery('d', now.getDate())
+
+      now = new Date(year, month, day)
+
+      if(year===today.year && month===today.month && day===today.day){ return }
+      today.year = year
+      today.month = month
+      today.day = day
+
+      today.monthName = months[month]
+      today.dayName = weekNames[now.getDay()]
+
+      var dayInfo = calendar.solar2lunar(year, month+1, day);
+
+      var daInfoKeys = Object.keys(dayInfo)
+      for(var i=0; i<daInfoKeys.length; i++){
+        var key = daInfoKeys[i]
+        today[key] = dayInfo[key]
+      }
+      // document.write(JSON.stringify(today))
+      // console.log(today)
+      setStr()
+    }
+    /**
+     * 时钟启动函数。
+     *
+     */
+    var clockStart = function(){
+      setTime()
+      window.setInterval(setTime, 6e4)
+    }
+    window.addEventListener('load', function(){
+      setTime()
+      window.setTimeout(clockStart, 6e4-(+new Date())%6e4)
+    })
+    window.addEventListener('resize', resize)
+  </script>
+</body>
+</html>
