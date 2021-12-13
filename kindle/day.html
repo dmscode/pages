@@ -36,61 +36,61 @@
       border-right: 2px solid #666668;
     }
     .tr.header {
-      height: 4em;
+      height: 4em;          /* 8vmin */
     }
     #date,
     #year {
-      height: 1.33em;
-      width: 2.5em;
-      font-size: 3em;
-      line-height: 1.33em;
+      height: 1.33em;       /* 8vmin */
+      width: 2.5em;         /* 15vmin */
+      font-size: 3em;       /* 6vmin */
+      line-height: 1.33em;  /* 8vmin */
       text-align: left;
-      padding: 0 .2em;
+      padding: 0 .2em;      /* 0 1.2vmin */
     }
     .td.solar {
-      height: 4em;
-      width: 8em;
-      padding: .8em .2em;
+      height: 4em;          /* 8vmin */
+      width: 8em;           /* 16vmin */
+      padding: .8em .2em;   /* 1.6vmin .4vmin */
       text-align: left;
     }
     .td.solar > .tr {
-      font-size: 1.2em;
-      line-height: 1em;
+      font-size: 1.2em;     /* 2.4vmin */
+      line-height: 1em;     /* 2.4vmin */
     }
     #year {
       float: right;
       text-align: right;
     }
     .tr.content {
-      height: 1.5em;
-      font-size: 18em;
-      line-height: 1.5em;
+      height: 1.5em;        /* 54vmin */
+      font-size: 18em;      /* 36vmin */
+      line-height: 1.5em;   /* 54vmin */
       font-weight: bold;
     }
     .tr.footer {
-      height: 18em;
-      padding: .5em;
+      height: 18em;         /* 36vmin */
+      padding: .5em;        /* 1vmin */
     }
     #note {
-      height: 16em;
-      width: 18em;
-      padding: 1em 2em;
+      height: 16em;         /* 32vmin */
+      width: 18em;          /* 36vmin */
+      padding: 1em 2em;     /* 2vmin 4vmin */
     }
     #lunar {
-      width: 6em;
-      font-size: 1.2em;
-      line-height: 1.8em;
+      width: 6em;           /* 14.4vmin */
+      font-size: 1.2em;     /* 2.4vmin */
+      line-height: 1.8em;   /* 4.32vmin */
       text-align: center;
-      padding-left: .417em;
+      padding-left: .417em; /* 1vmin */
     }
     .tr.note-content {
-      font-size: 1.4em;
-      line-height: 1.8em;
+      font-size: 1.4em;     /* 2.8vmin */
+      line-height: 1.8em;   /* 5.04vmin */
       text-align: left;
     }
     .tr.note-from {
       text-align: right;
-      line-height: 1.8em;
+      line-height: 1.8em;   /* 3.6vmin */
     }
   </style>
 </head>
@@ -201,7 +201,7 @@
     const setTime = function(){
       var now = new Date()
       var year = +getQuery('y', now.getFullYear())
-      var month = +getQuery('m', now.getMonth())
+      var month = +getQuery('m', now.getMonth()+1)-1
       var day = +getQuery('d', now.getDate())
 
       now = new Date(year, month, day)

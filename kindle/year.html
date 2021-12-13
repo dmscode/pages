@@ -176,7 +176,7 @@
       resize()
       var now = new Date()
       var year = +getQuery('y', now.getFullYear())
-      var month = +getQuery('m', now.getMonth())
+      var month = +getQuery('m', now.getMonth()+1)-1
       var day = +getQuery('d', now.getDate())
 
       if(year===today.year && month===today.month && day===today.day && !isResize){ return }

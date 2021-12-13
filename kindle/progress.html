@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>流水东去</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      overflow: hidden;
+    }
+    #table {
+      position: relative;
+      text-align: center;
+      width: 96%;
+      max-width: 800px;
+    }
+    .title {
+      font-size: .8em;
+      text-align: left;
+    }
+    .title>span {
+      font-size: 1.25em;
+    }
+    .progress-bar {
+      height: 10px;
+      border: 1px solid #CCCCCC;
+      border-radius: 1em;
+      background-color: #CCCCCC;
+    }
+    .progress {
+      height: 10px;
+      border-radius: 1em;
+    }
+    #year-progress {
+      background-color: #EE3366;
+    }
+    #month-progress {
+      background-color: #66AA33;
+    }
+    #week-progress {
+      background-color: #3366FF;
+    }
+    #day-progress {
+      background-color: #FF9900;
+    }
+    #hour-progress {
+      background-color: #00AAAA;
+    }
+  </style>
+</head>
+<body>
+  <style id="resize"></style>
+  <div id="table">
+    <div class="tr">
+      <div id="year-title" class="tr title"></div>
+      <div class="tr progress-bar">
+        <div id="year-progress" class="tr progress"></div>
+      </div>
+    </div>
+    <div class="tr">
+      <div id="month-title" class="tr title"></div>
+      <div class="tr progress-bar">
+        <div id="month-progress" class="tr progress"></div>
+      </div>
+    </div>
+    <div class="tr">
+      <div id="week-title" class="tr title"></div>
+      <div class="tr progress-bar">
+        <div id="week-progress" class="tr progress"></div>
+      </div>
+    </div>
+    <div class="tr">
+      <div id="day-title" class="tr title"></div>
+      <div class="tr progress-bar">
+        <div id="day-progress" class="tr progress"></div>
+      </div>
+    </div>
+    <div class="tr">
+      <div id="hour-title" class="tr title"></div>
+      <div class="tr progress-bar">
+        <div id="hour-progress" class="tr progress"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    /**
+     * 获取链接中的 get 参数。
+     *
+     * @param {string} key 要获取的键值
+     * @param {string|undefined} defVal 默认值
+     * @return {string} 
+     */
+    var getQuery = function(key, defVal){
+      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
+      if(window.location.search && reg.test(window.location.search)){
+        return decodeURIComponent(window.location.search.replace(reg, '$1'))
+      }
+      return defVal
+    }
+    /**
+     * 计算窗口中元素的尺寸属性
+     *
+     */
+    var table = document.getElementById('table')
+    var style = document.getElementById('resize')
+    var resize = function(){
+      var winW = document.body.offsetWidth
+      var winH = document.body.offsetHeight
+      var baseByH = ((winH > 570 ? 570 : winH)-60)/(5*2.8)
+      var baseByW = winW/24
+      var vmin = baseByW < baseByH ? baseByW : baseByH
+
+      var styleSource = '#table {'
+                      + 'height: '+(vmin*5*2.8+60).toFixed(2)+'px;'
+                      + 'margin: '+((winH-vmin*5*2.8-60)/2).toFixed(2)+'px auto;'
+                      + 'font-size: '+vmin.toFixed(2)+'px;'
+                      + 'line-height: '+(1.8*vmin.toFixed(2))+'px;'
+                      + '}'
+      styleSource += '.progress-bar {'
+                  + 'margin-bottom: '+vmin.toFixed(2)+'px;'
+                  + '}'
+      if(getQuery('ink', 0)){
+        styleSource += '.progress {'
+                    + 'background-color: black !important;'
+                    + '}'
+      }
+
+      style.innerHTML = styleSource
+    }
+    /**
+     * 将文字内容设置到元素中。
+     *
+     * @param {array} str 文字内容数组。
+     */
+    var setStr = function(p){
+      var keys = Object.keys(p)
+      for(var i=0; i<keys.length; i++){
+        var key = keys[i]
+        var keyLow = key.toLocaleLowerCase()
+        if(p[key]===progress[key]){ continue }
+        progress[key] = p[key]
+        document.getElementById(keyLow+'-title').innerHTML = key+': passed <span>'+p[key]+'%</span>, remaining <span>'+(100-p[key]).toFixed(2)+'%</span>.'
+        document.getElementById(keyLow+'-progress').style.width = p[key]+'%'
+      }
+    }
+    /**
+     * 将数字两位化输出。
+     *
+     * @param {number} num
+     * @return {string} 
+     */
+    var dbNum = function(num){
+      return num>9 ? ''+num : '0'+num
+    }
+    /**
+     * 获取时间并设置到元素。
+     *
+     */
+    var progress = {}
+    const setTime = function(){
+      var now = new Date()
+      var year = now.getFullYear()
+      var month = now.getMonth()
+      var day = now.getDate()
+      var hour = now.getHours()
+      var weekIndex = now.getDay()
+
+      var yearStart = +new Date(year, 0)
+      var yearEnd = +new Date(year+1, 0)
+
+      var monthStart = +new Date(year, month)
+      var monthEnd = +new Date(year, month+1)
+
+      var dayStart = +new Date(year, month, day)
+      var dayEnd = +new Date(year, month, day+1)
+
+      var hourStart = +new Date(year, month, day, hour)
+      var hourEnd = +new Date(year, month, day, hour+1)
+
+      var weekStart = +new Date(year, month, day-weekIndex)
+      var weekEnd = +new Date(year, month, day+7-weekIndex)
+
+      var newProgress = {
+        Year: ((now-yearStart)/(yearEnd-yearStart)*100).toFixed(2),
+        Month: ((now-monthStart)/(monthEnd-monthStart)*100).toFixed(2),
+        Day: ((now-dayStart)/(dayEnd-dayStart)*100).toFixed(2),
+        Hour: ((now-hourStart)/(hourEnd-hourStart)*100).toFixed(2),
+        Week: ((now-weekStart)/(weekEnd-weekStart)*100).toFixed(2),
+      }
+      setStr(newProgress)
+    }
+    /**
+     * 时钟启动函数。
+     *
+     */
+    var clockStart = function(){
+      setTime()
+      window.setInterval(setTime, 6e4)
+    }
+    window.addEventListener('load', function(){
+      resize()
+      setTime()
+      window.setTimeout(clockStart, 6e4-(+new Date())%6e4)
+    })
+    window.addEventListener('resize', resize)
+  </script>
+</body>
+</html>
