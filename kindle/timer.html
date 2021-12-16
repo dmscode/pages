@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>手中之沙</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      overflow: hidden;
+    }
+    #table {
+      position: relative;
+      height: 100%;
+      line-height: 100%;
+      text-align: center;
+      overflow: hidden;
+      color: white;
+      background-color: #3399FF;
+    }
+    #progress {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      color: black;
+      background-color: white;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <style id="resize"></style>
+  <div id="table">
+    <span id="time">12</span>
+    <div id="progress">12</div>
+  </div>
+  <script>
+    /**s
+     * 获取链接中的 get 参数。
+     *
+     * @param {string} key 要获取的键值
+     * @param {string|undefined} defVal 默认值
+     * @return {string} 
+     */
+    var getQuery = function(key, defVal){
+      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
+      if(window.location.search && reg.test(window.location.search)){
+        return decodeURIComponent(window.location.search.replace(reg, '$1'))
+      }
+      return defVal
+    }
+    /**
+     * 计算窗口中元素的尺寸属性
+     *
+     */
+    var table = document.getElementById('table')
+    var style = document.getElementById('resize')
+    var isInk = getQuery('ink', false)
+    var interval = isInk ? 1e4 : 1e3
+    var timeLong = getQuery('t', 0)
+    var startTime = Math.floor((new Date())/1e3)
+    var endTime = startTime+timeLong*60
+
+    var resize = function(){
+      var winW = document.body.offsetWidth
+      var winH = document.body.offsetHeight
+      var vminByH = winH*0.6
+      var vminByW = winW/4
+      var vmin = vminByW<vminByH ? vminByW : vminByH
+
+      var styleSource = '#table {'
+                      + 'width: '+winW+'px;'
+                      + 'height: '+winH+'px;'
+                      + 'font-size: '+vmin.toFixed(2)+'px;'
+                      + 'line-height: '+winH+'px;'
+                      + (isInk ? 'background-color: black;' : '')
+                      + '}'
+      style.innerHTML = styleSource
+    }
+    /**
+     * 将文字内容设置到元素中。
+     *
+     * @param {array} str 文字内容数组。
+     */
+    var setStr = function(str, p){
+      document.getElementById('time').innerText = str
+      document.getElementById('progress').innerText =str
+      document.getElementById('progress').style.height = p+'%'
+    }
+    /**
+     * 将数字两位化输出。
+     *
+     * @param {number} num
+     * @return {string} 
+     */
+    var dbNum = function(num){
+      return num>9 ? ''+num : '0'+num
+    }
+    /**
+     * 获取时间并设置到元素。
+     *
+     */
+    const setTime = function(){
+      var now = Math.floor((new Date())/1e3)
+      if(now>=endTime){ window.location.href = './timer-set.html' }
+      var str = Math.floor((endTime-now)/60)+':'+dbNum((endTime-now)%60)
+      var p = ((now-startTime)/(endTime-startTime)*100).toFixed(2)
+      setStr(str, p)
+    }
+
+    window.addEventListener('load', function(){
+      resize()
+      setTime()
+      window.setInterval(setTime, interval)
+    })
+    window.addEventListener('resize', resize)
+  </script>
+</body>
+</html>

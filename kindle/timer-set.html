@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>手中之沙</title>
+  <style>
+    body {
+      text-align: center;
+    }
+    a {
+      display: inline-block;
+      padding: 12px;
+      border: 1px solid #999999;
+      font-size: 24px;
+      line-height: 24px;
+    }
+    input {
+      padding: 12px;
+      font-size: 24px;
+      line-height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <h3>点击按钮，启动一个定时器</h3>
+  <p>普通设备请点击左侧按钮，时间会1秒钟更新一次。如果是墨水屏设备，则点击右侧按钮，每 10 秒钟更新一次。</p>
+  <p>时间结束会返回此页面，不会有明确提醒。所以只适合粗略的计时使用。比如煮咖啡，比如番茄工作法。</p>
+  <p>可在进入计时页面之后将链接加入收藏夹，既可从收藏夹快速开始此定时器。</p>
+  <p><a href="./timer.html?t=1">1 min</a> <a href="./timer.html?ink=1&t=1">1 min (ink)</a> </p>
+  <p><a href="./timer.html?t=3">3 min</a> <a href="./timer.html?ink=1&t=3">3 min (ink)</a> </p>
+  <p><a href="./timer.html?t=5">5 min</a> <a href="./timer.html?ink=1&t=5">5 min (ink)</a> </p>
+  <p><a href="./timer.html?t=10">10 min</a> <a href="./timer.html?ink=1&t=10">10 min (ink)</a> </p>
+  <p><a href="./timer.html?t=15">15 min</a> <a href="./timer.html?ink=1&t=15">15 min (ink)</a> </p>
+  <p><a href="./timer.html?t=25">25 min</a> <a href="./timer.html?ink=1&t=25">25 min (ink)</a> </p>
+  <p><a href="./timer.html?t=30">30 min</a> <a href="./timer.html?ink=1&t=30">30 min (ink)</a> </p>
+  <form action="./timer.html" method="get">
+    <p><input type="number" name="t" placeholder="Custom..."><input type="submit" value="Go"></p>
+  </form>
+  <form action="./timer.html" method="get">
+    <input type="hidden" name="ink" value="1">
+    <p><input type="number" name="t" placeholder="Custom..."><input type="submit" value="Go(ink)"></p>
+  </form>
+  
+</body>
+</html>
