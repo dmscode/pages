@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>手势密码穷举辅助工具</title>
+  <style>
+    html,
+    body {
+      font-size: 18px;
+      text-align: center;
+    }
+    a {
+      display: inline-block;
+      margin: 30px auto;
+      padding: 12px 36px;
+      font-size: 36px;
+      line-height: 1;
+      border: 1px solid #AAA;
+      color: #333338;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h1></h1>
+  <h2></h2>
+  <canvas></canvas>
+  <br>
+  <a href="" id="prev">Previous</a>
+  <a href="" id="next">Next</a>
+  <script>
+    const data = [[1,2,4,5],[1,2,7,8],[2,3,4,5],[2,3,5,6],[2,3,8,9],[4,5,7,8],[5,4,2,1],[5,4,3,2],[5,6,7,8],[5,6,8,9],[6,5,3,2],[8,7,2,1],[8,7,5,4],[8,7,6,5],[9,8,3,2],[9,8,6,5],[1,2,3,4,5],[1,2,3,5,6],[1,2,3,8,9],[1,2,4,5,6],[1,2,7,8,9],[2,3,4,5,6],[2,3,5,7,8],[4,5,6,7,8],[4,5,6,8,9],[4,5,7,8,9],[5,4,3,2,1],[5,6,7,8,9],[6,5,3,2,1],[6,5,4,2,1],[6,5,4,3,2],[8,7,5,3,2],[8,7,6,5,4],[9,8,3,2,1],[9,8,6,5,4],[9,8,7,2,1],[9,8,7,5,4],[9,8,7,6,5],[1,2,3,4,5,6],[1,2,3,5,7,8],[2,3,5,7,8,9],[4,5,6,7,8,9],[6,5,4,3,2,1],[8,7,5,3,2,1],[9,8,7,5,3,2],[9,8,7,6,5,4],[1,2,3,5,7,8,9],[9,8,7,5,3,2,1]]
+    /**
+     * 获取链接中的 get 参数。
+     *
+     * @param {string} key 要获取的键值
+     * @param {string|undefined} defVal 默认值
+     * @return {string} 
+     */
+     var getQuery = function(key, defVal){
+      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
+      if(window.location.search && reg.test(window.location.search)){
+        return decodeURIComponent(window.location.search.replace(reg, '$1'))
+      }
+      return defVal
+    }
+    const index = +getQuery('i', 0)
+    if(index<0 || index>data.length-1) alert('取值范围：0~'+(data.length-1))
+    const path = data[index]
+    document.body.querySelector('h1').innerText = 'No. '+index
+    document.body.querySelector('h2').innerText = path.join('-')
+    document.body.querySelector('#prev').href = './?i='+(index-1)
+    if(index<=0) document.body.querySelector('#prev').style.display = 'none'
+    document.body.querySelector('#next').href = './?i='+(index+1)
+    if(index>=data.length-1) document.body.querySelector('#next').style.display = 'none'
+
+
+    const canvas = document.body.querySelector('canvas')
+    const ctx = canvas.getContext('2d')
+
+    const winW = window.innerWidth
+    const winH = window.innerHeight
+    const baseLong = +(winW<=winH*0.6 ? winW : winH*0.6).toFixed()
+    const baseLongA = +(baseLong/16*7).toFixed()
+    const baseLongB = +(baseLong/16).toFixed()
+
+    canvas.width = baseLong
+    canvas.height = baseLong
+
+    const points = []
+
+    for(let i=0; i<3; i++){
+      for(let j=0; j<3; j++){
+        points.push({
+          x: j*baseLongA+baseLongB,
+          y: i*baseLongA+baseLongB
+        })
+      }
+    }
+
+    for(let i=0; i<9; i++){
+      ctx.beginPath()
+      ctx.arc(points[i].x, points[i].y, baseLongB-1, 0, Math.PI*2, true)
+      ctx.lineWidth = 1.0
+      ctx.strokeStyle = "#AAA"
+      ctx.stroke()
+    }
+    path.forEach((s, i)=>{
+      if(i===path.length-1) return
+      const start = s-1
+      const end = path[i+1]-1
+
+      ctx.beginPath()
+      ctx.moveTo(points[start].x, points[start].y)
+      ctx.lineTo(points[end].x, points[end].y)
+      ctx.lineWidth = (baseLongB/4).toFixed()
+      ctx.strokeStyle = "#33AA33"
+      ctx.stroke()
+    })
+  </script>
+</body>
+</html>

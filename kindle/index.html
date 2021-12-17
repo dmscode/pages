@@ -12,7 +12,9 @@
   </style>
 </head>
 <body>
-  <h3>四个字吖</h3>
+  <h1>Simple Pages.</h1>
+  <hr style="border: 2px solid #999999; background: #999999;">
+  <h3 id="four-letters">四个字吖</h3>
   <p>在下面输入 1~4 个字，然后显示它们。不输入就显示时钟，这时候你可以在下面选择时钟的数字格式。</p>
   <form action="./four-words.html" method="get">
     <input id="four-letters-content" name="s" type="text" placeholder="老鼠最萌"><br>
@@ -23,7 +25,7 @@
     <input type="submit" value="Go">
   </form>
   <hr>
-  <h3>只言片语</h3>
+  <h3 id="some-words">只言片语</h3>
   <p>在下面输入一句话，自行换行，然后显示它们，不输入就显示时钟。</p>
   <form action="./some-words.html" method="get">
     <textarea name="s" id="" cols="30" rows="10" placeholder="聪明伶俐小老鼠"></textarea>
@@ -31,22 +33,22 @@
     <input type="submit" value="Go">
   </form>
   <hr>
-  <h3>年、月、日</h3>
+  <h3 id="year-month-day">年、月、日</h3>
   <p>
     <a href="./year.html">年历模式</a> /
     <a href="./month.html">月历模式</a> /
     <a href="./day.html">日历模式</a>
   </p>
   <hr>
-  <h3>似水流年</h3>
+  <h3 id="progress">似水流年</h3>
   <p>
     <a href="./progress.html">时光进度</a> /
     <a href="./progress.html?ink=1">时光进度（墨水屏专用）</a>
   </p>
-  <h3>手中之沙</h3>
+  <h3 id="timer">手中之沙</h3>
   <p>一个全屏倒计时器，用于不十分精确的计时场景。点击下方链接进入快速定时页面。</p>
   <p><a href="./timer-set.html">手中之沙</a></p>
-  <h3>渐近渐远</h3>
+  <h3 id="countdown">渐近渐远</h3>
   <p>在下面输入年、月、日，然后会显示距离目标时间还有多少天，或者已经过去了多少天。</p>
   <p>如果目标时间就在今年，则年份可以不填写。就在这个月，则月份可以不填写。</p>
   <form action="./countdown.html" method="get">
