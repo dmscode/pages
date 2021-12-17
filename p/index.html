@@ -60,9 +60,9 @@
     const canvas = document.body.querySelector('canvas')
     const ctx = canvas.getContext('2d')
 
-    const winW = window.innerWidth
-    const winH = window.innerHeight
-    const baseLong = +(winW<=winH*0.6 ? winW : winH*0.6).toFixed()
+    const winW = window.innerWidth*0.8
+    const winH = window.innerHeight*0.6
+    const baseLong = +(winW<=winH ? winW : winH).toFixed()
     const baseLongA = +(baseLong/16*7).toFixed()
     const baseLongB = +(baseLong/16).toFixed()
 
