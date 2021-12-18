@@ -74,7 +74,7 @@
     var getQuery = function(key, defVal){
       var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
       if(window.location.search && reg.test(window.location.search)){
-        return decodeURIComponent(window.location.search.replace(reg, '$1'))
+        return decodeURIComponent(window.location.search.replace(reg, '$1').replace(/\+/g, ' '))
       }
       return defVal
     }
