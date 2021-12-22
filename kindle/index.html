@@ -58,6 +58,7 @@
       <input type="radio" name="t" id="type-1" value="1"><label for="type-1">〇一二三</label><br>
       <input type="radio" name="t" id="type-2" value="2"><label for="type-2">零壹贰仨</label><br>
       <input type="submit" value="Go">
+      <input type="hidden" name="tz" class="timezone">
     </form>
   </div>
   <div class="box">
@@ -67,18 +68,19 @@
       <textarea name="s" id="" cols="20" rows="5" placeholder="聪明伶俐小老鼠"></textarea>
       <br>
       <input type="submit" value="Go">
+      <input type="hidden" name="tz" class="timezone">
     </form>
   </div>
   <div class="box">
     <h3 id="year-month-day">年、月、日</h3>
-    <a href="./year.html">年历模式</a><br><br>
-    <a href="./month.html">月历模式</a><br><br>
-    <a href="./day.html">日历模式</a>
+    <a href="./year.html" class="timezone-link">年历模式</a><br><br>
+    <a href="./month.html" class="timezone-link">月历模式</a><br><br>
+    <a href="./day.html" class="timezone-link">日历模式</a>
   </div>
   <div class="box">
     <h3 id="progress">似水流年</h3>
-    <a href="./progress.html">时光进度</a><br>
-    <a href="./progress.html?ink=1">时光进度（墨水屏专用）</a>
+    <a href="./progress.html" class="timezone-link">时光进度</a><br>
+    <a href="./progress.html?ink=1" class="timezone-link">时光进度（墨水屏专用）</a>
   </div>
   <div class="box">
     <h3 id="timer">手中之沙</h3>
@@ -93,7 +95,18 @@
       <label for="month">Month (eg:1~12)</label><input type="number" name="m" id="month" class="text-input"><br>
       <label for="day">Day (eg:1~31)</label><input type="number" name="d" id="day" class="text-input"><br>
       <input type="submit" value="Go">
+      <input type="hidden" name="tz" class="timezone">
     </form>
+  </div>
+  <div class="box">
+    <h3 id="timer">聚沙成塔</h3>
+    <p>计数器，点击数字 +1，点击页面左上角 -1，点击页面右上角切换显示计数日志。用来记录一些重复事件发生的次数，比如喝了几杯水，去了几次厕所，修改到了第几稿……</p>
+    <a href="./counter.html" class="timezone-link">聚沙成塔</a>
+  </div>
+  <div class="box">
+    <h3 id="timer">日夜轮转</h3>
+    <p>长周期待办列表，比如上一次洗澡是几天前，上一次交电费是几天前，数据保存在本地，点击页面右上角切换时间显示。描述文字尽可能简短，最多只能容纳大概 12 个项目。</p>
+    <a href="./long-period-todo.html" class="timezone-link">日夜轮转</a>
   </div>
   <div id="afdian" class="box">
     扫描二维码或者点击 <a href="https://afdian.net/@daomishu" target="_blank">此链接</a> 支持小老鼠
@@ -101,5 +114,25 @@
     <br>
     <img src="./src/afdian.png" alt="">
   </div>
+  <script>
+    var getQuery = function(key, defVal){
+      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
+      if(window.location.search && reg.test(window.location.search)){
+        return decodeURIComponent(window.location.search.replace(reg, '$1'))
+      }
+      return defVal
+    }
+    var timeZone = getQuery('tz')
+    if(typeof(timeZone)!=='undefined' && timeZone.length){
+      var inputArr = document.body.getElementsByClassName('timezone')
+      for (var i=0; i<inputArr.length; i++) {
+        inputArr[i].value = timeZone
+      }
+      var linkArr = document.body.getElementsByClassName('timezone-link')
+      for (var i=0; i<linkArr.length; i++) {
+        linkArr[i].href = linkArr[i].href+'?tz='+timeZone
+      }
+    }
+  </script>
 </body>
 </html>

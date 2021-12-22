@@ -104,6 +104,11 @@
       }
       return defVal
     }
+    var timeZone = +getQuery('tz', -new Date().getTimezoneOffset()/60)
+    var timeOffset = (timeZone*60+new Date().getTimezoneOffset())*6e4
+    var fixDate = function(time){
+      return new Date((+time)+timeOffset)
+    }
     /**
      * 计算窗口中元素的尺寸属性
      *
@@ -164,8 +169,8 @@
      *
      */
     var progress = {}
-    const setTime = function(){
-      var now = new Date()
+    var setTime = function(){
+      var now = fixDate(new Date())
       var year = now.getFullYear()
       var month = now.getMonth()
       var day = now.getDate()

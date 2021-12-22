@@ -107,7 +107,7 @@
      * 获取时间并设置到元素。
      *
      */
-    const setTime = function(){
+    var setTime = function(){
       var now = Math.floor((new Date())/1e3)
       if(now>=endTime){ window.location.href = './timer-set.html' }
       var str = Math.floor((endTime-now)/60)+':'+dbNum((endTime-now)%60)

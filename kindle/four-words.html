@@ -62,6 +62,11 @@
       }
       return defVal
     }
+    var timeZone = +getQuery('tz', -new Date().getTimezoneOffset()/60)
+    var timeOffset = (timeZone*60+new Date().getTimezoneOffset())*6e4
+    var fixDate = function(time){
+      return new Date((+time)+timeOffset)
+    }
     /** @type {string} 要显示的文字 */
     var queryStr = getQuery('s')
     /** @type {string} 时钟使用的文字类型 */
@@ -129,8 +134,8 @@
      * 获取时间并设置到元素。
      *
      */
-    const setTime = function(){
-      var now = new Date()
+    var setTime = function(){
+      var now = fixDate(new Date())
       var hour = dbNum(now.getHours())
       var minute = dbNum(now.getMinutes())
       var numStr = (hour+minute).split('')

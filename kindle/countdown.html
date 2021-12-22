@@ -55,6 +55,11 @@
       }
       return defVal
     }
+    var timeZone = +getQuery('tz', -new Date().getTimezoneOffset()/60)
+    var timeOffset = (timeZone*60+new Date().getTimezoneOffset())*6e4
+    var fixDate = function(time){
+      return new Date((+time)+timeOffset)
+    }
     /**
      * 计算窗口中元素的尺寸属性
      *
@@ -105,13 +110,13 @@
      *
      */
     var timeLong = null
-    const setTime = function(){
-      var now = new Date()
+    var setTime = function(){
+      var now = fixDate(new Date())
       var year = +getQuery('y', now.getFullYear())
       var month = +getQuery('m', now.getMonth()+1)-1
       var day = +getQuery('d', now.getDate())
 
-      var newTimeLong = Math.ceil((new Date(year, month, day)-(+new Date()))/86400e3)
+      var newTimeLong = Math.ceil((+new Date(year, month, day)-(+now))/86400e3)
 
       if(timeLong!==newTimeLong){
         timeLong = newTimeLong
