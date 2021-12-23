@@ -179,7 +179,7 @@
         var cookie = cookies[i]
         var cookieArr = cookie.split('=')
         var key = cookieArr[0]
-        if(!/^todo_\d+$/.test(key)){ continue }
+        if(!/^long_todo_\d+$/.test(key)){ continue }
         var val = JSON.parse(decodeURIComponent(cookieArr[1]))
         list[val.mark] = val.content
         var pass = passdays(val.mark)
@@ -224,12 +224,12 @@
         mark: mark,
         date: toDate(mark)
       }
-      document.cookie = 'todo_'+mark+'='+encodeURIComponent(JSON.stringify(todoItem))+'; expires=Fri, 31 Dec 9999 23:59:59 GMT;'
+      document.cookie = 'long_todo_'+mark+'='+encodeURIComponent(JSON.stringify(todoItem))+'; expires=Fri, 31 Dec 9999 23:59:59 GMT;'
       setStr()
     }
     var removeTodo = function(mark){
       if(confirm('确认删除“'+list[mark]+'”？')){
-        document.cookie = 'todo_'+mark+'=; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        document.cookie = 'long_todo_'+mark+'=; expires=Thu, 01 Jan 1970 00:00:00 GMT'
         delete list[mark]
         setStr()
       }
@@ -237,7 +237,7 @@
     var refreshDate = function(mark){
       var content = list[mark]
       if(confirm('确认更新“'+content+'”的时间？')){
-        document.cookie = 'todo_'+mark+'=; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        document.cookie = 'long_todo_'+mark+'=; expires=Thu, 01 Jan 1970 00:00:00 GMT'
         delete list[mark]
         addTodo(content)
       }
