@@ -158,7 +158,7 @@
       style.innerHTML = styleSource
     }
     var toDate = function(t){
-      var time = fixDate(new Date(t))
+      var time = new Date(t)
       return time.getFullYear()+'-'+dbNum(time.getMonth()+1)+'-'+dbNum(time.getDate())
     }
     var passdays = function(t){
