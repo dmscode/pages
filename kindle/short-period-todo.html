@@ -114,26 +114,8 @@
     </div>
   </div>
   <div id="reset-all" onclick="resetAll()"></div>
+  <script src="./src/functions.js"></script>
   <script>
-    /**s
-     * 获取链接中的 get 参数。
-     *
-     * @param {string} key 要获取的键值
-     * @param {string|undefined} defVal 默认值
-     * @return {string} 
-     */
-    var getQuery = function(key, defVal){
-      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
-      if(window.location.search && reg.test(window.location.search)){
-        return decodeURIComponent(window.location.search.replace(reg, '$1'))
-      }
-      return defVal
-    }
-    var timeZone = +getQuery('tz', -new Date().getTimezoneOffset()/60)
-    var timeOffset = (timeZone*60+new Date().getTimezoneOffset())*6e4
-    var fixDate = function(time){
-      return new Date((+time)+timeOffset)
-    }
     /**
      * 计算窗口中元素的尺寸属性
      *
@@ -161,7 +143,7 @@
       style.innerHTML = styleSource
     }
     var getTime = function(){
-      var time = fixDate(new Date())
+      var time = fixDate()
       return dbNum(time.getHours())+':'+dbNum(time.getMinutes())+':'+dbNum(time.getSeconds())
     }
     /**
@@ -207,7 +189,7 @@
       content = content ? content : document.getElementById('add-todo-content').value
       if(!content.length){ return }
       document.getElementById('add-todo-content').value = ''
-      var mark = +fixDate(new Date())
+      var mark = +fixDate()
       var todoItem = {
         done: false,
         content: content,
@@ -233,16 +215,6 @@
         document.getElementById('time-'+mark).innerText = list[mark].done ? list[mark].time : ''
         document.getElementById('content-'+mark).innerHTML = '<span'+(list[mark].done ? ' class="done"' : '')+'>'+list[mark].content+'</span>'
     }
-    /**
-     * 将数字两位化输出。
-     *
-     * @param {number} num
-     * @return {string} 
-     */
-    var dbNum = function(num){
-      return num>9 ? ''+num : '0'+num
-    }
-
     window.addEventListener('load', function(){
       resize()
       setStr()

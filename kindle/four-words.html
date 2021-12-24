@@ -31,6 +31,7 @@
   </style>
 </head>
 <body>
+  <style id="resize"></style>
   <div id="table">
     <div class="tr">
       <div class="td"></div>
@@ -41,6 +42,7 @@
       <div class="td"></div>
     </div>
   </div>
+  <script src="./src/functions.js"></script>
   <script>
     /** 用来显示时钟的各种数字。如果无此参数或者序号为零，则均显示阿拉伯数字。 */
     var nums = [
@@ -48,29 +50,12 @@
       ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'],
       ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖']
     ]
-    /**
-     * 获取链接中的 get 参数。
-     *
-     * @param {string} key 要获取的键值
-     * @param {string|undefined} defVal 默认值
-     * @return {string} 
-     */
-    var getQuery = function(key, defVal){
-      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
-      if(window.location.search && reg.test(window.location.search)){
-        return decodeURIComponent(window.location.search.replace(reg, '$1'))
-      }
-      return defVal
-    }
-    var timeZone = +getQuery('tz', -new Date().getTimezoneOffset()/60)
-    var timeOffset = (timeZone*60+new Date().getTimezoneOffset())*6e4
-    var fixDate = function(time){
-      return new Date((+time)+timeOffset)
-    }
     /** @type {string} 要显示的文字 */
     var queryStr = getQuery('s')
     /** @type {string} 时钟使用的文字类型 */
     var numType = getQuery('t')
+    var table = document.getElementById('table')
+    var style = document.getElementById('resize')
     /**
      * 计算窗口中元素的尺寸属性
      *
@@ -80,29 +65,26 @@
       var winH = document.body.offsetHeight
       var vmin = (winW >= winH ? winH : winW)/100
 
-      var table = document.getElementById('table')
-      table.style.width = (vmin*81).toFixed(2)+'px'
-      table.style.height = (vmin*81).toFixed(2)+'px'
-      table.style.margin = ((winH-vmin*81)/2).toFixed(2)+'px auto'
-      table.style.border = (3*vmin).toFixed(2)+'px solid #CC0000'
-      table.style.padding = (vmin).toFixed(2)+'px'
-      table.style.fontSize = (35*0.8*vmin).toFixed(2)+'px'
-      table.style.lineHeight = (35*vmin).toFixed(2)+'px'
+      var styleSource = '#table {'
+                      + 'width: '+(vmin*81).toFixed(2)+'px;'
+                      + 'height: '+(vmin*81).toFixed(2)+'px;'
+                      + 'margin: '+((winH-vmin*81)/2).toFixed(2)+'px auto;'
+                      + 'border: '+(3*vmin).toFixed(2)+'px solid #CC0000;'
+                      + 'padding: '+(vmin).toFixed(2)+'px;'
+                      + 'font-size: '+(35*0.8*vmin).toFixed(2)+'px;'
+                      + 'line-height: '+(35*vmin).toFixed(2)+'px;'
+                      + '}'
+      styleSource += '.tr {'
+                  + 'height: '+(35*vmin).toFixed(2)+'px;'
+                  + 'border: '+(vmin).toFixed(2)+'px solid #CC0000;'
+                  + '}'
+      styleSource += '.td {'
+                  + 'width: '+(35*vmin).toFixed(2)+'px;'
+                  + 'height: '+(35*vmin).toFixed(2)+'px;'
+                  + 'border-left: '+(vmin).toFixed(2)+'px solid #CC0000;'
+                  + '}'
 
-      var trs = document.body.getElementsByClassName('tr')
-      for(var i=0; i<trs.length; i++){
-        var tr = trs[i]
-        tr.style.height = (35*vmin).toFixed(2)+'px'
-        tr.style.border = (vmin).toFixed(2)+'px solid #CC0000'
-      }
-
-      var tds = document.body.getElementsByClassName('td')
-      for(var i=0; i<tds.length; i++){
-        var td = tds[i]
-        td.style.width = (35*vmin).toFixed(2)+'px'
-        td.style.height = (35*vmin).toFixed(2)+'px'
-        td.style.borderLeft = (vmin).toFixed(2)+'px solid #CC0000'
-      }
+      style.innerHTML = styleSource
     }
     /** @type {*} 当前显示在元素中的文字内容 */
     var nowStr = []
@@ -122,20 +104,11 @@
       }
     }
     /**
-     * 将数字两位化输出。
-     *
-     * @param {number} num
-     * @return {string} 
-     */
-    var dbNum = function(num){
-      return num>9 ? ''+num : '0'+num
-    }
-    /**
      * 获取时间并设置到元素。
      *
      */
     var setTime = function(){
-      var now = fixDate(new Date())
+      var now = fixDate()
       var hour = dbNum(now.getHours())
       var minute = dbNum(now.getMinutes())
       var numStr = (hour+minute).split('')

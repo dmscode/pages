@@ -119,16 +119,9 @@
     <br>
     <img src="./src/afdian.png" alt="">
   </div>
+  <script src="./src/functions.js"></script>
   <script>
-    var getQuery = function(key, defVal){
-      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
-      if(window.location.search && reg.test(window.location.search)){
-        return decodeURIComponent(window.location.search.replace(reg, '$1'))
-      }
-      return defVal
-    }
-    var timeZone = getQuery('tz')
-    if(typeof(timeZone)!=='undefined' && timeZone.length){
+    if(typeof(timeZone)!=='undefined' && (''+timeZone).length){
       var inputArr = document.body.getElementsByClassName('timezone')
       for (var i=0; i<inputArr.length; i++) {
         inputArr[i].value = timeZone

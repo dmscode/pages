@@ -112,29 +112,11 @@
       <div class="td" id="lunar"></div>
     </div>
   </div>
+  <script src="./src/functions.js"></script>
   <script>
     /** 用来显示时钟的各种数字。如果无此参数或者序号为零，则均显示阿拉伯数字。 */
     var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
     var weekNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    /**
-     * 获取链接中的 get 参数。
-     *
-     * @param {string} key 要获取的键值
-     * @param {string|undefined} defVal 默认值
-     * @return {string} 
-     */
-    var getQuery = function(key, defVal){
-      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
-      if(window.location.search && reg.test(window.location.search)){
-        return decodeURIComponent(window.location.search.replace(reg, '$1'))
-      }
-      return defVal
-    }
-    var timeZone = +getQuery('tz', -new Date().getTimezoneOffset()/60)
-    var timeOffset = (timeZone*60+new Date().getTimezoneOffset())*6e4
-    var fixDate = function(time){
-      return new Date((+time)+timeOffset)
-    }
     /**
      * 计算窗口中元素的尺寸属性
      *
@@ -157,15 +139,6 @@
                       + 'line-height: '+(vmin*2).toFixed(2)+'px;'
                       + '}'
       style.innerHTML = styleSource
-    }
-    /**
-     * 将数字两位化输出。
-     *
-     * @param {number} num
-     * @return {string} 
-     */
-     var dbNum = function(num){
-      return num>9 ? ''+num : '0'+num
     }
     var setNote = function(note){
       var index = Math.round(Math.random()*hitokoto.length)
@@ -204,7 +177,7 @@
      *
      */
     var setTime = function(){
-      var now = fixDate(new Date())
+      var now = fixDate()
       var year = +getQuery('y', now.getFullYear())
       var month = +getQuery('m', now.getMonth()+1)-1
       var day = +getQuery('d', now.getDate())

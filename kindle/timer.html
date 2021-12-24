@@ -41,21 +41,8 @@
     <span id="time">12</span>
     <div id="progress">12</div>
   </div>
+  <script src="./src/functions.js"></script>
   <script>
-    /**
-     * 获取链接中的 get 参数。
-     *
-     * @param {string} key 要获取的键值
-     * @param {string|undefined} defVal 默认值
-     * @return {string} 
-     */
-    var getQuery = function(key, defVal){
-      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
-      if(window.location.search && reg.test(window.location.search)){
-        return decodeURIComponent(window.location.search.replace(reg, '$1'))
-      }
-      return defVal
-    }
     /**
      * 计算窗口中元素的尺寸属性
      *
@@ -93,15 +80,6 @@
       document.getElementById('time').innerText = str
       document.getElementById('progress').innerText =str
       document.getElementById('progress').style.height = p+'%'
-    }
-    /**
-     * 将数字两位化输出。
-     *
-     * @param {number} num
-     * @return {string} 
-     */
-    var dbNum = function(num){
-      return num>9 ? ''+num : '0'+num
     }
     /**
      * 获取时间并设置到元素。

@@ -111,26 +111,8 @@
     </div>
   </div>
   <div id="toggle-date" onclick="toggleDate()"></div>
+  <script src="./src/functions.js"></script>
   <script>
-    /**s
-     * 获取链接中的 get 参数。
-     *
-     * @param {string} key 要获取的键值
-     * @param {string|undefined} defVal 默认值
-     * @return {string} 
-     */
-    var getQuery = function(key, defVal){
-      var reg = new RegExp('^.*[?&]'+key+'=([^&]+)(?:&.*)?$', '')
-      if(window.location.search && reg.test(window.location.search)){
-        return decodeURIComponent(window.location.search.replace(reg, '$1'))
-      }
-      return defVal
-    }
-    var timeZone = +getQuery('tz', -new Date().getTimezoneOffset()/60)
-    var timeOffset = (timeZone*60+new Date().getTimezoneOffset())*6e4
-    var fixDate = function(time){
-      return new Date((+time)+timeOffset)
-    }
     /**
      * 计算窗口中元素的尺寸属性
      *
@@ -162,7 +144,7 @@
       return time.getFullYear()+'-'+dbNum(time.getMonth()+1)+'-'+dbNum(time.getDate())
     }
     var passdays = function(t){
-      return Math.floor(+fixDate(new Date())/864e5)-Math.floor(t/864e5)
+      return Math.floor(+fixDate()/864e5)-Math.floor(t/864e5)
     }
     /**
      * 将文字内容设置到元素中。
@@ -218,7 +200,7 @@
       content = content ? content : document.getElementById('add-todo-content').value
       if(!content.length){ return }
       document.getElementById('add-todo-content').value = ''
-      var mark = +fixDate(new Date())
+      var mark = +fixDate()
       var todoItem = {
         content: content,
         mark: mark,
@@ -241,15 +223,6 @@
         delete list[mark]
         addTodo(content)
       }
-    }
-    /**
-     * 将数字两位化输出。
-     *
-     * @param {number} num
-     * @return {string} 
-     */
-    var dbNum = function(num){
-      return num>9 ? ''+num : '0'+num
     }
     /**
      * 时钟启动函数。
