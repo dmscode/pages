@@ -8,6 +8,7 @@
   <style>
     body {
       text-align: center;
+      margin: 8px;
     }
     .box {
       display: inline-block;
@@ -16,10 +17,14 @@
       margin-bottom: 8px;
       font-size: 18px;
       line-height: 1.6em;
-      width: 24em;
+      width: 20em;
       height: 20em;
       padding: 8px 12px;
       overflow: hidden;
+    }
+    #mini > .box,
+    #single > .box {
+      height: auto;
     }
     .box > p {
       text-align: left;
@@ -45,8 +50,9 @@
   </style>
 </head>
 <body>
+  <style id="resize"></style>
   <h1>Simple Pages.</h1>
-  <a href="./qa.html">Q&A</a> | <a href="https://afdian.net/@daomishu" target="_blank">支持一下</a>
+  <a href="./introduction.html">详细介绍</a> | <a href="https://afdian.net/@daomishu" target="_blank">支持一下</a>
   <hr style="border: 2px solid #999999; background: #999999;">
   <div class="box">
     <h3 id="four-letters">四个字吖</h3>
@@ -140,6 +146,43 @@
         linkArr[i].href = linkArr[i].href+'?tz='+timeZone
       }
     }
+    var style = document.getElementById('resize')
+    var resize = function(){
+      var winW = document.body.offsetWidth
+      var em = 18
+      if(winW < em*20+15*2){ // 390
+        document.body.id = 'mini'
+        style.innerHTML = '#mini > .box {'
+                          + 'width: '+(winW-30)+'px;'
+                        + '}'
+                        + '#afdian > img {'
+                          + 'width: '+(winW-30)+'px;'
+                        + '}'
+        return
+      }
+      if(winW < em*41+15*4){  // 798
+        document.body.id = 'single'
+        style.innerHTML = ''
+        return
+      }
+      if(winW < em*62+15*6){  // 1206
+        document.body.id = 'normal'
+        style.innerHTML = ''
+        return
+      }
+      if(winW < em*83+15*8){  // 1206
+        document.body.id = 'wide'
+        style.innerHTML = ''
+        return
+      }
+      document.body.id = 'full'
+      style.innerHTML = 'body {'
+                        + 'padding: 0 '+(winW-em*83+15*8)/2+'px'
+                      + '}'
+    }
+    resize()
+    window.onload = resize
+    window.onresize = resize
   </script>
 </body>
 </html>
