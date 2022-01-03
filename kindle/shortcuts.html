@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>快捷键呐</title>
+  <style>
+    body {
+      /* font-size: 18px; */
+      line-height: 1.8em;
+    }
+    .table {
+      z-index: -1;
+    }
+    .tr {
+      position: relative;
+      /* margin: 1em 0; */
+      border-bottom: 1px solid #AAAAAA;
+    }
+    .td {
+      /* float: left; */
+      word-break: break-all;
+      white-space: normal;
+    }
+    .tr > .td:first-child {
+      padding-right: 2em;
+    }
+    .clear {
+      clear: both;
+    }
+    .kbd {
+      position: relative;
+      display: inline-block;
+      line-height: 1em;
+      font-weight: 600;
+      color: white;
+      background-color: #333336;
+      padding: .2em .3em;
+      /* bottom: -6px; */
+      border-radius: .2em;
+    }
+  </style>
+</head>
+<body>
+  <div id="table"></div>
+  <div id="shortcuts-data"></div>
+  <script src="./src/functions.js"></script>
+  <script>
+    var showShortcuts = function(){
+      var code = ''
+      for(var shortcutsI=0; shortcutsI<shortcuts.length; shortcutsI++){
+        var group = shortcuts[shortcutsI]
+        code += '<h3>'+group.title+'</h3>'
+        for(var groupI=0; groupI<group.table.length; groupI++){
+          var sc = group.table[groupI]
+          code += '<div class="tr"><span class="td">'
+          for(var scI=0; scI<sc.key.length; scI++){
+            var keys = sc.key[scI]
+            if(scI){ code += '<br>' }
+            for(var keysI=0; keysI<keys.length; keysI++){
+              var k = keys[keysI]
+              if(keysI){ code += ' + ' }
+              code += '<span class="kbd">'+k+'</span>'
+            }
+          }
+          code += '</span>'
+                + '<span class="td">' + sc.desc + '</span>'
+                // + '<div class="clear"></div>'
+                + '</div>'
+        }
+      }
+      document.getElementById('table').innerHTML = code
+    }
+
+    var type = getQuery('t', 'win11')
+    var script = document.createElement('script')
+    script.src = './src/'+type+'-Shortcut-Keys.js'
+    try {
+      document.body.appendChild(script)
+    } catch (error) {
+      alert(error)
+    }
+  </script>
+</body>
+</html>
