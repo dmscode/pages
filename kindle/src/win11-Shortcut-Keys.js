@@ -31,12 +31,12 @@ var shortcuts = [
         key: [["Alt", "F4"]],
       },
       {
-        keySource: "Windows 徽标键  + L",
+        keySource: "Windows 徽标键  + L",
         desc: "锁定你的电脑。",
         key: [["Win", "L"]],
       },
       {
-        keySource: "Windows 徽标键  + D",
+        keySource: "Windows 徽标键  + D",
         desc: "显示和隐藏桌面。",
         key: [["Win", "D"]],
       },
@@ -69,9 +69,9 @@ var shortcuts = [
         key: [["Alt", "Esc"]],
       },
       {
-        keySource: "Alt + 带下划线的字母",
-        desc: "执行该字母相关的命令。",
-        key: [["Alt", "带下划线的字母"]],
+        keySource: "Alt + 字母",
+        desc: "执行该（带下划线的）字母相关的命令。",
+        key: [["Alt", "字母"]],
       },
       {
         keySource: "Alt + Enter",
@@ -86,14 +86,14 @@ var shortcuts = [
       { keySource: "Alt + 向左键", desc: "返回。", key: [["Alt", "←"]] },
       { keySource: "Alt + 向右键", desc: "前进。", key: [["Alt", "→"]] },
       {
-        keySource: "Alt + Page Up",
+        keySource: "Alt + PageUp",
         desc: "向上移动一个屏幕。",
-        key: [["Alt", "Page Up"]],
+        key: [["Alt", "PageUp"]],
       },
       {
-        keySource: "Alt + Page Down",
+        keySource: "Alt + PageDn",
         desc: "向下移动一个屏幕。",
-        key: [["Alt", "Page Down"]],
+        key: [["Alt", "PageDn"]],
       },
       {
         keySource: "Ctrl + F4",
@@ -111,9 +111,9 @@ var shortcuts = [
         key: [["Ctrl", "D"], ["Delete"]],
       },
       {
-        keySource: "Ctrl + E",
+        keySource: "Ctrl + F",
         desc: "打开搜索（在大多数应用中）。",
-        key: [["Ctrl", "E"]],
+        key: [["Ctrl", "F"]],
       },
       {
         keySource: "Ctrl + R（或 F5）",
@@ -162,9 +162,9 @@ var shortcuts = [
         key: [["Ctrl", "方向键"]],
       },
       {
-        keySource: "Ctrl + 箭头键（移至某个项目）+ 空格键",
-        desc: "选择窗口中或桌面上的多个单独项目。",
-        key: [["Ctrl", "方向键（移至某个项目）+ Space"]],
+        keySource: "Ctrl + 箭头键+ 空格键",
+        desc: "选择窗口中或桌面上的多个单独项目（先用方向键移动，再用空格键选中）。",
+        key: [["Ctrl", "方向键", "Space"]],
       },
       {
         keySource: "Ctrl + Shift（及箭头键）",
@@ -219,7 +219,7 @@ var shortcuts = [
       { keySource: "Esc", desc: "停止或离开当前任务。", key: [["Esc"]] },
       {
         keySource: "PrtScn",
-        desc: "捕获整个屏幕的屏幕截图并将其复制到剪贴板。 注意你可以更改此快捷方式，以便它还可以打开屏幕截取，这允许你编辑屏幕截图。 依次选择“开始” > “设置” > “轻松访问” > “键盘”，然后打开“Print Screen 快捷方式”下的切换开关。使用 PrtScn 键打开屏幕截取",
+        desc: "捕获整个屏幕的屏幕截图并将其复制到剪贴板。 注意你可以更改此快捷方式，以便它还可以打开屏幕截取，这允许你编辑屏幕截图。 依次选择“开始” > “设置” > “轻松访问” > “键盘”，然后打开“Print Screen 快捷方式”下的切换开关。使用 PrtScn 键打开屏幕截取",
         key: [["PrtScn"]],
       },
     ],
@@ -238,27 +238,27 @@ var shortcuts = [
         key: [["Win", "A"]],
       },
       {
-        keySource: "Windows 徽标键  + B ",
+        keySource: "Windows 徽标键  + B ",
         desc: "将焦点设置为任务栏角落的第一个图标。",
         key: [["Win", "B"]],
       },
       {
-        keySource: "Windows 徽标键  + C",
+        keySource: "Windows 徽标键  + C",
         desc: "从 Microsoft Teams 打开聊天。 在 Windows 11 中更新。",
         key: [["Win", "C"]],
       },
       {
-        keySource: "Windows 徽标键  + Shift + C",
+        keySource: "Windows 徽标键  + Shift + C",
         desc: "打开超级按钮菜单。",
         key: [["Win", "Shift", "C"]],
       },
       {
-        keySource: "Windows 徽标键  + Ctrl + C",
+        keySource: "Windows 徽标键  + Ctrl + C",
         desc: "打开颜色筛选器（在颜色筛选器设置中首先启用此快捷方式）。",
         key: [["Win", "Ctrl", "C"]],
       },
       {
-        keySource: "Windows 徽标键  + D",
+        keySource: "Windows 徽标键  + D",
         desc: "显示和隐藏桌面。",
         key: [["Win", "D"]],
       },
@@ -268,47 +268,47 @@ var shortcuts = [
         key: [["Win", "E"]],
       },
       {
-        keySource: "Windows 徽标键  + F",
+        keySource: "Windows 徽标键  + F",
         desc: "打开反馈中心并获取屏幕截图。",
         key: [["Win", "F"]],
       },
       {
-        keySource: "Windows 徽标键  + G",
+        keySource: "Windows 徽标键  + G",
         desc: "打开 Xbox Game Bar（当游戏处于打开状态时）。",
         key: [["Win", "G"]],
       },
       {
         keySource: "Windows 徽标键  + Alt + B",
-        desc: "打开或关闭 HDR。注意: 适用于 Xbox 游戏栏应用版本 5.721.7292.0 或更高版本。 若要更新 Xbox 游戏栏，请转到 Microsoft Store 应用并检查更新。",
+        desc: "打开或关闭 HDR。注意: 适用于 Xbox 游戏栏应用版本 5.721.7292.0 或更高版本。 若要更新 Xbox 游戏栏，请转到 Microsoft Store 应用并检查更新。",
         key: [["Win", "Alt", "B"]],
       },
       {
-        keySource: "Windows 徽标键  + H",
+        keySource: "Windows 徽标键  + H",
         desc: "启动语音键入。 在 Windows 11 中更新。",
         key: [["Win", "H"]],
       },
       {
-        keySource: "Windows 徽标键  + I",
+        keySource: "Windows 徽标键  + I",
         desc: "打开设置。",
         key: [["Win", "I"]],
       },
       {
-        keySource: "Windows 徽标键  + J",
-        desc: "请将焦点设置到可用的 Windows 提示。当出现 Windows 提示时，请将焦点移到提示上。  再次按下键盘快捷方式，将焦点放在屏幕上 Windows 提示所固定的元素上。",
+        keySource: "Windows 徽标键  + J",
+        desc: "请将焦点设置到可用的 Windows 提示。当出现 Windows 提示时，请将焦点移到提示上。  再次按下键盘快捷方式，将焦点放在屏幕上 Windows 提示所固定的元素上。",
         key: [["Win", "J"]],
       },
       {
-        keySource: "Windows 徽标键  + K",
+        keySource: "Windows 徽标键  + K",
         desc: "从“快速设置”打开“投放”。 在 Windows 11 中更新。",
         key: [["Win", "K"]],
       },
       {
-        keySource: "Windows 徽标键  + L",
+        keySource: "Windows 徽标键  + L",
         desc: "锁定你的电脑或切换帐户。",
         key: [["Win", "L"]],
       },
       {
-        keySource: "Windows 徽标键  + M",
+        keySource: "Windows 徽标键  + M",
         desc: "最小化所有窗口。",
         key: [["Win", "M"]],
       },
@@ -338,7 +338,7 @@ var shortcuts = [
         key: [["Win", "Ctrl", "Q"]],
       },
       {
-        keySource: "Windows 徽标键  + R",
+        keySource: "Windows 徽标键  + R",
         desc: "打开“运行”对话框。",
         key: [["Win", "R"]],
       },
@@ -353,7 +353,7 @@ var shortcuts = [
         key: [["Win", "S"]],
       },
       {
-        keySource: "Windows 徽标键  + Shift + S",
+        keySource: "Windows 徽标键  + Shift + S",
         desc: "获取部分屏幕的屏幕截图。",
         key: [["Win", "Shift", "S"]],
       },
@@ -368,8 +368,8 @@ var shortcuts = [
         key: [["Win", "U"]],
       },
       {
-        keySource: "Windows 徽标键  + V",
-        desc: "打开剪贴板历史记录。 注意默认情况下，剪贴板历史记录未打开。 如果要打开它，请使用此键盘快捷方式，然后选择提示以打开历史记录。 或者，可以选择开始>设置>系统>剪贴板，然后打开剪贴板历史记录下的开关。",
+        keySource: "Windows 徽标键  + V",
+        desc: "打开剪贴板历史记录。 注意默认情况下，剪贴板历史记录未打开。 如果要打开它，请使用此键盘快捷方式，然后选择提示以打开历史记录。 或者，可以选择开始>设置>系统>剪贴板，然后打开剪贴板历史记录下的开关。",
         key: [["Win", "V"]],
       },
       {
@@ -388,7 +388,7 @@ var shortcuts = [
         key: [["Win", "X"]],
       },
       {
-        keySource: "Windows 徽标键  + Y",
+        keySource: "Windows 徽标键  + Y",
         desc: "在 Windows Mixed Reality 与桌面之间切换输入。",
         key: [["Win", "Y"]],
       },
@@ -398,17 +398,17 @@ var shortcuts = [
         key: [["Win", "Z"]],
       },
       {
-        keySource: "Windows 徽标键  + 句号 (.) 或分号 (;)",
+        keySource: "Windows 徽标键  + 句号 (.) 或分号 (;)",
         desc: "打开表情符号面板。",
         key: [["Win", ". 或 ;"]],
       },
       {
-        keySource: "Windows 徽标键  + 逗号 (,)",
+        keySource: "Windows 徽标键  + 逗号 (,)",
         desc: "临时速览桌面。",
         key: [["Win", ","]],
       },
       {
-        keySource: "Windows 徽标键  + Pause 键",
+        keySource: "Windows 徽标键  + Pause 键",
         desc: "打开设置>系统>关于。",
         key: [["Win", "Pause"]],
       },
@@ -418,22 +418,22 @@ var shortcuts = [
         key: [["Win", "Ctrl", "F"]],
       },
       {
-        keySource: "Windows 徽标键  + 数字",
+        keySource: "Windows 徽标键  + 数字",
         desc: "打开桌面，然后启动固定到任务栏的应用（位于数字所指明的位置）。 如果应用已处于运行状态，则切换至该应用。",
         key: [["Win", "1~9"]],
       },
       {
-        keySource: "Windows 徽标键  + Shift + 数字",
+        keySource: "Windows 徽标键  + Shift + 数字",
         desc: "打开桌面，然后启动固定到任务栏的应用新实例（位于数字所指明的位置）。",
         key: [["Win", "Shift", "1~9"]],
       },
       {
-        keySource: "Windows 徽标键  + Ctrl + 数字",
+        keySource: "Windows 徽标键  + Ctrl + 数字",
         desc: "打开桌面，然后切换至固定到任务栏的应用的最后活动窗口（位于数字所指明的位置）。",
         key: [["Win", "Ctrl", "1~9"]],
       },
       {
-        keySource: "Windows 徽标键  + Alt + 数字",
+        keySource: "Windows 徽标键  + Alt + 数字",
         desc: "打开桌面，然后打开固定到任务栏的应用的“跳转列表”（位于数字所指明的位置）。",
         key: [["Win", "Alt", "1~9"]],
       },
@@ -443,7 +443,7 @@ var shortcuts = [
         key: [["Win", "Ctrl", "Shift", "1~9"]],
       },
       {
-        keySource: "Windows 徽标键  + Tab",
+        keySource: "Windows 徽标键  + Tab",
         desc: "打开任务视图。",
         key: [["Win", "Tab"]],
       },
@@ -478,22 +478,22 @@ var shortcuts = [
         key: [["Win", "→"]],
       },
       {
-        keySource: "Windows 徽标键  + Home",
+        keySource: "Windows 徽标键  + Home",
         desc: "最小化活动桌面窗口之外的所有窗口（在第二个笔划时还原所有窗口）。",
         key: [["Win", "Home"]],
       },
       {
-        keySource: "Windows 徽标键  + Shift + 向上键",
+        keySource: "Windows 徽标键  + Shift + 向上键",
         desc: "将桌面窗口拉伸至屏幕顶部和底部。",
         key: [["Win", "Shift", "↑"]],
       },
       {
-        keySource: "Windows 徽标键  + Shift + 向下键",
+        keySource: "Windows 徽标键  + Shift + 向下键",
         desc: "在垂直方向上还原/最小化活动桌面窗口，而宽度保持不变。",
         key: [["Win", "Shift", "↓"]],
       },
       {
-        keySource: "Windows 徽标键  + Shift + 向左键或向右键",
+        keySource: "Windows 徽标键  + Shift + 向左键或向右键",
         desc: "将桌面上的应用或窗口从一台显示器移动至另一台显示器。",
         key: [["Win", "Shift", "← 或 →"]],
       },
@@ -503,17 +503,17 @@ var shortcuts = [
         key: [["Win", "Shift", "Space"]],
       },
       {
-        keySource: "Windows 徽标键  + 空格键",
+        keySource: "Windows 徽标键  + 空格键",
         desc: "切换输入语言和键盘布局。",
         key: [["Win", "Space"]],
       },
       {
-        keySource: "Windows 徽标键  + Ctrl + 空格键",
+        keySource: "Windows 徽标键  + Ctrl + 空格键",
         desc: "对之前选择的输入所做的更改。",
         key: [["Win", "Ctrl", "Space"]],
       },
       {
-        keySource: "Windows 徽标键  + Ctrl + Enter",
+        keySource: "Windows 徽标键  + Ctrl + Enter",
         desc: "打开“讲述人”。",
         key: [["Win", "Ctrl", "Enter"]],
       },
@@ -533,14 +533,14 @@ var shortcuts = [
         key: [["Win", "Esc"]],
       },
       {
-        keySource: "Windows 徽标键  + 正斜杠 (/)",
+        keySource: "Windows 徽标键  + 正斜杠 (/)",
         desc: "开始输入法复原流程。",
         key: [["Win", "/"]],
       },
       {
-        keySource: "Windows 徽标键‌  + Ctrl + Shift + B",
+        keySource: "Windows 徽标键 + Ctrl + Shift + B",
         desc: "从空白或黑屏唤醒电脑。",
-        key: [["Win‌", "Ctrl", "Shift", "B"]],
+        key: [["Win", "Ctrl", "Shift", "B"]],
       },
       {
         keySource: "Windows 徽标键  + PrtScn",
@@ -581,24 +581,24 @@ var shortcuts = [
       },
       { keySource: "箭头键", desc: "按指定方向移动光标。", key: [["方向键"]] },
       {
-        keySource: "Page up",
+        keySource: "PageUp",
         desc: "将光标向上移动一个页面。",
-        key: [["Page up"]],
+        key: [["PageUp"]],
       },
       {
-        keySource: "Page Down",
+        keySource: "PageDn",
         desc: "将光标向下移动一个页面。",
-        key: [["Page Down"]],
+        key: [["PageDn"]],
       },
       {
-        keySource: "Ctrl + Home（标记模式）",
-        desc: "将光标移动到缓冲区的起始处。",
-        key: [["Ctrl", "Home（标记模式）"]],
+        keySource: "Ctrl + Home",
+        desc: "（标记模式）将光标移动到缓冲区的起始处。<br>（历史记录导航）如果命令行为空，则将视区移动到缓冲区顶部。 否则，请删除命令行中光标左侧的所有字符。",
+        key: [["Ctrl", "Home"]],
       },
       {
-        keySource: "Ctrl + End（标记模式）",
-        desc: "将光标移动到缓冲区的结尾处。",
-        key: [["Ctrl", "End（标记模式）"]],
+        keySource: "Ctrl + End",
+        desc: "（标记模式）将光标移动到缓冲区的结尾处。<br>（历史记录导航）如果命令行为空，则将视区移动到命令行。 否则，请删除命令行中光标右侧的所有字符。",
+        key: [["Ctrl", "End"]],
       },
       {
         keySource: "Ctrl + 向上键",
@@ -609,16 +609,6 @@ var shortcuts = [
         keySource: "Ctrl + 向下键",
         desc: "在输出历史记录中下移一行。",
         key: [["Ctrl", "↓"]],
-      },
-      {
-        keySource: "Ctrl + Home（历史记录导航）",
-        desc: "如果命令行为空，则将视区移动到缓冲区顶部。 否则，请删除命令行中光标左侧的所有字符。",
-        key: [["Ctrl", "Home（历史记录导航）"]],
-      },
-      {
-        keySource: "Ctrl + End（历史记录导航）",
-        desc: "如果命令行为空，则将视区移动到命令行。 否则，请删除命令行中光标右侧的所有字符。",
-        key: [["Ctrl", "End（历史记录导航）"]],
       },
     ],
   },
@@ -637,7 +627,7 @@ var shortcuts = [
         key: [["Ctrl", "Shift", "Tab"]],
       },
       {
-        keySource: "Ctrl + 数字 （数字 1–9）",
+        keySource: "Ctrl + 数字 （数字 1-9）",
         desc: "移动到第 n 个选项卡。",
         key: [["Ctrl", "1~9"]],
       },
@@ -649,8 +639,8 @@ var shortcuts = [
       },
       {
         keySource: "Alt + 带下划线的字母",
-        desc: "执行可与该字母结合使用的命令（或选择该选项）。",
-        key: [["Alt", "带下划线的字母"]],
+        desc: "执行可与该（带下划线的）字母相关的命令（或选择该选项）。",
+        key: [["Alt", "字母"]],
       },
       {
         keySource: "空格键",
@@ -752,27 +742,27 @@ var shortcuts = [
     title: "虚拟桌面的键盘快捷方式",
     table: [
       {
-        keySource: "Windows 徽标键  + Tab",
+        keySource: "Windows 徽标键  + Tab",
         desc: "打开任务视图。",
         key: [["Win", "Tab"]],
       },
       {
-        keySource: "Windows 徽标键  + Ctrl + D",
+        keySource: "Windows 徽标键  + Ctrl + D",
         desc: "添加虚拟桌面。",
         key: [["Win", "Ctrl", "D"]],
       },
       {
-        keySource: "Windows 徽标键  + Ctrl + 向右键",
+        keySource: "Windows 徽标键  + Ctrl + 向右键",
         desc: "在你于右侧创建的虚拟桌面之间切换。",
         key: [["Win", "Ctrl", "→"]],
       },
       {
-        keySource: "Windows 徽标键  + Ctrl + 向左键",
+        keySource: "Windows 徽标键  + Ctrl + 向左键",
         desc: "在你于左侧创建的虚拟桌面之间切换。",
         key: [["Win", "Ctrl", "←"]],
       },
       {
-        keySource: "Windows 徽标键  + Ctrl + F4",
+        keySource: "Windows 徽标键  + Ctrl + F4",
         desc: "关闭你正在使用的虚拟桌面。",
         key: [["Win", "Ctrl", "F4"]],
       },
@@ -784,27 +774,27 @@ var shortcuts = [
       {
         keySource: "Shift + 单击任务栏按钮",
         desc: "打开应用或快速打开另一个应用实例。",
-        key: [["Shift", "单击任务栏按钮"]],
+        key: [["Shift", "鼠标左键"]],
       },
       {
         keySource: "Ctrl + Shift + 单击任务栏按钮",
         desc: "以管理员身份打开应用。",
-        key: [["Ctrl", "Shift", "单击任务栏按钮"]],
+        key: [["Ctrl", "Shift", "鼠标左键"]],
       },
       {
         keySource: "Shift + 右键单击任务栏按钮",
         desc: "显示应用的窗口菜单。",
-        key: [["Shift", "右键单击任务栏按钮"]],
+        key: [["Shift", "鼠标右键"]],
       },
       {
         keySource: "Shift + 右键单击分组任务栏按钮",
         desc: "显示组的窗口菜单。",
-        key: [["Shift", "右键单击分组任务栏按钮"]],
+        key: [["Shift", "鼠标右键"]],
       },
       {
         keySource: "Ctrl + 单击分组任务栏按钮",
         desc: "循环浏览组的窗口。",
-        key: [["Ctrl", "单击分组任务栏按钮"]],
+        key: [["Ctrl", "鼠标左键"]],
       },
     ],
   },
@@ -812,7 +802,7 @@ var shortcuts = [
     title: "设置键盘快捷方式",
     table: [
       {
-        keySource: "Windows 徽标键  + I",
+        keySource: "Windows 徽标键  + I",
         desc: "打开设置。",
         key: [["Win", "I"]],
       },
@@ -821,13 +811,7 @@ var shortcuts = [
         desc: "返回到设置主页。",
         key: [["Backspace"]],
       },
-      {
-        keySource: "使用搜索框在任何页面上键入",
-        desc: "搜索设置。",
-        key: [["使用搜索框在任何页面上键入"]],
-      },
     ],
   },
-  { title: "其他键盘快捷方式", table: [] },
 ];
 showShortcuts();

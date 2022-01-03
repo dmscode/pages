@@ -10,7 +10,7 @@ document.querySelectorAll('#WindowsVersion-supTabControlContent-1 section.ocpSec
     }
     t.table.push({
       keySource : tr.querySelectorAll('td')[0].innerText.replace(/\n\s*/g, ''),
-      desc : tr.querySelectorAll('td')[1].innerText.replace(/\n\s*/g, ''),
+      desc : tr.querySelectorAll('td')[1].innerText.replace(/\n\s*/g, '').trim(),
     })
   })
   json.push(t)
