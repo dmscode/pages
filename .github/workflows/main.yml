@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  push:
+    tags:
+    - 'publish'
+
+jobs:
+  zip-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: papeloto/action-zip@v1
+        with:
+          files: kindle/
+          dest: Simple-Pages.zip
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: "Simple-Pages.zip"
+        # bodyFile: "body.md"
+        token: ${{ secrets.GITHUB_TOKEN }}
