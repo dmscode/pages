@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>聚沙成塔</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      overflow: hidden;
+    }
+    #table {
+      position: relative;
+      text-align: center;
+      font-size: 100px;
+    }
+    #count {
+      font-size: 1em;
+      line-height: 1.8em;
+      cursor: pointer;
+    }
+    #reduce,
+    #toggle-logs {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      z-index: 100;
+      cursor: pointer;
+      top: 0;
+    }
+    #reduce {
+      left: 0;
+    }
+    #toggle-logs {
+      right: 0;
+    }
+    #logs {
+      position: absolute;
+      z-index: -1;
+      display: none;
+      color: #999999;
+    }
+  </style>
+</head>
+<body>
+  <style id="resize"></style>
+  <div id="table">
+    <div id="reduce"></div>
+    <div class="tr">
+      <span id="count"></span>
+    </div>
+    <div id="toggle-logs"></div>
+    <div id="logs"></div>
+  </div>
+  <script src="./src/functions.js"></script>
+  <script>
+    /**
+     * 计算窗口中元素的尺寸属性
+     *
+     */
+    var table = document.getElementById('table')
+    var style = document.getElementById('resize')
+
+    var count = document.getElementById('count')
+    var reduce = document.getElementById('reduce')
+    var toggle = document.getElementById('toggle-logs')
+    var logsEl = document.getElementById('logs')
+
+    var showLogs = false
+
+    var nowEm = 100
+    var resize = function(){
+      var winW = document.body.offsetWidth
+      var winH = document.body.offsetHeight
+      var emByH = winH/2
+      var emByW = winW*0.8/count.offsetWidth*nowEm
+      var em = emByW<emByH ? emByW : emByH
+
+      nowEm = em.toFixed(2)
+
+      var vmin = ((winW<=winH ? winW : winH)/100).toFixed(2)
+      var logsBase = (vmin*100/36).toFixed(2)
+
+      var styleSource = '#table {'
+                      + 'width: '+winW+'px;'
+                      + 'height: '+winH+'px;'
+                      + 'margin: 0;'
+                      + 'font-size: '+em.toFixed(2)+'px;'
+                      + 'line-height: '+winH+'px;'
+                      + '}'
+      styleSource += '#logs {'
+                  + 'bottom: '+logsBase+'px;'
+                  + 'right: '+logsBase+'px;'
+                  + 'font-size: '+logsBase+'px;'
+                  + 'line-height: '+(logsBase*1.6).toFixed(2)+'px;'
+                  + '}'
+      styleSource += '#reduce, #toggle-logs {'
+                  + 'width: '+(vmin*10)+'px;'
+                  + 'height: '+(vmin*10)+'px;'
+                  + '}'
+
+      style.innerHTML = styleSource
+    }
+    /**
+     * 将文字内容设置到元素中。
+     *
+     * @param {array} str 文字内容数组。
+     */
+    var logs = []
+    var refreshData = function(){
+      count.innerText = logs.length
+      var logsCode = ''
+      if(showLogs){
+        for(var i=0; i<logs.length; i++){
+          logsCode += (i+1)+': '+logs[i]+'<br>'
+        }
+      }
+      logsEl.innerHTML = logsCode
+      resize()
+    }
+    /**
+     * 获取时间并设置到元素。
+     *
+     */
+    var addCount = function(){
+      var now = fixDate()
+      var hours = dbNum(now.getHours())
+      var minutes = dbNum(now.getMinutes())
+      var seconds = dbNum(now.getSeconds())
+
+      logs.push(hours+':'+minutes+':'+seconds)
+
+      refreshData()
+    }
+    var reduceCount = function(){
+      if(confirm('确认删除上一条计数？')){
+        logs.shift()
+        refreshData()
+      }
+    }
+    window.addEventListener('load', function(){
+      refreshData()
+      count.addEventListener('click', addCount)
+      reduce.addEventListener('click', reduceCount)
+      toggle.addEventListener('click', function(){
+        showLogs = !showLogs
+        if(showLogs){
+          logsEl.style.display = 'block'
+          refreshData()
+          return
+        }
+        logsEl.style.display = 'none'
+      })
+    })
+    window.addEventListener('resize', resize)
+  </script>
+</body>
+</html>

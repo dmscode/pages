@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>四个字吖</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      overflow: hidden;
+    }
+    #table {
+      box-sizing: border-box;
+    }
+    .tr:first-child {
+      border-bottom: none !important;
+    }
+    .td {
+      float: left;
+      text-align: center;
+    }
+    .td:first-child {
+      border: none !important;
+    }
+  </style>
+</head>
+<body>
+  <style id="resize"></style>
+  <div id="table">
+    <div class="tr">
+      <div class="td"></div>
+      <div class="td"></div>
+    </div>
+    <div class="tr">
+      <div class="td"></div>
+      <div class="td"></div>
+    </div>
+  </div>
+  <script src="./src/functions.js"></script>
+  <script>
+    /** 用来显示时钟的各种数字。如果无此参数或者序号为零，则均显示阿拉伯数字。 */
+    var nums = [
+      ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+      ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'],
+      ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖']
+    ]
+    /** @type {string} 要显示的文字 */
+    var queryStr = getQuery('s')
+    /** @type {string} 时钟使用的文字类型 */
+    var numType = getQuery('t')
+    var table = document.getElementById('table')
+    var style = document.getElementById('resize')
+    /**
+     * 计算窗口中元素的尺寸属性
+     *
+     */
+    var resize = function(){
+      var winW = document.body.offsetWidth
+      var winH = document.body.offsetHeight
+      var vmin = (winW >= winH ? winH : winW)/100
+
+      var styleSource = '#table {'
+                      + 'width: '+(vmin*81).toFixed(2)+'px;'
+                      + 'height: '+(vmin*81).toFixed(2)+'px;'
+                      + 'margin: '+((winH-vmin*81)/2).toFixed(2)+'px auto;'
+                      + 'border: '+(3*vmin).toFixed(2)+'px solid #CC0000;'
+                      + 'padding: '+(vmin).toFixed(2)+'px;'
+                      + 'font-size: '+(35*0.8*vmin).toFixed(2)+'px;'
+                      + 'line-height: '+(35*vmin).toFixed(2)+'px;'
+                      + '}'
+      styleSource += '.tr {'
+                  + 'height: '+(35*vmin).toFixed(2)+'px;'
+                  + 'border: '+(vmin).toFixed(2)+'px solid #CC0000;'
+                  + '}'
+      styleSource += '.td {'
+                  + 'width: '+(35*vmin).toFixed(2)+'px;'
+                  + 'height: '+(35*vmin).toFixed(2)+'px;'
+                  + 'border-left: '+(vmin).toFixed(2)+'px solid #CC0000;'
+                  + '}'
+
+      style.innerHTML = styleSource
+    }
+    /** @type {*} 当前显示在元素中的文字内容 */
+    var nowStr = []
+    /**
+     * 将文字内容设置到元素中。
+     *
+     * @param {array} str 文字内容数组。
+     */
+    var setStr = function(str){
+      var tds = document.body.getElementsByClassName('td')
+      for(var i=0; i<tds.length; i++){
+        var s = i>=str.length ? '' : str[i]
+        if(nowStr[i] !== s){
+          tds[i].innerText = s
+          nowStr[i] = s
+        }
+      }
+    }
+    /**
+     * 获取时间并设置到元素。
+     *
+     */
+    var setTime = function(){
+      var now = fixDate()
+      var hour = dbNum(now.getHours())
+      var minute = dbNum(now.getMinutes())
+      var numStr = (hour+minute).split('')
+      if(numType){
+        for(var i=0; i<numStr.length; i++){
+          numStr[i] = nums[numType][+numStr[i]]
+        }
+      }
+      setStr(numStr)
+    }
+    /**
+     * 时钟启动函数。
+     *
+     */
+    var clockStart = function(){
+      setTime()
+      window.setInterval(setTime, 6e4)
+    }
+    window.addEventListener('load', function(){
+      resize()
+      if(queryStr){
+        setStr(queryStr.split(''))
+        return
+      }
+      setTime()
+      window.setTimeout(clockStart, 6e4-(+new Date())%6e4)
+    })
+    window.addEventListener('resize', resize)
+  </script>
+</body>
+</html>

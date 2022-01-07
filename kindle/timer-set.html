@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>手中之沙</title>
+  <style>
+    p {
+      text-align: left;
+      text-indent: 2em;
+    }
+    a {
+      display: inline-block;
+      padding: 12px;
+      border: 1px solid #666666;
+      font-size: 24px;
+      line-height: 24px;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+    #content {
+      width: 98%;
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: justify;
+    }
+    .button-area {
+      display: inline-block;
+
+    }
+    .button-area > a {
+      margin-bottom: .3em;
+    }
+    .button-area > a:first-child {
+      border-radius: 8px 0 0 8px;
+    }
+    .button-area > a:last-child {
+      border-radius: 0 8px 8px 0;
+      border-left: none;
+      background-color: #666666;
+      color: white;
+    }
+    form { margin-bottom: .3em; }
+    form > input {
+      box-sizing: content-box;
+      padding: 12px;
+      height: 24px;
+      font-size: 24px;
+      line-height: 24px;
+      border: 1px solid #666666;
+    }
+    form > input:first-child {
+      border-radius: 8px 0 0 8px;
+    }
+    form > input:last-child {
+      border-radius: 0 8px 8px 0;
+      border-left: none;
+    }
+    #ink > input:last-child {
+      background-color: #666666;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="content">
+    <a href="./">&lt; &lt; &lt; 返回导航页面</a>
+    <h3>点击按钮，启动一个定时器</h3>
+    <p>普通设备请点击左侧按钮，时间会1秒钟更新一次。如果是墨水屏设备，则点击右侧按钮，每 10 秒钟更新一次。</p>
+    <p>时间结束会返回此页面，不会有明确提醒。所以只适合粗略的计时使用。比如煮咖啡，比如番茄工作法。</p>
+    <p>可在进入计时页面之后将链接加入收藏夹，既可从收藏夹快速开始此定时器。</p>
+    <div class="button-area"><a href="./timer.html?t=1">1 min</a><a href="./timer.html?ink=1&t=1">Ink</a></div>
+    <div class="button-area"><a href="./timer.html?t=3">3 mins</a><a href="./timer.html?ink=1&t=3">Ink</a></div>
+    <div class="button-area"><a href="./timer.html?t=5">5 mins</a><a href="./timer.html?ink=1&t=5">Ink</a></div>
+    <div class="button-area"><a href="./timer.html?t=10">10 mins</a><a href="./timer.html?ink=1&t=10">Ink</a></div>
+    <div class="button-area"><a href="./timer.html?t=15">15 mins</a><a href="./timer.html?ink=1&t=15">Ink</a></div>
+    <div class="button-area"><a href="./timer.html?t=25">25 mins</a><a href="./timer.html?ink=1&t=25">Ink</a></div>
+    <div class="button-area"><a href="./timer.html?t=30">30 mins</a><a href="./timer.html?ink=1&t=30">Ink</a></div>
+    <form action="./timer.html" method="get" id="normal">
+      <input type="number" name="t" placeholder="Custom..."><input type="submit" value="Go">
+    </form>
+    <form action="./timer.html" method="get" id="ink">
+      <input type="number" name="t" placeholder="Custom..."><input type="hidden" name="ink" value="1"><input type="submit" value="Ink">
+    </form>
+  </div>
+</body>
+</html>

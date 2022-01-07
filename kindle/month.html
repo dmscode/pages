@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>这个月吖</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      overflow: hidden;
+    }
+    #table {
+      position: relative;
+      text-align: center;
+    }
+    .month-mark {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      color: #CCCCCC;
+      z-index: -1;
+    }
+    .tr:last-child {
+      border-bottom: none !important;
+    }
+    .td {
+      float: left;
+    }
+    .td:first-child {
+      border: none !important;
+    }
+    .td.today {
+      background-color: #666668;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <style id="resize"></style>
+  <div id="table">
+
+  </div>
+  <script src="./src/functions.js"></script>
+  <script>
+    /** 用来显示时钟的各种数字。如果无此参数或者序号为零，则均显示阿拉伯数字。 */
+    var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    var weekNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+    /**
+     * 计算窗口中元素的尺寸属性
+     *
+     */
+    var table = document.getElementById('table')
+    var style = document.getElementById('resize')
+    var resize = function(){
+      var winW = document.body.offsetWidth
+      var winH = document.body.offsetHeight
+      var vmin = (winW >= winH ? winH : winW)/100
+
+      var baseLong = (12*vmin).toFixed()
+      var styleSource = '#table {'
+                      + 'width: '+(baseLong*7+12)+'px;'
+                      + 'height: '+(baseLong*7+12)+'px;'
+                      + 'margin: '+((winH-baseLong*7-20)/2)+'px '+((winW-baseLong*7-20)/2)+'px;'
+                      + 'border: 4px solid #666668;'
+                      + 'font-size: '+baseLong/2+'px;'
+                      + 'line-height: '+baseLong+'px;'
+                      + '}'
+      styleSource += '.month-mark {'
+                  + 'font-size: '+baseLong*7/2+'px;'
+                  + 'line-height: '+baseLong*7+'px;'
+                   + '}'
+      styleSource += '.tr {'
+                   + 'height: '+baseLong+'px;'
+                   + 'border-bottom: 2px solid #666668;'
+                   + '}'
+      styleSource += '.td {'
+                   + 'width: '+baseLong+'px;'
+                   + 'height: 100%;'
+                   + 'border-left: 2px solid #666668;'
+                   + '}'
+
+      style.innerHTML = styleSource
+    }
+    /**
+     * 将文字内容设置到元素中。
+     *
+     * @param {array} str 文字内容数组。
+     */
+    var setStr = function(title, daysArr){
+      // var monthStr = '<div class="month-mark">'+(today.month)+'</div>'
+      var monthStr = '<div class="tr">'+title+'</div>'
+                   + '<div class="tr"><div class="td">'+weekNames.join('</div><div class="td">')+'</div></div>'
+      for(var i=0; i<35; i++){
+        if(i%7===0){ monthStr+= '<div class="tr">' }
+          monthStr+= '<div class="td'+(daysArr[i].today? ' today' : '')+'">'+daysArr[i].name+'</div>'
+        if(i%7===6){ monthStr+= '</div>' }
+      }
+      table.innerHTML = monthStr
+      resize()
+    }
+    /**
+     * 获取时间并设置到元素。
+     *
+     */
+    var today = {}
+    var setTime = function(){
+      var now = fixDate()
+      var year = +getQuery('y', now.getFullYear())
+      var month = +getQuery('m', now.getMonth()+1)-1
+      var day = +getQuery('d', now.getDate())
+
+      if(year===today.year && month===today.month && day===today.day){ return }
+      today.year = year
+      today.month = month
+      today.day = day
+
+      var monthStart = new Date(year, month, 1)
+      var monthEnd = new Date(year, month+1, 1)
+      var monthDays = (monthEnd-monthStart)/86400e3
+      var monthStartWeekDay = monthStart.getDay()
+
+      var daysArr = new Array(35)
+      for(var i=0; i<daysArr.length; i++){
+        daysArr[i] = { name: '' }
+      }
+      for(var i=0; i<monthDays; i++){
+        daysArr[(i+monthStartWeekDay)%35].name = i+1
+        if(i+1===day){ daysArr[(i+monthStartWeekDay)%35].today = true }
+      }
+
+      setStr(year+' '+months[month], daysArr)
+    }
+    /**
+     * 时钟启动函数。
+     *
+     */
+    var clockStart = function(){
+      setTime()
+      window.setInterval(setTime, 6e4)
+    }
+    window.addEventListener('load', function(){
+      setTime()
+      window.setTimeout(clockStart, 6e4-(+new Date())%6e4)
+    })
+    window.addEventListener('resize', resize)
+  </script>
+</body>
+</html>

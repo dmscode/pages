@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>快捷键呐</title>
+  <style>
+    body {
+      /* font-size: 18px; */
+      line-height: 1.8em;
+    }
+    #table {
+      margin: 0 auto;
+      width:  90%;
+      max-width: 800px;
+    }
+    .tr {
+      position: relative;
+      /* margin: 1em 0; */
+      border-bottom: 1px solid #AAAAAA;
+    }
+    .td {
+      float: left;
+      word-break: break-all;
+      white-space: normal;
+    }
+    .tr > .td.keys {
+      text-align: right;
+    }
+    .clear {
+      clear: both;
+    }
+    .kbd {
+      position: relative;
+      display: inline-block;
+      line-height: 1em;
+      font-weight: 600;
+      color: white;
+      background-color: #333336;
+      padding: .2em .3em;
+      /* bottom: -6px; */
+      border-radius: .2em;
+    }
+    .hidden {
+      position: fixed;
+      left: -1000px;
+      bottom:-1000px;
+      visibility: hidden;
+      z-index: -1000;
+    }
+  </style>
+</head>
+<body>
+  <style id="resize"></style>
+  <div id="table"></div>
+  <div id="shortcuts-data"></div>
+  <span id="sep" class="hidden">O</span>
+  <script src="./src/functions.js"></script>
+  <script>
+      var type = getQuery('t', 'win11')
+      var script = document.createElement('script')
+      script.src = './src/' + type + '-Shortcut-Keys.js'
+      document.body.appendChild(script)
+    
+      var showShortcuts = function () {
+        var code = ''
+        for (var shortcutsI = 0; shortcutsI < shortcuts.length; shortcutsI++) {
+          var group = shortcuts[shortcutsI]
+          code += '<h3>' + group.title + '</h3><div class="subtable">'
+          for (var groupI = 0; groupI < group.table.length; groupI++) {
+            var sc = group.table[groupI]
+            code += '<div class="tr"><div class="td keys">'
+            for (var scI = 0; scI < sc.key.length; scI++) {
+              var keys = sc.key[scI]
+              if (scI) { code += '<br>' }
+              for (var keysI = 0; keysI < keys.length; keysI++) {
+                var k = keys[keysI]
+                if (keysI) { code += '+' }
+                code += '<span class="kbd">' + k + '</span>'
+              }
+            }
+            code += '</div>'
+              + '<div class="td desc">' + sc.desc + '</div>'
+              + '<div class="clear"></div>'
+              + '</div>'
+          }
+          code += '</div>'
+        }
+        document.getElementById('table').innerHTML = code
+        resize()
+      }
+
+      var sep = document.getElementById('sep').offsetWidth
+      var style = document.getElementById('resize')
+      var resize = function () {
+        var winW = document.body.offsetWidth
+        // var cols = Math.floor(winW/360)
+        // var trW = Math.floor((winW-sep*(cols-1))/cols)
+
+        var subtable = document.body.getElementsByClassName('subtable')
+        for (var subI = 0; subI < subtable.length; subI++) {
+          var keysEls = subtable[subI].getElementsByClassName('keys')
+          var trEls = subtable[subI].getElementsByClassName('tr')
+
+          var maxW = 0
+          for (var i = 0; i < keysEls.length; i++) {
+            var kEl = keysEls[i]
+            kEl.style.width = 'auto'
+            if (kEl.offsetWidth > maxW) {
+              maxW = kEl.offsetWidth
+            }
+          }
+          for (var i = 0; i < keysEls.length; i++) {
+            keysEls[i].style.width = maxW + 'px'
+          }
+          for (var i = 0; i < trEls.length; i++) {
+            var trW = trEls[i].offsetWidth
+            trEls[i].getElementsByClassName('desc')[0].style.width = trW - maxW - sep - 1 + 'px'
+          }
+        }
+
+        var styleSource = '.keys {'
+          + 'margin-right: ' + sep + 'px;'
+          + '}'
+        style.innerHTML = styleSource
+      }
+  </script>
+</body>
+</html>

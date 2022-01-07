@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>只言片语</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      overflow: hidden;
+    }
+    #table {
+      box-sizing: border-box;
+      font-size: 100px;
+      line-height: 1.2em;
+      white-space: nowrap;
+      word-break: keep-all;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <style id="resize"></style>
+  <div id="table">
+    <span id="content"></span>
+  </div>
+  <script src="./src/functions.js"></script>
+  <script>
+    /** 用来显示时钟的各种数字。如果无此参数或者序号为零，则均显示阿拉伯数字。 */
+    var nums = ['Zero',
+      'One',           'Two',           'Three',        'Four',
+      'Five',          'Six',           'Seven',        'Eight',
+      'Nine',          'Ten',           'Eleven',       'Twelve',
+      'Thirteen',      'Fourteen',      'Fifteen',      'Sixteen',
+      'Seventeen',     'Eighteen',      'Nineteen',     'Twenty',
+      'Twenty-one',    'Twenty-two',    'Twenty-three', 'Twenty-four',
+      'Twenty-five',   'Twenty-six',    'Twenty-seven', 'Twenty-eight',
+      'Twenty-nine',   'Thirty',        'Thirty-one',   'Thirty-two',
+      'Thirty-three',  'Thirty-four',   'Thirty-five',  'Thirty-six',
+      'Thirty-seven',  'Thirty-eight',  'Thirty-nine',  'Forty',
+      'Forty-one',     'Forty-two',     'Forty-three',  'Forty-four',
+      'Forty-five',    'Forty-six',     'Forty-seven',  'Forty-eight',
+      'Forty-nine',    'Fifty',         'Fifty-one',    'Fifty-two',
+      'Fifty-three',   'Fifty-four',    'Fifty-five',   'Fifty-six',
+      'Fifty-seven',   'Fifty-eight',   'Fifty-nine',   'Sixty',
+      'Sixty-one',     'Sixty-two',     'Sixty-three',  'Sixty-four',
+      'Sixty-five',    'Sixty-six',     'Sixty-seven',  'Sixty-eight',
+      'Sixty-nine',    'Seventy',       'Seventy-one',  'Seventy-two',
+      'Seventy-three', 'Seventy-four',  'Seventy-five', 'Seventy-six',
+      'Seventy-seven', 'Seventy-eight', 'Seventy-nine', 'Eighty',
+      'Eighty-one',    'Eighty-two',    'Eighty-three', 'Eighty-four',
+      'Eighty-five',   'Eighty-six',    'Eighty-seven', 'Eighty-eight',
+      'Eighty-nine',   'Ninety',        'Ninety-one',   'Ninety-two',
+      'Ninety-three',  'Ninety-four',   'Ninety-five',  'Ninety-six',
+      'Ninety-seven',  'Ninety-eight',  'Ninety-nine',  'Hundred'
+    ]
+    var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    var weekNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    /** @type {string} 要显示的文字 */
+    var queryStr = getQuery('s')
+    /** @type {string} 时钟使用的文字类型 */
+    var numType = getQuery('t')
+
+    var table = document.getElementById('table')
+    var content = document.getElementById('content')
+    var style = document.getElementById('resize')
+    var conFontSize = 100
+    /**
+     * 计算窗口中元素的尺寸属性
+     *
+     */
+    var resize = function(){
+      var winW = document.body.offsetWidth
+      var winH = document.body.offsetHeight
+      var vmin = (winW >= winH ? winH : winW)/100
+
+      var conW = content.offsetWidth
+      var conH = content.offsetHeight
+      var fontSizeByW = (winW*0.9)/conW*conFontSize
+      var fontSizeByH = (winH*0.9)/conH*conFontSize
+      conFontSize = (fontSizeByW <= fontSizeByH ? fontSizeByW : fontSizeByH).toFixed(2)
+
+      table.style.width = (winW*0.9).toFixed(2)+'px'
+      table.style.height = (winH*0.9).toFixed(2)+'px'
+      table.style.margin = (winH*0.05).toFixed(2)+'px '+(winW*0.05).toFixed(2)+'px'
+      table.style.fontSize = conFontSize+'px'
+      var styleSource = '#table {'
+                      + 'width: '+(vmin*0.9).toFixed(2)+'px;'
+                      + 'height: '+(vmin*0.9).toFixed(2)+'px;'
+                      + 'margin: '+(winH*0.05).toFixed(2)+'px '+(winW*0.05).toFixed(2)+'px;'
+                      + 'font-size: '+conFontSize+'px;'
+                      + '}'
+
+      style.innerHTML = styleSource
+    }
+    /**
+     * 将文字内容设置到元素中。
+     *
+     * @param {array} str 文字内容数组。
+     */
+    var setStr = function(str){
+      content.innerHTML = str.replace(/\n/g, '<br>')
+    }
+    /**
+     * 获取时间并设置到元素。
+     *
+     */
+    var setTime = function(){
+      var now = fixDate()
+      var year = now.getFullYear()
+      var month = months[now.getMonth()]
+      var day = nums[now.getDate()]
+      var weekName = weekNames[now.getDay()]
+      var hour = nums[now.getHours()]
+      var minute = nums[now.getMinutes()]
+      var numStr = '<b>'+hour+'</b><br>'
+                 + minute +'<br>'
+                 + year + '<br>'
+                 + month + ' ' + day + '<br>'
+                 + weekName
+      setStr(numStr)
+      resize()
+    }
+    /**
+     * 时钟启动函数。
+     *
+     */
+    var clockStart = function(){
+      setTime()
+      window.setInterval(setTime, 6e4)
+    }
+    window.addEventListener('load', function(){
+      if(queryStr){
+        setStr(queryStr)
+        resize()
+        return
+      }
+      setTime()
+      window.setTimeout(clockStart, 6e4-(+new Date())%6e4)
+    })
+    window.addEventListener('resize', resize)
+  </script>
+</body>
+</html>

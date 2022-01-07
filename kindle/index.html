@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>导航页哦</title>
+  <style>
+    body {
+      text-align: center;
+      margin: 8px;
+    }
+    .box {
+      display: inline-block;
+      border: 3px solid #AAA;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 18px;
+      line-height: 1.6em;
+      width: 20em;
+      height: 20em;
+      padding: 8px 12px;
+      overflow: hidden;
+    }
+    #mini > .box,
+    #single > .box {
+      height: auto;
+    }
+    .box > p {
+      text-align: left;
+      text-indent: 2em;
+    }
+    .box a {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    input.text-input {
+      width: 50%;
+    }
+    textarea {
+      font-size: 18px;
+      line-height: 1.6em;
+      width: 96%;
+      height: 8em;
+    }
+    #afdian {
+      text-align: center;
+      line-height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <style id="resize"></style>
+  <h1>Simple Pages.</h1>
+  <a href="./introduction.html">详细介绍</a> | <a href="https://afdian.net/@daomishu" target="_blank">支持一下</a>
+  <hr style="border: 2px solid #999999; background: #999999;">
+  <div class="box">
+    <h3 id="four-letters">四个字吖</h3>
+    <p>在下面输入 1~4 个字，然后显示它们。不输入就显示时钟，这时候你可以在下面选择时钟的数字格式。</p>
+    <form action="./four-words.html" method="get">
+      <input id="four-letters-content" name="s" type="text" placeholder="老鼠最萌"><br>
+      <strong>时钟文字样式</strong><br>
+      <input type="radio" name="t" id="type-0" value="0" checked><label for="type-0">0123</label><br>
+      <input type="radio" name="t" id="type-1" value="1"><label for="type-1">〇一二三</label><br>
+      <input type="radio" name="t" id="type-2" value="2"><label for="type-2">零壹贰仨</label><br>
+      <input type="submit" value="Go">
+      <input type="hidden" name="tz" class="timezone">
+    </form>
+  </div>
+  <div class="box">
+    <h3 id="some-words">只言片语</h3>
+    <p>在下面输入一句话，自行换行，然后显示它们，不输入就显示时钟。</p>
+    <form action="./some-words.html" method="get">
+      <textarea name="s" id="" cols="20" rows="5" placeholder="聪明伶俐小老鼠"></textarea>
+      <br>
+      <input type="submit" value="Go">
+      <input type="hidden" name="tz" class="timezone">
+    </form>
+  </div>
+  <div class="box">
+    <h3 id="year-month-day">年、月、日</h3>
+    <a href="./year.html" class="timezone-link">年历模式</a><br><br>
+    <a href="./month.html" class="timezone-link">月历模式</a><br><br>
+    <a href="./day.html" class="timezone-link">日历模式</a>
+  </div>
+  <div class="box">
+    <h3 id="progress">似水流年</h3>
+    <a href="./progress.html" class="timezone-link">时光进度</a><br>
+    <a href="./progress.html?ink=1" class="timezone-link">时光进度（墨水屏专用）</a>
+  </div>
+  <div class="box">
+    <h3 id="timer">手中之沙</h3>
+    <p>一个全屏倒计时器，用于不十分精确的计时场景。点击下方链接进入快速定时页面。</p>
+    <a href="./timer-set.html">手中之沙</a>
+  </div>
+  <div class="box">
+    <h3 id="countdown">渐近渐远</h3>
+    <p>在下面输入年、月、日，然后会显示距离目标时间还有多少天，或者已经过去了多少天。</p>
+    <form action="./countdown.html" method="get">
+      <label for="year">Year (eg:2021)</label><input type="number" name="y" id="year" class="text-input"><br>
+      <label for="month">Month (eg:1~12)</label><input type="number" name="m" id="month" class="text-input"><br>
+      <label for="day">Day (eg:1~31)</label><input type="number" name="d" id="day" class="text-input"><br>
+      <input type="submit" value="Go">
+      <input type="hidden" name="tz" class="timezone">
+    </form>
+  </div>
+  <div class="box">
+    <h3 id="timer">聚沙成塔</h3>
+    <p>计数器，点击数字 +1，点击页面左上角 -1，点击页面右上角切换显示计数日志。用来记录一些重复事件发生的次数，比如喝了几杯水，去了几次厕所，修改到了第几稿……</p>
+    <a href="./counter.html" class="timezone-link">聚沙成塔</a>
+  </div>
+  <div class="box">
+    <h3 id="timer">日夜轮转</h3>
+    <p>长周期待办列表，比如上一次洗澡是几天前，上一次交电费是几天前，点击项目更新完成时间，数据保存在本地，点击页面右上角切换时间显示。描述文字尽可能简短，最多只能容纳大概 12 个项目。</p>
+    <a href="./long-period-todo.html" class="timezone-link">日夜轮转</a>
+  </div>
+  <div class="box">
+    <h3 id="timer">日复一日</h3>
+    <p>短周期待办列表，比如早、中、晚吃药，下午三点检查电子邮箱等，点击项目切换完成状态，数据保存在本地，点击页面右上角重置所有项目。描述文字尽可能简短，最多只能容纳大概 12 个项目。</p>
+    <a href="./short-period-todo.html" class="timezone-link">日复一日</a>
+  </div>
+  <div class="box">
+    <h3 id="drink-water">弱水三千</h3>
+    <p>一台饮水机，用来记录每天喝水的完成程度。下方设置每天要喝的杯数，默认为 8 杯水。点左侧阀门接走一杯水，右侧阀门取消，点水桶可以换水。</p>
+    <form action="./drink-water.html" method="get">
+      <label for="cup">今天喝几杯？</label><input type="number" name="c" id="cup" class="text-input"><br>
+      <input type="submit" value="Go">
+      <input type="hidden" name="tz" class="timezone">
+    </form>
+  </div>
+  <div id="afdian" class="box">
+    扫描二维码或者点击 <a href="https://afdian.net/@daomishu" target="_blank">此链接</a> 支持小老鼠
+    <br>
+    <br>
+    <img src="./src/afdian.png" alt="">
+  </div>
+  <script src="./src/functions.js"></script>
+  <script>
+    if(typeof(timeZone)!=='undefined' && (''+timeZone).length){
+      var inputArr = document.body.getElementsByClassName('timezone')
+      for (var i=0; i<inputArr.length; i++) {
+        inputArr[i].value = timeZone
+      }
+      var linkArr = document.body.getElementsByClassName('timezone-link')
+      for (var i=0; i<linkArr.length; i++) {
+        linkArr[i].href = linkArr[i].href+'?tz='+timeZone
+      }
+    }
+    var style = document.getElementById('resize')
+    var resize = function(){
+      var winW = document.body.offsetWidth
+      var em = 18
+      if(winW < em*20+15*2){ // 390
+        document.body.id = 'mini'
+        style.innerHTML = '#mini > .box {'
+                          + 'width: '+(winW-30)+'px;'
+                        + '}'
+                        + '#afdian > img {'
+                          + 'width: '+(winW-30)+'px;'
+                        + '}'
+        return
+      }
+      if(winW < em*41+15*4){  // 798
+        document.body.id = 'single'
+        style.innerHTML = ''
+        return
+      }
+      if(winW < em*62+15*6){  // 1206
+        document.body.id = 'normal'
+        style.innerHTML = ''
+        return
+      }
+      if(winW < em*83+15*8){  // 1206
+        document.body.id = 'wide'
+        style.innerHTML = ''
+        return
+      }
+      document.body.id = 'full'
+      style.innerHTML = 'body {'
+                        + 'padding: 0 '+(winW-em*83+15*8)/2+'px'
+                      + '}'
+    }
+    resize()
+    window.onload = resize
+    window.onresize = resize
+  </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日复一日</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      overflow: hidden;
+      text-align: center;
+    }
+    #table {
+      margin: 0 auto;
+    }
+    #list,
+    #add-todo {
+      margin: 0 auto 1em;
+      border: 4px solid #AAAAAA;
+      border-radius: 3px;
+      padding: .2em 1em;
+    }
+    #list {
+      text-align: left;
+    }
+    .todo {
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid #AAAAAA;
+    }
+    .todo:last-child {
+      border: none;
+    }
+    .content {
+      float: left;
+    }
+    .right-area {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+    .right-area > * {
+      float: left;
+    }
+    .time {
+      font-size: .6em;
+      color: #333333;
+      margin-right: .2em;
+    }
+    .content,
+    .remove {
+      cursor: pointer;
+    }
+    .done {
+      color: #999999;
+      text-decoration: line-through;
+    }
+    .remove {
+      width: 1.2em;
+      line-height: 1.2em;
+      margin: .3em;
+      text-align: center;
+      font-weight: 200;
+      border: 1px solid #CCCCCC;
+      border-radius: 8px;
+      color: #FF6699;
+    }
+    .remove:hover {
+      color: white;
+      background-color: #FF6699;
+    }
+    #add-todo > input,
+    #add-todo > button {
+      box-sizing: border-box;
+      font-size: 1em;
+      line-height: 1.8em;
+      height: 1.8em;
+      padding: 0 .5em;
+      border: 1px solid #CCCCCC;
+    }
+    #add-todo > input {
+      width: 82%;
+    }
+    #add-todo > button {
+      width: 13%;
+    }
+    #reset-all {
+      position: fixed;
+      width: 36px;
+      height: 36px;
+      z-index: 100;
+      cursor: pointer;
+      top: 0;
+      right: 0;
+    }
+  </style>
+</head>
+<body>
+  <style id="resize"></style>
+  <h1>List.</h1>
+  <div id="table">
+    <div id="list" class="tr">
+
+    </div>
+    <div id="add-todo" class="tr">
+      <input type="text" id="add-todo-content" placeholder="输入事项，字别太多……">
+      <button onclick="addTodo()">+</button>
+    </div>
+  </div>
+  <div id="reset-all" onclick="resetAll()"></div>
+  <script src="./src/functions.js"></script>
+  <script>
+    /**
+     * 计算窗口中元素的尺寸属性
+     *
+     */
+    var table = document.getElementById('table')
+    var style = document.getElementById('resize')
+    var nowEm = 100
+    var resize = function(){
+      var winW = document.body.offsetWidth
+      var winH = document.body.offsetHeight
+      var em = (winH/30).toFixed(2)
+      var tableW = winW>600 ? 600 : winW
+
+      var vmin = ((winW<=winH ? winW : winH)/100).toFixed(2)
+
+      var styleSource = '#table {'
+                      + 'width: '+tableW+'px;'
+                      + 'font-size: '+em+'px;'
+                      + 'line-height: '+(1.8*em).toFixed(2)+'px;'
+                      + '}'
+      styleSource += '#clear-all {'
+                  + 'width: '+(vmin*10)+'px;'
+                  + 'height: '+(vmin*10)+'px;'
+                  + '}'
+      style.innerHTML = styleSource
+    }
+    var getTime = function(){
+      var time = fixDate()
+      return dbNum(time.getHours())+':'+dbNum(time.getMinutes())+':'+dbNum(time.getSeconds())
+    }
+    /**
+     * 将文字内容设置到元素中。
+     *
+     * @param {array} str 文字内容数组。
+     */
+    var list = {}
+    var codeTemp = null
+    var showDate = false
+    var setStr = function(){
+      var cookies = document.cookie.split(/;\s*/g)
+      var code = ''
+      for(var i=0; i<cookies.length; i++){
+        var cookie = cookies[i]
+        var cookieArr = cookie.split('=')
+        var key = cookieArr[0]
+        if(!/^short_todo_\d+$/.test(key)){ continue }
+        var val = JSON.parse(decodeURIComponent(cookieArr[1]))
+        list[val.mark] = val
+        code += '<div class="todo tr">'
+                + '<div class="content td" onclick="toggleState('+val.mark+')" id="content-'+val.mark+'">'
+                  + '<span'+(val.done ? ' class="done"' : '')+'>'+val.content+'</span>'
+                + '</div>'
+                + '<div class="right-area">'
+                  + '<div class="time td" id="time-'+val.mark+'">'+(val.done ? val.time : '')+'</div>'
+                  + '<div class="remove td" onclick="removeTodo('+val.mark+')">X</div>'
+                + '</div>'
+              + '</div>'
+      }
+      if(codeTemp !== code){
+        codeTemp = code
+        document.getElementById('list').innerHTML = code
+      }
+    }
+    var resetAll = function(){
+      if(!confirm('确认重置所有项目？')){ return }
+      for(var m in list){
+        toggleState(m, false)
+      }
+    }
+    var addTodo = function(content){
+      content = content ? content : document.getElementById('add-todo-content').value
+      if(!content.length){ return }
+      document.getElementById('add-todo-content').value = ''
+      var mark = +fixDate()
+      var todoItem = {
+        done: false,
+        content: content,
+        mark: mark,
+        time: ''
+      }
+      document.cookie = 'short_todo_'+mark+'='+encodeURIComponent(JSON.stringify(todoItem))+'; expires=Fri, 31 Dec 9999 23:59:59 GMT;'
+      setStr()
+    }
+    var removeTodo = function(mark){
+      if(confirm('确认删除“'+list[mark].content+'”？')){
+        document.cookie = 'short_todo_'+mark+'=; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        delete list[mark]
+        setStr()
+      }
+    }
+    var toggleState = function(mark, isDone){
+        list[mark].done = typeof(isDone)==='boolean' ? isDone : !list[mark].done
+        list[mark].time = getTime()
+
+        document.cookie = 'short_todo_'+mark+'='+encodeURIComponent(JSON.stringify(list[mark]))+'; expires=Fri, 31 Dec 9999 23:59:59 GMT;'
+
+        document.getElementById('time-'+mark).innerText = list[mark].done ? list[mark].time : ''
+        document.getElementById('content-'+mark).innerHTML = '<span'+(list[mark].done ? ' class="done"' : '')+'>'+list[mark].content+'</span>'
+    }
+    window.addEventListener('load', function(){
+      resize()
+      setStr()
+    })
+    window.addEventListener('resize', resize)
+  </script>
+</body>
+</html>
