@@ -22,6 +22,6 @@ jobs:
     - uses: ncipollo/release-action@v1
       with:
         name: "Simple Pages"
-        artifacts: "Simple-Pages.zip"
+        artifacts: "kindle/dist/Simple-Pages.zip"
         # bodyFile: "body.md"
         token: ${{ secrets.GITHUB_TOKEN }}
