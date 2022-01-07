@@ -16,12 +16,11 @@ jobs:
       with:
         type: 'zip'
         filename: 'Simple-Pages.zip'
-        path: '../'
-        directory: 'kindle/dist/'
+        path: 'kindle'
         exclusions: '*.git* /*node_modules/* .editorconfig /*dist/*'
     - uses: ncipollo/release-action@v1
       with:
         name: "Simple Pages"
-        artifacts: "kindle/dist/Simple-Pages.zip"
+        artifacts: "Simple-Pages.zip"
         # bodyFile: "body.md"
         token: ${{ secrets.GITHUB_TOKEN }}
