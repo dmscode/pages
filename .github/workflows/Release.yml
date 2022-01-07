@@ -16,7 +16,7 @@ jobs:
       with:
         type: 'zip'
         filename: 'Simple-Pages.zip'
-        path: './kindle'
+        path: '../'
         directory: 'kindle/dist/'
         exclusions: '*.git* /*node_modules/* .editorconfig /*dist/*'
     - uses: ncipollo/release-action@v1
