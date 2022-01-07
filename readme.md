@@ -5,4 +5,4 @@
 
 * [Ink Clock](https://pages.izyx.xyz/ink-clock/)： 这是一个专为电子墨水屏制作的数字时钟，[详细说明](/ink-clock/readme.md)
 * [Simple Clock](https://pages.izyx.xyz/simple-clock/)： 极度简化，但相对精确的时钟。
-* [Simple Pages](https://pages.izyx.xyz/kindle/)：一些专为旧设备设计的简单页面
+* [Simple Pages](https://pages.izyx.xyz/kindle/)：一些专为旧设备设计的简单页面。
