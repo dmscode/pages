@@ -83,6 +83,9 @@
       visibility: hidden;
       z-index: -1000;
     }
+    .nokey {
+      height: 1em;
+    }
     #test-area {
       visibility: hidden;
       position: fixed;
@@ -112,6 +115,7 @@
     var type = getQuery('t', 'win11')
     var isLoop = +getQuery('l', '0')
     var isStop = +getQuery('s', '0')
+    var showAll = +getQuery('a', '0')
     var script = document.createElement('script')
     script.src = './src/' + type + '-Shortcut-Keys.js'
     document.body.appendChild(script)
@@ -139,11 +143,15 @@
     var computeKeysELWidth = function () {
       for (var groupIndex = 0; groupIndex < shortcuts.length; groupIndex++) {
         var group = shortcuts[groupIndex]
+        if(group.hidden && !showAll) { continue }
         group.maxKeysW = 0
         for (var itemIndex = 0; itemIndex < group.table.length; itemIndex++) {
           var item = group.table[itemIndex]
           item.keysW = 0
           item.keysCode = ''
+          if(!item.key.length){
+            item.keysCode = '<div class="nokey"></div>'
+          }
           for (var shortcutIndex = 0; shortcutIndex < item.key.length; shortcutIndex++) {
             var shortcut = item.key[shortcutIndex]
             var keysCode = getKeysCode(shortcut)
@@ -168,6 +176,7 @@
     var computeItemHeight = function () {
       for (var groupIndex = 0; groupIndex < shortcuts.length; groupIndex++) {
         var group = shortcuts[groupIndex]
+        if(group.hidden && !showAll) { continue }
         if(!group.titleCode){ group.titleCode = '<h3 class="tr">'+group.title+'</h3>' }
         testArea.innerHTML = group.titleCode
         group.titleHeight = testArea.offsetHeight
@@ -262,6 +271,7 @@
         for (var groupIndex = 0; groupIndex < shortcuts.length; groupIndex++) {
           if(!turn && groupIndex < nowGroup){ continue }
           var group = shortcuts[groupIndex]
+          if(group.hidden && !showAll) { continue }
           if(nowH+group.titleHeight>=winH){ if(!addCol()){
             setNext(groupIndex, 0)
             needBreak = true

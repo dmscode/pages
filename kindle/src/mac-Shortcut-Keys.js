@@ -100,17 +100,17 @@ var shortcuts = [
       },
       {
         keySource: "Command-空格键",
-        key: [["Command", "空格键"]],
+        key: [["Command", "Space"]],
         desc: "显示或隐藏“聚焦”搜索栏",
       },
       {
         keySource: "Command-空格键",
-        key: [["Command", "Option", "空格键"]],
+        key: [["Command", "Option", "Space"]],
         desc: "从“访达”窗口进行“聚焦”搜索",
       },
       {
         keySource: "Control-Command–空格键",
-        key: [["Control", "Command", "空格键"]],
+        key: [["Control", "Command", "Space"]],
         desc: "显示字符检视器，您可以从中选择表情符号和其他符号",
       },
       {
@@ -119,8 +119,8 @@ var shortcuts = [
         desc: "全屏使用应用（如果应用支持）",
       },
       {
-        keySource: "空格键",
-        key: [["空格键"]],
+        keySource: "Space",
+        key: [["Space"]],
         desc: "使用“快速查看”来预览所选项",
       },
       {
@@ -888,7 +888,7 @@ var shortcuts = [
         key: [
           ["Command", "F5"],
           ["Fn", "Command", "F5"],
-          ["", "连按三次 touch ID"],
+          ["Command", "连按三次 touch ID"],
         ],
         desc: "开启或关闭旁白",
       },
@@ -969,7 +969,7 @@ var shortcuts = [
         key: [["Control", "方向键"]],
         desc: "移至与文本栏相邻的控制项",
       },
-      { keySource: "空格键", key: [["空格键"]], desc: "选取所选菜单项" },
+      { keySource: "Space", key: [["Space"]], desc: "选取所选菜单项" },
       {
         keySource: "Return 或 Enter",
         key: [["Return"], ["Enter"]],
@@ -1107,12 +1107,12 @@ var shortcuts = [
       },
       {
         keySource: "Page Down 键<br><br>空格键",
-        key: [["PageDn"], ["空格键"]],
+        key: [["PageDn"], ["Space"]],
         desc: "向下滚动屏幕",
       },
       {
         keySource: "Page Up 键<br><br>Shift-空格键",
-        key: [["PageUp"], ["Shift", "空格键"]],
+        key: [["PageUp"], ["Shift", "Space"]],
         desc: "向上滚动屏幕",
       },
       {
@@ -1334,8 +1334,8 @@ var shortcuts = [
       },
       {
         keySource: "按住 Shift 键点按页面的链接",
-        key: [["按住 Shift 键点按页面的链接"]],
-        desc: "添加链接页面",
+        key: [["Shift"]],
+        desc: "【按住】点按页面的链接，可以添加链接页面",
       },
       {
         keySource:
@@ -1359,7 +1359,7 @@ var shortcuts = [
       {
         keySource:
           "点按智能搜索栏以显示页面的完整地址及其图标，然后将图标拖到“个人收藏”栏",
-        key: [[]],
+        key: [],
         desc: "点按智能搜索栏以显示页面的完整地址及其图标，然后将图标拖到“个人收藏”栏，可以将书签添加到“个人收藏”栏",
       },
       {
@@ -1369,12 +1369,12 @@ var shortcuts = [
       },
       {
         keySource: "左右拖移书签",
-        key: [[]],
+        key: [],
         desc: "左右拖移书签，可以在“个人收藏”栏上移动书签",
       },
       {
         keySource: "将书签拖移到个人收藏栏外",
-        key: [[]],
+        key: [],
         desc: "将书签拖移到个人收藏栏外， 可从“个人收藏”栏移除书签",
       },
     ],
@@ -1400,15 +1400,15 @@ var shortcuts = [
         key: [["↑"], ["↓"]],
         desc: "选择下一个书签或文件夹",
       },
-      { keySource: "空格键", key: [["空格键"]], desc: "打开所选书签" },
+      { keySource: "Space", key: [["Space"]], desc: "打开所选书签" },
       {
         keySource: "空格键或右箭头键",
-        key: [["空格键"], ["→"]],
+        key: [["Space"], ["→"]],
         desc: "打开所选文件夹",
       },
       {
         keySource: "空格键或左箭头键",
-        key: [["空格键"], ["←"]],
+        key: [["Space"], ["←"]],
         desc: "关闭所选文件夹",
       },
       {
@@ -1443,7 +1443,7 @@ var shortcuts = [
     table: [
       {
         keySource: "Command-空格键",
-        key: [["Command", "空格键"]],
+        key: [["Command", "Space"]],
         desc: "打开或关闭“聚焦”窗口",
       },
       { keySource: "Tab 键", key: [["Tab"]], desc: "显示预览区域" },
@@ -1475,7 +1475,7 @@ var shortcuts = [
       },
       {
         keySource: "Option-Command-空格键",
-        key: [["Option", "Command", "空格键"]],
+        key: [["Option", "Command", "Space"]],
         desc: "打开搜索结果已选定的“访达”窗口",
       },
     ],

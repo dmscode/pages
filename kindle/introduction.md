@@ -112,7 +112,7 @@
 
 * [x] Windows11
 * [x] MacOS
-* [ ] Visual studio code
+* [x] Visual studio code
 * [ ] Office
 * [ ] PhotoShop
 * [ ] illustrator
