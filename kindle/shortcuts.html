@@ -6,32 +6,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>快捷键呐</title>
   <style>
+    html,
     body {
-      /* font-size: 18px; */
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    body {
+      margin: .5em;
       line-height: 1.8em;
     }
     #table {
       margin: 0 auto;
-      width:  90%;
-      max-width: 800px;
+    }
+    .col {
+      float: left;
+      border-left: 3px solid #AAAAAA;
+    }
+    .col-0 {
+      border: none;
+    }
+    .col:last-child {
+      margin-right: 0;
     }
     .tr {
       position: relative;
       /* margin: 1em 0; */
       border-bottom: 1px solid #AAAAAA;
     }
+    .tr:last-child {
+      border: none;
+    }
     .td {
       float: left;
-      word-break: break-all;
-      white-space: normal;
     }
     .tr > .td.keys {
       text-align: right;
+      margin-right: 1em;
+      word-break: keep-all;
+      white-space: nowrap;
+    }
+    .tr > .td.desc {
+      word-break: break-all;
+      white-space: normal;
     }
     .clear {
       clear: both;
     }
-    .kbd {
+    .kbd,
+    .then,
+    .add {
       position: relative;
       display: inline-block;
       line-height: 1em;
@@ -41,6 +65,16 @@
       padding: .2em .3em;
       /* bottom: -6px; */
       border-radius: .2em;
+      /* border: 1px solid white;
+      box-shadow: 0 3px 0 #AAA, 2px 3px 0 #AAA, -2px 3px 0 #AAA; */
+    }
+    .then,
+    .add {
+      background-color: #33AAFF;
+      margin: 0 .2em;
+    }
+    .add {
+      background-color: #99CC33;
     }
     .hidden {
       position: fixed;
@@ -49,82 +83,228 @@
       visibility: hidden;
       z-index: -1000;
     }
+    #test-area {
+      visibility: hidden;
+      position: fixed;
+      left: -1000px;
+      top: -1000px;
+      z-index: -1000;
+    }
+    #next {
+      position: fixed;
+      width: 5em;
+      height: 5em;
+      z-index: 100;
+      cursor: pointer;
+      top: 0;
+      right: 0;
+      /* background-color: blue; */
+    }
   </style>
 </head>
 <body>
   <style id="resize"></style>
   <div id="table"></div>
-  <div id="shortcuts-data"></div>
-  <span id="sep" class="hidden">O</span>
+  <div id="next"></div>
+  <div id="test-area" class="tr"></div>
   <script src="./src/functions.js"></script>
   <script>
-      var type = getQuery('t', 'win11')
-      var script = document.createElement('script')
-      script.src = './src/' + type + '-Shortcut-Keys.js'
-      document.body.appendChild(script)
-    
-      var showShortcuts = function () {
-        var code = ''
-        for (var shortcutsI = 0; shortcutsI < shortcuts.length; shortcutsI++) {
-          var group = shortcuts[shortcutsI]
-          code += '<h3>' + group.title + '</h3><div class="subtable">'
-          for (var groupI = 0; groupI < group.table.length; groupI++) {
-            var sc = group.table[groupI]
-            code += '<div class="tr"><div class="td keys">'
-            for (var scI = 0; scI < sc.key.length; scI++) {
-              var keys = sc.key[scI]
-              if (scI) { code += '<br>' }
-              for (var keysI = 0; keysI < keys.length; keysI++) {
-                var k = keys[keysI]
-                if (keysI) { code += '+' }
-                code += '<span class="kbd">' + k + '</span>'
-              }
-            }
-            code += '</div>'
-              + '<div class="td desc">' + sc.desc + '</div>'
-              + '<div class="clear"></div>'
-              + '</div>'
-          }
-          code += '</div>'
+    var type = getQuery('t', 'win11')
+    var isLoop = +getQuery('l', '0')
+    var isStop = +getQuery('s', '0')
+    var script = document.createElement('script')
+    script.src = './src/' + type + '-Shortcut-Keys.js'
+    document.body.appendChild(script)
+
+    var style = document.getElementById('resize')
+    var testArea = document.getElementById('test-area')
+    var isInit = false
+
+    var getKeysCode = function(keys){
+      var keysCode = ''
+      var noAdd = false
+      for(var i=0; i<keys.length; i++){
+        var key = keys[i]
+        if(key==='then' || key==='add'){
+          keysCode += '<span class="'+key+'">'+key+'</span>'
+          noAdd = true
+          continue
         }
-        document.getElementById('table').innerHTML = code
-        resize()
+        if(i && !noAdd){ keysCode +='+' }
+        noAdd = false
+        keysCode += '<span class="kbd">'+key+'</span>'
       }
-
-      var sep = document.getElementById('sep').offsetWidth
-      var style = document.getElementById('resize')
-      var resize = function () {
-        var winW = document.body.offsetWidth
-        // var cols = Math.floor(winW/360)
-        // var trW = Math.floor((winW-sep*(cols-1))/cols)
-
-        var subtable = document.body.getElementsByClassName('subtable')
-        for (var subI = 0; subI < subtable.length; subI++) {
-          var keysEls = subtable[subI].getElementsByClassName('keys')
-          var trEls = subtable[subI].getElementsByClassName('tr')
-
-          var maxW = 0
-          for (var i = 0; i < keysEls.length; i++) {
-            var kEl = keysEls[i]
-            kEl.style.width = 'auto'
-            if (kEl.offsetWidth > maxW) {
-              maxW = kEl.offsetWidth
+      return keysCode
+    }
+    var computeKeysELWidth = function () {
+      for (var groupIndex = 0; groupIndex < shortcuts.length; groupIndex++) {
+        var group = shortcuts[groupIndex]
+        group.maxKeysW = 0
+        for (var itemIndex = 0; itemIndex < group.table.length; itemIndex++) {
+          var item = group.table[itemIndex]
+          item.keysW = 0
+          item.keysCode = ''
+          for (var shortcutIndex = 0; shortcutIndex < item.key.length; shortcutIndex++) {
+            var shortcut = item.key[shortcutIndex]
+            var keysCode = getKeysCode(shortcut)
+            if(shortcutIndex){ item.keysCode += '<br>' }
+            item.keysCode += keysCode
+            var td = document.createElement('div')
+            td.setAttribute('class', 'td keys')
+            td.innerHTML = keysCode
+            testArea.appendChild(td)
+            var tdW = td.offsetWidth
+            if (tdW > item.keysW) {
+              item.keysW = tdW
+            }
+            if (item.keysW > group.maxKeysW) {
+              group.maxKeysW = item.keysW
             }
           }
-          for (var i = 0; i < keysEls.length; i++) {
-            keysEls[i].style.width = maxW + 'px'
-          }
-          for (var i = 0; i < trEls.length; i++) {
-            var trW = trEls[i].offsetWidth
-            trEls[i].getElementsByClassName('desc')[0].style.width = trW - maxW - sep - 1 + 'px'
-          }
         }
+      }
+      isInit = true
+    }
+    var computeItemHeight = function () {
+      for (var groupIndex = 0; groupIndex < shortcuts.length; groupIndex++) {
+        var group = shortcuts[groupIndex]
+        if(!group.titleCode){ group.titleCode = '<h3 class="tr">'+group.title+'</h3>' }
+        testArea.innerHTML = group.titleCode
+        group.titleHeight = testArea.offsetHeight
+        for (var itemIndex = 0; itemIndex < group.table.length; itemIndex++) {
+          var item = group.table[itemIndex]
+          if(!item.code){
+            item.code = '<div class="tr group-'+groupIndex+'"><div class="td keys">'
+                      + item.keysCode
+                      + '</div>'
+                      + '<div class="td desc">' + item.desc + '</div>'
+                      + '<div class="clear"></div>'
+                      + '</div>'
+          }
+          testArea.innerHTML = item.code
+          item.height = testArea.offsetHeight
+        }
+      }
+    }
+    /**
+     * 获取网页的默认 em 大小。
+     * 前提是未对 html 和 body 元素设置 font-size
+     * @return {number} em 的值，单位（px）
+     */
+    var getDefaultEm = function(){
+      var el = document.createElement('div')
+      el.setAttribute('style', 'position: fixed; left: -1000px; top: -1000px; visibility: hidden; width: 1em; height: 1em;')
+      document.body.appendChild(el)
+      var em = el.offsetWidth
+      document.body.removeChild(el)
+      return em
+    }
 
-        var styleSource = '.keys {'
-          + 'margin-right: ' + sep + 'px;'
+    var em = getDefaultEm()
+    var oldWinW = 0
+    var nowGroup = 0
+    var nowItem = 0
+    var nextGroup = 0
+    var nextItem = 0
+    var setNext = function(gi,ii){
+      nextGroup = gi
+      nextItem = ii
+    }
+    var lastUpdateTime = +(new Date())
+
+    var showShortcuts = function (isNext) {
+      if(!isInit){ computeKeysELWidth() }
+
+      var winW = document.body.offsetWidth-em
+      var winH = document.body.offsetHeight-em
+      var cols = Math.floor(winW/(24*em)) // 当前页面可以显示几列内容。
+      var trW = Math.round((winW-cols*em)/cols)
+      var sep = Math.floor((winW-cols*trW)/cols)
+      
+      var isResize = winW!==oldWinW
+      oldWinW = winW
+
+      if(isResize){
+        var styleSource = '.col {'
+          + 'width: ' + trW + 'px;'
+          + 'height: ' + winH + 'px;'
+          + 'padding: 0 ' + ((sep-3)/2) + 'px;'
           + '}'
+          + '.tr {'
+          + 'width: ' + trW + 'px;'
+          + '}'
+        for (var groupIndex = 0; groupIndex < shortcuts.length; groupIndex++) {
+          styleSource += '.group-'+groupIndex+' .td.keys { width: '+shortcuts[groupIndex].maxKeysW+'px }'
+          styleSource += '.group-'+groupIndex+' .td.desc { width: '+(trW-shortcuts[groupIndex].maxKeysW-em-1)+'px }'
+        }
         style.innerHTML = styleSource
+        computeItemHeight()
       }
+
+      if(isNext){
+        nowGroup = nextGroup
+        nowItem = nextItem
+        lastUpdateTime = +(new Date())
+      }
+      var colArr = []
+      var nowH = 0
+
+      var addCol = function(){
+        if(colArr.length>=cols){ return false }
+        colArr.push('')
+        nowH = 0
+        return true
+      }
+      addCol()
+      var needBreak = false
+      var turn = 0
+      do{
+        for (var groupIndex = 0; groupIndex < shortcuts.length; groupIndex++) {
+          if(!turn && groupIndex < nowGroup){ continue }
+          var group = shortcuts[groupIndex]
+          if(nowH+group.titleHeight>=winH){ if(!addCol()){
+            setNext(groupIndex, 0)
+            needBreak = true
+            break
+          } }
+          colArr[colArr.length-1] += group.titleCode
+          nowH += group.titleHeight
+          for (var itemIndex = 0; itemIndex < group.table.length; itemIndex++) {
+            if(!turn && groupIndex===nowGroup && itemIndex<nowItem){ continue }
+            var item = group.table[itemIndex]
+            if(nowH+item.height>=winH){ if(!addCol()){
+              setNext(groupIndex, itemIndex)
+              needBreak = true
+              break
+            }}
+            colArr[colArr.length-1] += item.code
+            nowH += item.height
+          }
+          if(needBreak){ break }
+        }
+        turn++
+        if(needBreak){ break }
+      }while(isLoop)
+      if(!needBreak){ setNext(0, 0) }
+      var code = ''
+      for(var colIndex=0; colIndex<colArr.length; colIndex++){
+        code += '<div class="col col-'+colIndex+'">'+colArr[colIndex]+'</div>'
+      }
+      document.getElementById('table').innerHTML = code
+      // resize()
+    }
+    document.getElementById('next').addEventListener('click', function(){ showShortcuts(true) })
+    window.addEventListener('resize', function(){ showShortcuts() })
+
+    var mainInterval = null
+    if(!isStop){
+        mainInterval = window.setInterval(function(){
+        var now = +(new Date())
+        if(now-lastUpdateTime >= document.body.innerText.length*1e3){
+          showShortcuts(true)
+        }
+      }, 1e3)
+    }
   </script>
 </body>
 </html>
