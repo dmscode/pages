@@ -1,7 +1,7 @@
 var json = []
 var tempTitle
-document.querySelectorAll('#post-content > h3, #post-content > table').forEach(se=>{
-  if(se.tagName==='H3'){
+document.querySelectorAll('article > h2, article > table').forEach(se=>{
+  if(se.tagName==='H2'){
     tempTitle = se.innerText
     return
   }
@@ -14,7 +14,7 @@ document.querySelectorAll('#post-content > h3, #post-content > table').forEach(s
       return
     }
     const arr = tr.querySelectorAll('td')
-    const keySource = arr[1].innerText+'/'+arr[2].innerText
+    const keySource = arr[1].innerText
     const key = []
     keySource.split(/\//g)
              .forEach(keys=>{
