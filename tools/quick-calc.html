@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>快速计算器 v1.0</title>
+    <style>
+      #input,
+      #note,
+      #output {
+        display: block;
+        width: 60%;
+        min-width: 380px;
+        max-width: 720px;
+        margin: 10px auto;
+        padding: 10px 30px;
+        font-size: 1.8rem;
+        line-height: 1.8em;
+      }
+      #note {
+        font-size: 1em;
+      }
+      #input {
+        border: none;
+        border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+        outline: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="text" id="input" />
+    <div id="note"></div>
+    <div id="output">
+      <p>
+        点击页面获取焦点后，直接在键盘上输入计算式，一般无需切换输入法。回车可存入历史，并开启新的运算。
+      </p>
+    </div>
+    <script>
+      let input, note, output, time
+      const noteCode = `在使用之前最好先阅读一下【<a href="" target="_blank">使用说明</a>】，才能发挥此工具的最大潜力哦~`
+      const copy = function(text){
+        const oldVal = input.value
+        input.value = text
+        input.select()
+        document.execCommand('copy')
+        input.value = oldVal
+        note.innerText = '【'+text+'】 is copied!'
+        window.clearTimeout(time)
+        time = window.setTimeout(()=>{
+          note.innerHTML = noteCode
+        }, 3000)
+      }
+      window.onload = function () {
+        input = document.getElementById("input")
+        note = document.getElementById("note")
+        output = document.getElementById("output")
+        note.innerHTML = noteCode
+        input.focus()
+        input.onblur = function () {
+          input.focus();
+        }
+        const computeInput = function (inputText) {
+          let res = "";
+          try {
+            res = eval(inputText.replace(/%/g, "/100").replace(/\^/g, "**"));
+          } catch (error) {
+            res = "算式有误";
+          }
+          return void 0 === res ? "无结果" : res;
+        };
+        
+        input.onkeyup = function (event) {
+          const inputText = input.value
+            .replace(/[\s，]+/g, "")
+            .replace(/。/g, ".")
+            .replace(/[（[【{]/g, "(")
+            .replace(/[）\]】}]/g, ")")
+            .replace(/、/g, "/")
+            .replace(/……/g, "^");
+
+          const result = computeInput(inputText)
+          const nowLine = output.querySelector("p:last-child")
+          nowLine.innerText = inputText
+            .replace(/\*/g, "×")
+            .replace(/\//g, "÷")
+             + " = " + result
+          nowLine.setAttribute('onclick', "copy('"+inputText+" = "+result+"')")
+          if (inputText.length && 13 === event.keyCode) {
+            input.value = ""
+            if(/^clear|clr$/i.test(inputText)){
+              output.innerHTML = ''
+              note.innerHTML = noteCode
+              return
+            }
+            const newLine = document.createElement("p");
+            output.appendChild(newLine);
+          }
+        };
+      };
+    </script>
+  </body>
+</html>
