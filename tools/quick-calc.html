@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>快速计算器 v1.1</title>
+    <title>快速计算器 v1.2</title>
     <style>
       #input,
       #note,
@@ -25,6 +25,9 @@
         border-bottom: 2px solid rgba(0, 0, 0, 0.6);
         outline: 0;
       }
+      #input.high-precision {
+        border-bottom: 2px solid rgba(0, 120, 36, 0.6);
+      }
     </style>
   </head>
   <body>
@@ -35,7 +38,12 @@
         点击页面获取焦点后，直接在键盘上输入计算式，一般无需切换输入法。回车可存入历史，并开启新的运算。
       </p>
     </div>
+    <script src="https://cdn.bootcdn.net/ajax/libs/mathjs/10.6.4/math.min.js"></script>
     <script>
+      math.config({
+        number: 'BigNumber',  
+        precision: 64
+      })
       let input, note, output, time
       const noteCode = `在使用之前最好先阅读一下【<a href="https://meta.appinn.net/t/topic/34300" target="_blank">使用说明</a>】，才能发挥此工具的最大潜力哦~`
       const copy = function(text){
@@ -59,10 +67,12 @@
         input.onblur = function () {
           input.focus();
         }
+        if(math) input.classList.add('high-precision')
         const computeInput = function (inputText) {
           let res = "";
           try {
-            res = eval(inputText.replace(/%/g, "/100").replace(/\^/g, "**"));
+            const formula = inputText.replace(/%/g, "/100").replace(/\^/g, "**")
+            res = math ? math.evaluate(formula) : eval(formula);
           } catch (error) {
             res = "算式有误";
           }
