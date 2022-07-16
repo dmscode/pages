@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>快速计算器 v1.0</title>
+    <title>快速计算器 v1.1</title>
     <style>
       #input,
       #note,
@@ -37,7 +37,7 @@
     </div>
     <script>
       let input, note, output, time
-      const noteCode = `在使用之前最好先阅读一下【<a href="" target="_blank">使用说明</a>】，才能发挥此工具的最大潜力哦~`
+      const noteCode = `在使用之前最好先阅读一下【<a href="https://meta.appinn.net/t/topic/34300" target="_blank">使用说明</a>】，才能发挥此工具的最大潜力哦~`
       const copy = function(text){
         const oldVal = input.value
         input.value = text
@@ -73,6 +73,7 @@
           const inputText = input.value
             .replace(/[\s，]+/g, "")
             .replace(/。/g, ".")
+            .replace(/！/g, "!")
             .replace(/[（[【{]/g, "(")
             .replace(/[）\]】}]/g, ")")
             .replace(/、/g, "/")
