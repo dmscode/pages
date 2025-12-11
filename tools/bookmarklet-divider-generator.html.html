@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小书签分割条生成工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSJub25lIi8+PC9zdmc+">
+    <style>
+        .bookmarklet-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .bookmarklet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+        .bookmarklet-btn:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">小书签分割条生成工具</h1>
+            <p class="text-gray-600 mb-6">创建书签栏水平分割线，用于整理和分类书签</p>
+            
+            <div class="mb-6">
+                <label for="dividerText" class="block text-gray-700 font-medium mb-3">
+                    自定义分割条文字（可选）
+                </label>
+                <input 
+                    type="text" 
+                    id="dividerText" 
+                    placeholder="输入分类标题，如：工作、学习、娱乐" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                    maxlength="20"
+                >
+                <p class="text-sm text-gray-500 mt-2">输入文字后，分割条会显示为：------▼--文字--▼------</p>
+            </div>
+            
+            <div class="text-center">
+                <p class="text-gray-700 mb-3">将下方按钮拖拽到书签栏安装：</p>
+                <a 
+                    href="javascript:(function(){})();" 
+                    id="bookmarkletBtn"
+                    draggable="true"
+                    class="bookmarklet-btn inline-flex items-center px-6 py-4 text-white font-medium rounded-lg cursor-move"
+                >---------✂---------</a>
+                <p class="text-sm text-gray-500 mt-3">安装后，该分割条仅用于视觉分隔，点击后不会执行任何操作</p>
+            </div>
+        </div>
+        
+        <div class="text-center mt-6 text-gray-500 text-sm">
+            <p>© 2023 小书签分割条生成工具</p>
+        </div>
+    </div>
+
+    <script>
+        // 生成分割条函数
+        function generateDivider(text) {
+            const maxLength = 30;
+            const scissors = '▼';
+            
+            // 如果没有输入文字，使用默认分割线
+            if (!text.trim()) {
+                // 计算短横线数量，使总长度不超过maxLength
+                const totalDashes = maxLength - scissors.length;
+                const leftDashes = Math.floor(totalDashes / 2);
+                const rightDashes = totalDashes - leftDashes;
+                
+                return '-'.repeat(leftDashes) + scissors + '-'.repeat(rightDashes);
+            }
+            
+            // 如果有自定义文字
+            const content = `--${scissors}--${text}--${scissors}--`;
+            let totalLength = content.length;
+            
+            // 如果总长度不超过maxLength，直接返回
+            if (totalLength <= maxLength) {
+                // 计算需要添加的短横线
+                const remainingChars = maxLength - totalLength;
+                const leftDashes = Math.floor(remainingChars / 2);
+                const rightDashes = remainingChars - leftDashes;
+                
+                return '-'.repeat(leftDashes) + content + '-'.repeat(rightDashes);
+            }
+            
+            // 如果总长度超过maxLength，需要截断文字
+            let truncatedText = text;
+            while (content.length > maxLength && truncatedText.length > 0) {
+                truncatedText = truncatedText.substring(0, truncatedText.length - 1);
+                const newContent = `--${scissors}--${truncatedText}--${scissors}--`;
+                if (newContent.length <= maxLength) {
+                    const remainingChars = maxLength - newContent.length;
+                    const leftDashes = Math.floor(remainingChars / 2);
+                    const rightDashes = remainingChars - leftDashes;
+                    
+                    return '-'.repeat(leftDashes) + newContent + '-'.repeat(rightDashes);
+                }
+            }
+            
+            // 如果文字被完全截断，返回默认分割线
+            return generateDivider('');
+        }
+        
+        // 更新按钮
+        function updatePreviewAndButton() {
+            const text = document.getElementById('dividerText').value.trim();
+            const divider = generateDivider(text);
+            
+            // 更新按钮文本（如果太长则截断显示）
+            const btnText = document.getElementById('bookmarkletBtn');
+    
+            btnText.textContent = divider;
+            btnText.title = divider;
+
+            btnText.href = `#${text}`;
+        }
+        
+        // 初始化
+        function init() {
+            const input = document.getElementById('dividerText');
+
+            input.value = window.location.hash ? decodeURIComponent(window.location.hash.substring(1)) : '';
+            
+            // 初始更新
+            updatePreviewAndButton();
+            
+            // 输入框事件监听
+            input.addEventListener('input', updatePreviewAndButton);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

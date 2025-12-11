@@ -6,9 +6,17 @@
 * [**充电口朝上的时钟**](https://pages.zji.me/ink-clock/#bottom)：文字方向向下，只显示小时、分钟的信息
 * [**充电口朝左的时钟**](https://pages.zji.me/ink-clock/#left)：文字方向向左，显示年、月、日、小时、分钟、上下午的信息
 * [**充电口朝右的时钟**](https://pages.zji.me/ink-clock/#right)：文字方向向右，显示年、月、日、小时、分钟、上下午的信息
+* [**普通时钟**](https://pages.zji.me/ink-clock/)：文字方向向上，只显示小时、分钟的信息
+* [**充电口朝上的时钟**](https://pages.zji.me/ink-clock/#bottom)：文字方向向下，只显示小时、分钟的信息
+* [**充电口朝左的时钟**](https://pages.zji.me/ink-clock/#left)：文字方向向左，显示年、月、日、小时、分钟、上下午的信息
+* [**充电口朝右的时钟**](https://pages.zji.me/ink-clock/#right)：文字方向向右，显示年、月、日、小时、分钟、上下午的信息
 
 如果使用上面链接，发现存在时间偏差，那么可以尝试下面链接，已经增加了 8 小时的时间偏移量（希望我偏移的方向没有问题）。如果你处于其他时区，在后面有自定义时间偏移量的方法
 
+* [**普通时钟**](https://pages.zji.me/ink-clock/?offset=480)：文字方向向上，只显示小时、分钟的信息
+* [**充电口朝上的时钟**](https://pages.zji.me/ink-clock/?offset=480#bottom)：文字方向向下，只显示小时、分钟的信息
+* [**充电口朝左的时钟**](https://pages.zji.me/ink-clock/?offset=480#left)：文字方向向左，显示年、月、日、小时、分钟、上下午的信息
+* [**充电口朝右的时钟**](https://pages.zji.me/ink-clock/?offset=480#right)：文字方向向右，显示年、月、日、小时、分钟、上下午的信息
 * [**普通时钟**](https://pages.zji.me/ink-clock/?offset=480)：文字方向向上，只显示小时、分钟的信息
 * [**充电口朝上的时钟**](https://pages.zji.me/ink-clock/?offset=480#bottom)：文字方向向下，只显示小时、分钟的信息
 * [**充电口朝左的时钟**](https://pages.zji.me/ink-clock/?offset=480#left)：文字方向向左，显示年、月、日、小时、分钟、上下午的信息
@@ -55,6 +63,10 @@
 * [**充电口朝上的时钟**](https://pages.zji.me/ink-clock/?offset=480#bottom)：文字方向向下，只显示小时、分钟的信息
 * [**充电口朝左的时钟**](https://pages.zji.me/ink-clock/?offset=480#left)：文字方向向左，显示年、月、日、小时、分钟、上下午的信息
 * [**充电口朝右的时钟**](https://pages.zji.me/ink-clock/?offset=480#right)：文字方向向右，显示年、月、日、小时、分钟、上下午的信息
+* [**普通时钟**](https://pages.zji.me/ink-clock/?offset=480)：文字方向向上，只显示小时、分钟的信息
+* [**充电口朝上的时钟**](https://pages.zji.me/ink-clock/?offset=480#bottom)：文字方向向下，只显示小时、分钟的信息
+* [**充电口朝左的时钟**](https://pages.zji.me/ink-clock/?offset=480#left)：文字方向向左，显示年、月、日、小时、分钟、上下午的信息
+* [**充电口朝右的时钟**](https://pages.zji.me/ink-clock/?offset=480#right)：文字方向向右，显示年、月、日、小时、分钟、上下午的信息
 ```
 
 ### 12/24
@@ -89,6 +101,7 @@
 
 向页面传递素材参数的方法是：
 
+`https://pages.zji.me/ink-clock/?img=图片地址`
 `https://pages.zji.me/ink-clock/?img=图片地址`
 
 在网址的最后可以加上如下锚点表示时钟的朝向：
