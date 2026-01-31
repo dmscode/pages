@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手账尺寸对照手册 | Stationery Size Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #fafaf9;
+            background-image: 
+                radial-gradient(#e7e5e4 1px, transparent 1px),
+                radial-gradient(#e7e5e4 1px, transparent 1px);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+        }
+        
+        .paper-texture {
+            background-color: #fefdfb;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+        }
+
+        .handwritten {
+            font-family: 'Courier New', cursive, monospace;
+            letter-spacing: -0.5px;
+        }
+
+        .binder-hole {
+            width: 8px;
+            height: 8px;
+            background: #d6d3d1;
+            border-radius: 50%;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .wash-tape {
+            position: relative;
+            opacity: 0.9;
+        }
+        
+        .wash-tape::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 20%;
+            width: 60%;
+            height: 24px;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255,255,255,0.3),
+                rgba(255,255,255,0.3) 5px,
+                transparent 5px,
+                transparent 10px
+            );
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transform: rotate(-1deg);
+        }
+
+        .size-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .size-card:hover {
+            transform: translateY(-2px) rotate(0.5deg);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+        }
+
+        .grid-lines {
+            background-image: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 23px,
+                #e5e5e5 24px
+            );
+            background-size: 100% 24px;
+        }
+
+        .dot-grid {
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* 盐系配色类 */
+        .salt-pink { background-color: #faf5f5; border-color: #f5e6e8; }
+        .salt-blue { background-color: #f5f7fa; border-color: #e6eef5; }
+        .salt-green { background-color: #f5faf7; border-color: #e6f0ea; }
+        .salt-yellow { background-color: #faf9f5; border-color: #f5f0e6; }
+        .salt-purple { background-color: #f8f5fa; border-color: #f0e6f5; }
+
+        .neo-tag {
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        @media print {
+            .no-print { display: none; }
+            .shadow-lg { box-shadow: none; }
+        }
+    </style>
+</head>
+<body class="text-stone-600 leading-relaxed antialiased">
+
+    <!-- 顶部导航 -->
+    <header class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-stone-200 flex items-center justify-center handwritten font-bold text-stone-600 text-lg">D</div>
+                <div>
+                    <h1 class="text-xl font-medium text-stone-800 tracking-wide">手账尺寸对照手册</h1>
+                    <p class="text-xs text-stone-400">Stationery Size Reference Guide</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="搜索尺寸..." 
+                           class="pl-9 pr-4 py-2 rounded-full bg-white border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-stone-300 w-48 transition-all">
+                    <svg class="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+                <button onclick="toggleView('grid')" class="p-2 rounded-lg hover:bg-stone-200 transition-colors" title="网格视图">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                </button>
+                <button onclick="toggleView('table')" class="p-2 rounded-lg hover:bg-stone-200 transition-colors" title="表格视图">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 快速筛选标签 -->
+    <div class="max-w-6xl mx-auto px-4 py-6">
+        <div class="flex flex-wrap gap-2 justify-center no-print">
+            <button onclick="filterByType('all')" class="filter-btn active px-4 py-2 rounded-full text-sm border border-stone-300 bg-stone-800 text-white shadow-sm transition-all hover:shadow-md" data-type="all">全部</button>
+            <button onclick="filterByType('large')" class="filter-btn px-4 py-2 rounded-full text-sm border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 transition-all" data-type="large">大型(A5+)</button>
+            <button onclick="filterByType('medium')" class="filter-btn px-4 py-2 rounded-full text-sm border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 transition-all" data-type="medium">中型(A6家族)</button>
+            <button onclick="filterByType('small')" class="filter-btn px-4 py-2 rounded-full text-sm border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 transition-all" data-type="small">小型(A7/A8)</button>
+            <button onclick="filterByType('fold')" class="filter-btn px-4 py-2 rounded-full text-sm border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 transition-all" data-type="fold">折页</button>
+            <button onclick="filterByType('compatible')" class="filter-btn px-4 py-2 rounded-full text-sm border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all" data-type="compatible">⚡ 高兼容</button>
+        </div>
+    </div>
+
+    <!-- 主要内容区 -->
+    <main class="max-w-6xl mx-auto px-4 pb-20">
+        
+        <!-- 联动关系可视化 -->
+        <section class="mb-12 paper-texture rounded-2xl p-6 shadow-sm border border-stone-100 wash-tape">
+            <h2 class="text-lg font-medium text-stone-800 mb-4 flex items-center gap-2 handwritten">
+                <span class="w-2 h-2 rounded-full bg-stone-400"></span>
+                套娃收纳关系图
+            </h2>
+            <div class="overflow-x-auto">
+                <div class="flex items-end gap-1 min-w-max pb-4" id="nestingChart">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+            <p class="text-xs text-stone-400 mt-2 italic">点击尺寸查看可收纳的小尺寸内页</p>
+        </section>
+
+        <!-- 尺寸卡片网格 -->
+        <div id="sizeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <!-- 卡片由JS生成 -->
+        </div>
+
+        <!-- 对照工具区 -->
+        <section class="grid md:grid-cols-2 gap-6 mb-12">
+            <!-- 折页计算器 -->
+            <div class="paper-texture rounded-2xl p-6 shadow-sm border border-stone-100">
+                <h3 class="text-lg font-medium text-stone-800 mb-4 handwritten flex items-center gap-2">
+                    <svg class="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    折页尺寸计算器
+                </h3>
+                <div class="space-y-3">
+                    <select id="calcSize" class="w-full p-3 rounded-lg border border-stone-200 bg-white text-sm focus:outline-none focus:border-stone-400">
+                        <option value="">选择基础尺寸...</option>
+                    </select>
+                    <div class="flex gap-2">
+                        <button onclick="calcFold('bifold')" class="flex-1 py-2 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm transition-colors">二折页</button>
+                        <button onclick="calcFold('trifold')" class="flex-1 py-2 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm transition-colors">三折页</button>
+                    </div>
+                    <div id="calcResult" class="hidden mt-4 p-4 bg-stone-50 rounded-lg text-sm border border-stone-200">
+                        <!-- 结果 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 孔位对照 -->
+            <div class="paper-texture rounded-2xl p-6 shadow-sm border border-stone-100">
+                <h3 class="text-lg font-medium text-stone-800 mb-4 handwritten flex items-center gap-2">
+                    <svg class="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                    孔位体系速查
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3 p-3 rounded-lg bg-white border border-stone-200">
+                        <div class="flex flex-col gap-1 mt-1">
+                            <div class="w-2 h-2 rounded-full bg-stone-300"></div>
+                            <div class="w-2 h-2 rounded-full bg-stone-300"></div>
+                            <div class="w-2 h-2 rounded-full bg-stone-300"></div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium text-stone-800">欧美6孔标准</div>
+                            <div class="text-xs text-stone-500 mt-1">19mm间距 | A5/Personal/A6/A7通用</div>
+                            <div class="text-xs text-rose-500 mt-1">⚠️ 与日系20孔不兼容</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 rounded-lg bg-white border border-stone-200">
+                        <div class="flex flex-col gap-[2px] mt-1">
+                            <div class="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
+                            <div class="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium text-stone-800">日系20/26孔</div>
+                            <div class="text-xs text-stone-500 mt-1">9.5mm均匀孔距 | B5(26孔)/A5(20孔)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 新手推荐 -->
+        <section class="paper-texture rounded-2xl p-8 shadow-sm border border-stone-100 salt-blue">
+            <h2 class="text-xl font-medium text-stone-800 mb-6 handwritten text-center">新手入坑推荐 · Less is More</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="text-center p-6 rounded-xl bg-white/60 border border-stone-200">
+                    <div class="text-3xl mb-3">📝</div>
+                    <h4 class="font-medium text-stone-800 mb-2">工作学习首选</h4>
+                    <p class="text-sm text-stone-600 mb-3">A5 或 A5 Slim</p>
+                    <p class="text-xs text-stone-400">书写空间大，A5slim可收纳A4三折页，适合笔记记录</p>
+                </div>
+                <div class="text-center p-6 rounded-xl bg-white/60 border border-rose-200 ring-2 ring-rose-100">
+                    <div class="text-3xl mb-3">⭐</div>
+                    <h4 class="font-medium text-stone-800 mb-2">人气之选</h4>
+                    <p class="text-sm text-stone-600 mb-3">A6 Personal (95×170)</p>
+                    <p class="text-xs text-stone-400">配件最丰富，All-in-one日程管理，平衡便携与书写</p>
+                </div>
+                <div class="text-center p-6 rounded-xl bg-white/60 border border-stone-200">
+                    <div class="text-3xl mb-3">👜</div>
+                    <h4 class="font-medium text-stone-800 mb-2">随身便携</h4>
+                    <p class="text-sm text-stone-600 mb-3">A7 Pocket 或 M5</p>
+                    <p class="text-xs text-stone-400">A7适合日常记录，M5极致小巧，A8/M5宽67mm联动性最好</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="border-t border-stone-200 bg-stone-50 py-8 text-center text-sm text-stone-400">
+        <p>数据综合整理自 @青藤小笺 与 @画个小画sunnyplan</p>
+        <p class="mt-2 text-xs">不同品牌存在1-3mm误差属正常范围，购买前请以实物内径为准</p>
+    </footer>
+
+    <script>
+        // 手账数据
+        const sizeData = [
+            // 大型
+            { id: 'a5', name: 'A5', size: '144×210', type: 'large', holes: 6, pitch: '19-19-70-19-19', system: '欧美', color: 'salt-yellow', note: '标准尺寸，书写空间充裕，适合工作学习', fold2: '273×210', fold3: '406×210', compatible: ['a5s', 'a7', 'a8'] },
+            { id: 'a5s', name: 'A5 Slim', size: '110×210', type: 'large', holes: 6, pitch: '19-19-70-19-19', system: '欧美', color: 'salt-green', note: '与A5同高，宽度窄34mm，更便携，可收纳A4三折页', fold2: '205×210', fold3: '304×210', compatible: ['a7', 'a8'] },
+            { id: 'puo', name: 'PUO', size: '110×210', type: 'large', holes: 20, pitch: '9.5mm均匀', system: '日系', color: 'salt-blue', note: '20孔A5 Slim，可与TN标准本搭配', compatible: [] },
+            
+            // 中型 - Personal家族(170mm高)
+            { id: 'a6s', name: 'A6 Slim', size: '80×170', type: 'medium', holes: 6, pitch: '19-19-50-19-19', system: '欧美', color: 'salt-purple', note: '80mm宽度家族，可放入Personal本皮', compatible: ['a8'] },
+            { id: 'personal', name: 'A6 Personal', size: '95×170', type: 'medium', holes: 6, pitch: '19-19-50-19-19', system: '欧美', color: 'salt-pink', note: '⚡最常用尺寸，配件内页最丰富，新手首选', fold2: '177×170', fold3: '259×170', compatible: ['a6s', 'a8'] },
+            { id: 'fc', name: 'A6 FC', size: '108×170', type: 'medium', holes: 6, pitch: '19-19-50-19-19', system: '欧美', color: 'salt-blue', note: '同Personal孔系，宽度递增', compatible: ['personal', 'a6s', 'a8'] },
+            { id: 'pw', name: 'A6 PW', size: '120×170', type: 'medium', holes: 6, pitch: '19-19-50-19-19', system: '欧美', color: 'salt-green', note: '同Personal孔系', compatible: ['personal', 'a6s', 'a8'] },
+            { id: 'square', name: 'A6 方方子', size: '150×170', type: 'medium', holes: 6, pitch: '19-19-50-19-19', system: '欧美', color: 'salt-yellow', note: '同孔系最宽，国内小众，原名HB×WA5', compatible: ['personal', 'fc', 'pw', 'a6s', 'a8'] },
+            { id: 'a6weird', name: 'A6 奇葩', size: '105×148', type: 'medium', holes: 6, pitch: '19-19-38-19-19', system: '独立', color: 'salt-purple', note: '独特孔系，可兼容A7和M5内页，Smart三合一', fold2: '197×148', fold3: '289×148', compatible: ['a7', 'a8'] },
+            
+            // 小型
+            { id: 'a7', name: 'A7', size: '80×120', type: 'small', holes: 6, pitch: '19-19-19-19-19', system: '欧美', color: 'salt-pink', note: 'Pocket尺寸，国外也称Pocket，便携首选', fold2: '148×120', fold3: '216×120', compatible: ['a8'] },
+            { id: 'a7large', name: 'A7 大纸', size: '80×127', type: 'small', holes: 6, pitch: '19-19-19-19-19', system: '欧美', color: 'salt-blue', note: '比标准A7高7mm，缓解空间局促', compatible: ['a8'] },
+            { id: 'a8', name: 'A8/M5(67)', size: '67×105', type: 'small', holes: 6, pitch: '19-19-19-19', system: 'M5', color: 'salt-green', note: '⚡M5中联动性最好的尺寸，可放入A7/奇葩', fold2: '123×105', fold3: '179×105', compatible: [] },
+            { id: 'm5-62', name: 'M5 宽62', size: '62×105', type: 'small', holes: 6, pitch: '19mm', system: 'M5', color: 'salt-yellow', note: '更小巧的M5变体', compatible: [] },
+            { id: 'm5-74', name: 'M5 宽74', size: '74×105', type: 'small', holes: 6, pitch: '19mm', system: 'M5', color: 'salt-purple', note: '更宽的M5变体，需确认本皮适配', compatible: [] },
+            { id: 'm2.5', name: 'M2.5', size: '42×105', type: 'small', holes: 0, pitch: '-', system: '极小', color: 'salt-blue', note: '极小尺寸，配件极少，谨慎入坑', compatible: [] },
+            { id: 'a9', name: 'A9', size: '60×78', type: 'small', holes: 3, pitch: '28-28', system: '独立', color: 'salt-yellow', note: '❌无法与其他尺寸联动，适合单独做迷你打卡本', compatible: [] },
+        ];
+
+        let currentView = 'grid';
+        let currentFilter = 'all';
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGrid();
+            renderNestingChart();
+            populateCalcOptions();
+            
+            // 搜索监听
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                filterBySearch(term);
+            });
+        });
+
+        function renderGrid() {
+            const grid = document.getElementById('sizeGrid');
+            grid.innerHTML = '';
+            
+            const filtered = currentFilter === 'all' ? sizeData : 
+                           currentFilter === 'compatible' ? sizeData.filter(d => d.compatible.length > 0) :
+                           sizeData.filter(d => d.type === currentFilter);
+            
+            filtered.forEach(item => {
+                const card = createCard(item);
+                grid.appendChild(card);
+            });
+        }
+
+        function createCard(item) {
+            const div = document.createElement('div');
+            div.className = `size-card ${item.color} rounded-2xl p-6 border-2 relative overflow-hidden paper-texture`;
+            div.dataset.id = item.id;
+            
+            // 孔位可视化
+            let holesHtml = '';
+            if (item.holes > 0) {
+                holesHtml = '<div class="absolute left-3 top-8 bottom-8 flex flex-col justify-between py-2">';
+                for(let i=0; i<Math.min(item.holes, 6); i++) {
+                    holesHtml += '<div class="binder-hole"></div>';
+                }
+                holesHtml += '</div>';
+            }
+            
+            // 兼容标签
+            const compatTags = item.compatible.map(c => {
+                const target = sizeData.find(d => d.id === c);
+                return `<span class="inline-block px-2 py-1 bg-white/80 rounded text-xs text-stone-600 border border-stone-200 mr-1 mb-1">${target?.name || c}</span>`;
+            }).join('');
+            
+            div.innerHTML = `
+                ${holesHtml}
+                <div class="pl-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-lg font-bold text-stone-800 handwritten">${item.name}</h3>
+                        <span class="text-xs px-2 py-1 rounded-full bg-white/60 border border-stone-200 text-stone-500">${item.system}</span>
+                    </div>
+                    
+                    <div class="font-mono text-2xl font-medium text-stone-700 mb-2 tracking-tight">${item.size}<span class="text-sm text-stone-400 ml-1">mm</span></div>
+                    
+                    <div class="flex items-center gap-2 mb-3 text-xs text-stone-500">
+                        <span class="flex items-center gap-1">
+                            <div class="w-1.5 h-1.5 rounded-full bg-stone-400"></div>
+                            ${item.holes}孔
+                        </span>
+                        <span>|</span>
+                        <span>${item.pitch}</span>
+                    </div>
+                    
+                    <p class="text-sm text-stone-600 mb-4 leading-relaxed">${item.note}</p>
+                    
+                    ${item.compatible.length > 0 ? `
+                        <div class="border-t border-stone-300/50 pt-3 mt-3">
+                            <div class="text-xs text-stone-400 mb-2">可收纳内页：</div>
+                            <div class="flex flex-wrap">${compatTags}</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${item.fold2 ? `
+                        <div class="mt-3 pt-3 border-t border-stone-300/50 text-xs text-stone-500 grid grid-cols-2 gap-2">
+                            <div>二折: ${item.fold2}</div>
+                            <div>三折: ${item.fold3}</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            div.onclick = () => showDetail(item);
+            return div;
+        }
+
+        function renderNestingChart() {
+            const chart = document.getElementById('nestingChart');
+            const nestingOrder = ['a5', 'square', 'pw', 'fc', 'personal', 'a6weird', 'a7', 'a8', 'a9'];
+            
+            nestingOrder.forEach((id, index) => {
+                const item = sizeData.find(d => d.id === id);
+                if (!item) return;
+                
+                const width = parseInt(item.size.split('×')[0]);
+                const height = parseInt(item.size.split('×')[1]);
+                const scale = 0.8; // 缩放比例
+                
+                const div = document.createElement('div');
+                div.className = 'relative cursor-pointer transition-all hover:-translate-y-1';
+                div.style.width = `${width * scale}px`;
+                div.style.height = `${height * scale}px`;
+                div.style.minWidth = `${width * scale}px`;
+                div.style.zIndex = 10 - index;
+                div.className += ` ${item.color} border-2 border-stone-300 rounded shadow-sm flex flex-col items-center justify-center p-1 text-center`;
+                
+                div.innerHTML = `
+                    <div class="text-[10px] font-bold text-stone-700 leading-tight">${item.name}</div>
+                    <div class="text-[8px] text-stone-500 mt-1">${item.size}</div>
+                `;
+                
+                div.onclick = () => highlightCompatible(item.id);
+                chart.appendChild(div);
+            });
+        }
+
+        function highlightCompatible(id) {
+            const item = sizeData.find(d => d.id === id);
+            if (!item || !item.compatible.length) return;
+            
+            // 高亮可收纳的尺寸
+            document.querySelectorAll('.size-card').forEach(card => {
+                card.style.opacity = '0.4';
+                if (item.compatible.includes(card.dataset.id) || card.dataset.id === id) {
+                    card.style.opacity = '1';
+                    card.style.transform = 'scale(1.02)';
+                    setTimeout(() => card.style.transform = '', 200);
+                }
+            });
+            
+            setTimeout(() => {
+                document.querySelectorAll('.size-card').forEach(card => {
+                    card.style.opacity = '1';
+                });
+            }, 2000);
+        }
+
+        function filterByType(type) {
+            currentFilter = type;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.type === type) {
+                    btn.classList.add('bg-stone-800', 'text-white');
+                    btn.classList.remove('bg-white', 'text-stone-600');
+                } else {
+                    btn.classList.remove('bg-stone-800', 'text-white');
+                    btn.classList.add('bg-white', 'text-stone-600');
+                }
+            });
+            
+            renderGrid();
+        }
+
+        function filterBySearch(term) {
+            const cards = document.querySelectorAll('.size-card');
+            cards.forEach(card => {
+                const item = sizeData.find(d => d.id === card.dataset.id);
+                const match = item.name.toLowerCase().includes(term) || 
+                             item.size.includes(term) || 
+                             item.note.toLowerCase().includes(term);
+                card.style.display = match ? 'block' : 'none';
+            });
+        }
+
+        function toggleView(view) {
+            currentView = view;
+            const grid = document.getElementById('sizeGrid');
+            if (view === 'table') {
+                grid.className = 'space-y-2 mb-12';
+                // 重新渲染为表格行
+                grid.innerHTML = '';
+                sizeData.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'paper-texture p-4 rounded-lg border border-stone-200 flex flex-wrap items-center gap-4 text-sm';
+                    row.innerHTML = `
+                        <div class="w-24 font-bold text-stone-800">${item.name}</div>
+                        <div class="w-24 font-mono text-stone-600">${item.size}</div>
+                        <div class="w-16 text-stone-500">${item.holes}孔</div>
+                        <div class="w-32 text-stone-400 text-xs">${item.pitch}</div>
+                        <div class="flex-1 text-stone-600">${item.note}</div>
+                    `;
+                    grid.appendChild(row);
+                });
+            } else {
+                grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12';
+                renderGrid();
+            }
+        }
+
+        function populateCalcOptions() {
+            const select = document.getElementById('calcSize');
+            sizeData.filter(d => d.fold2).forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = JSON.stringify({w: item.size.split('×')[0], h: item.size.split('×')[1]});
+                opt.textContent = `${item.name} (${item.size})`;
+                select.appendChild(opt);
+            });
+        }
+
+        function calcFold(type) {
+            const select = document.getElementById('calcSize');
+            if (!select.value) return;
+            
+            const dims = JSON.parse(select.value);
+            const w = parseInt(dims.w);
+            const h = parseInt(dims.h);
+            
+            let result = '';
+            if (type === 'bifold') {
+                const foldW = Math.round(w * 2);
+                result = `二折页尺寸：<span class="font-mono font-bold text-stone-800 text-lg">${foldW}×${h}mm</span><br><span class="text-xs text-stone-400">折叠后：${w}×${h}mm</span>`;
+            } else {
+                const foldW = Math.round(w * 3);
+                result = `三折页尺寸：<span class="font-mono font-bold text-stone-800 text-lg">${foldW}×${h}mm</span><br><span class="text-xs text-stone-400">折叠后：${w}×${h}mm (每折约${Math.round(w/3*10)/10}cm)</span>`;
+            }
+            
+            const resDiv = document.getElementById('calcResult');
+            resDiv.innerHTML = result;
+            resDiv.classList.remove('hidden');
+        }
+
+        function showDetail(item) {
+            // 简单的详情展示，可以扩展为模态框
+            console.log('Detail:', item);
+        }
+    </script>
+</body>
+</html>
