@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>口令提取器</title>
-    <script src="assets/tailwind.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        @import url('assets/fonts/noto-sans-sc.css');
         body {
             font-family: 'Noto Sans SC', sans-serif;
             background-color: #fafaf9;
@@ -61,25 +61,16 @@
                 <label class="block text-xs font-medium text-stone-400 uppercase tracking-wider ml-1">
                     粘贴原文
                 </label>
-                <div class="relative">
-                    <textarea 
-                        id="inputText" 
-                        placeholder="复制这条，春节上元宝App打开抢红包！ ZH5554 Hz:/FYCJFO7JZD"
-                        class="w-full h-32 p-4 pr-12 rounded-2xl bg-stone-50 border-2 border-stone-200 focus:border-amber-400 focus:bg-white focus:outline-none transition-all resize-none text-stone-700 placeholder-stone-300 leading-relaxed"
-                    ></textarea>
-                    <!-- Floating Clear Button -->
-                    <button 
-                        onclick="clearAll()" 
-                        class="absolute bottom-3 right-3 p-2 rounded-xl bg-stone-200/50 text-stone-400 hover:bg-stone-200 hover:text-stone-600 transition-all btn-press"
-                        title="清空内容"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
+                <textarea 
+                    id="inputText" 
+                    placeholder="复制这条，春节上元宝App打开抢红包！ ZH5554 Hz:/FYCJFO7JZD"
+                    class="w-full h-32 p-4 rounded-2xl bg-stone-50 border-2 border-stone-200 focus:border-amber-400 focus:bg-white focus:outline-none transition-all resize-none text-stone-700 placeholder-stone-300 leading-relaxed"
+                ></textarea>
                 <div class="flex justify-between items-center px-1">
                     <span class="text-xs text-stone-400" id="matchInfo">等待输入...</span>
+                    <button onclick="clearAll()" class="text-xs text-stone-400 hover:text-stone-600 transition-colors">
+                        清空
+                    </button>
                 </div>
             </div>
 
@@ -180,7 +171,7 @@
 
         // 提取口令的正则：匹配字母、数字、空格、冒号、斜线，长度>10
         // 要求必须以字母或数字开头和结尾，避免匹配到纯符号
-        const codeRegex = /[A-Za-z0-9][A-Za-z0-9\\s:\\/]*[A-Za-z0-9]/g;
+        const codeRegex = /[A-Za-z0-9][A-Za-z0-9\s:\/]*[A-Za-z0-9]/g;
 
         inputText.addEventListener('input', extractCodes);
         inputText.addEventListener('paste', (e) => {
@@ -203,7 +194,7 @@
             currentMatches = [...new Set(currentMatches)];
 
             if (currentMatches.length === 0) {
-                outputText.textContent = '未检测到口令';
+                outputText.textContent = '【未检测到口令】';
                 outputText.classList.add('text-stone-500');
                 outputText.classList.remove('text-amber-300');
                 copyBtn.disabled = true;
@@ -248,7 +239,7 @@
 
         function selectMatch(match) {
             selectedMatch = match;
-            outputText.textContent = `${match}`;
+            outputText.textContent = `【${match}】`;
             outputText.classList.remove('text-stone-500');
             outputText.classList.add('text-amber-300');
             
@@ -260,7 +251,7 @@
         }
 
         function resetOutput() {
-            outputText.textContent = '等待提取';
+            outputText.textContent = '【等待提取】';
             outputText.classList.add('text-stone-500');
             outputText.classList.remove('text-amber-300');
             copyBtn.disabled = true;
