@@ -180,7 +180,7 @@
 
         // 提取规则优化：匹配字母、数字、空格、冒号、斜线、逗号、波浪号
         // 长度缩减为 8 个字符以上
-        const codeRegex = /[A-Za-z0-9,~][A-Za-z0-9\s:\/\\,~]*[A-Za-z0-9,~]/g;
+        const codeRegex = /[A-Za-z0-9,~!@#$%\^&*][A-Za-z0-9\s:\/\\,~]*[A-Za-z0-9,~!@#$%\^&*]/g;
 
         inputText.addEventListener('input', extractCodes);
         inputText.addEventListener('paste', (e) => {
