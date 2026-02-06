@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>口令提取器</title>
+    <script src="assets/tailwind.js"></script>
+    <style>
+        @import url('assets/fonts/noto-sans-sc.css');
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #fafaf9;
+            background-image: radial-gradient(#e7e5e4 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        .code-highlight {
+            background: linear-gradient(120deg, #fef3c7 0%, #fef3c7 100%);
+            background-repeat: no-repeat;
+            background-size: 100% 40%;
+            background-position: 0 88%;
+            font-weight: 600;
+            color: #92400e;
+            padding: 0 4px;
+            border-radius: 4px;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        .btn-press:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 text-stone-700">
+
+    <div class="w-full max-w-lg animate-slide-in">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-light tracking-wide text-stone-800 mb-2">
+                口令提取器
+            </h1>
+            <p class="text-sm text-stone-500 font-light">
+                自动识别并格式化红包口令
+            </p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="glass-panel rounded-3xl shadow-xl shadow-stone-200/50 p-6 md:p-8 space-y-6">
+            
+            <!-- Input Section -->
+            <div class="space-y-2">
+                <label class="block text-xs font-medium text-stone-400 uppercase tracking-wider ml-1">
+                    粘贴原文
+                </label>
+                <div class="relative">
+                    <textarea 
+                        id="inputText" 
+                        placeholder="复制这条原文，打开抢红包！"
+                        class="w-full h-32 p-4 pr-12 rounded-2xl bg-stone-50 border-2 border-stone-200 focus:border-amber-400 focus:bg-white focus:outline-none transition-all resize-none text-stone-700 placeholder-stone-300 leading-relaxed"
+                    ></textarea>
+                    <!-- Floating Clear Button -->
+                    <button 
+                        onclick="clearAll()" 
+                        class="absolute bottom-3 right-3 p-2 rounded-xl bg-stone-200/50 text-stone-400 hover:bg-stone-200 hover:text-stone-600 transition-all btn-press"
+                        title="清空内容"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex justify-between items-center px-1">
+                    <span class="text-xs text-stone-400" id="matchInfo">等待输入...</span>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-stone-200"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <div class="bg-white px-4 py-1 rounded-full border border-stone-200 shadow-sm">
+                        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="space-y-3">
+                <label class="block text-xs font-medium text-stone-400 uppercase tracking-wider ml-1">
+                    生成结果
+                </label>
+                
+                <!-- Multiple Matches Selector -->
+                <div id="matchSelector" class="hidden space-y-2 mb-3">
+                    <p class="text-xs text-stone-500">检测到多个口令，请选择：</p>
+                    <div id="matchButtons" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Result Display -->
+                <div class="relative group">
+                    <div 
+                        id="outputBox"
+                        class="w-full p-5 rounded-2xl bg-gradient-to-br from-stone-800 to-stone-900 text-white text-center cursor-pointer btn-press transition-all shadow-lg shadow-stone-300/50 hover:shadow-xl hover:shadow-stone-300/60"
+                        onclick="copyResult()"
+                    >
+                        <div class="flex items-center justify-center space-x-2 text-stone-300 text-sm mb-1">
+                            <span>千</span>
+                        </div>
+                        <div id="outputText" class="text-xl md:text-2xl font-mono font-medium tracking-wider text-amber-300 break-all px-2">
+                            【等待提取】
+                        </div>
+                        <div class="flex items-center justify-center space-x-2 text-stone-300 text-sm mt-1">
+                            <span>问</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Copy Hint -->
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        <span class="bg-black/50 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+                            点击复制
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Copy Button -->
+                <button 
+                    onclick="copyResult()"
+                    id="copyBtn"
+                    disabled
+                    class="w-full py-3 rounded-xl bg-stone-200 text-stone-400 font-medium transition-all btn-press flex items-center justify-center space-x-2 disabled:cursor-not-allowed"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                    </svg>
+                    <span>复制结果</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-stone-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none flex items-center space-x-2 text-sm">
+            <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>已复制到剪贴板</span>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-xs text-stone-400 space-y-1">
+            <p>自动匹配：数字、字母、空格、冒号、斜线、逗号、波浪号组合</p>
+            <p>长度需大于 8 个字符</p>
+        </div>
+    </div>
+
+    <script>
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const outputBox = document.getElementById('outputBox');
+        const copyBtn = document.getElementById('copyBtn');
+        const matchInfo = document.getElementById('matchInfo');
+        const matchSelector = document.getElementById('matchSelector');
+        const matchButtons = document.getElementById('matchButtons');
+        const toast = document.getElementById('toast');
+        
+        let currentMatches = [];
+        let selectedMatch = '';
+
+        // 提取规则优化：匹配字母、数字、空格、冒号、斜线、逗号、波浪号
+        // 长度缩减为 8 个字符以上
+        const codeRegex = /[A-Za-z0-9,~][A-Za-z0-9\s:\/\\,~]*[A-Za-z0-9,~]/g;
+
+        inputText.addEventListener('input', extractCodes);
+        inputText.addEventListener('paste', (e) => {
+            setTimeout(extractCodes, 0);
+        });
+
+        function extractCodes() {
+            const text = inputText.value;
+            if (!text.trim()) {
+                resetOutput();
+                return;
+            }
+
+            // 找出所有潜在的口令候选
+            const candidates = text.match(codeRegex) || [];
+            // 过滤长度 > 8 的
+            currentMatches = candidates.filter(match => match.length > 8);
+            
+            // 去重
+            currentMatches = [...new Set(currentMatches)];
+
+            if (currentMatches.length === 0) {
+                outputText.textContent = '未检测到口令';
+                outputText.classList.add('text-stone-500');
+                outputText.classList.remove('text-amber-300');
+                copyBtn.disabled = true;
+                copyBtn.classList.remove('bg-amber-500', 'text-white', 'hover:bg-amber-600');
+                copyBtn.classList.add('bg-stone-200', 'text-stone-400');
+                matchInfo.textContent = '未找到符合条件的口令';
+                matchSelector.classList.add('hidden');
+                selectedMatch = '';
+            } else if (currentMatches.length === 1) {
+                selectMatch(currentMatches[0]);
+                matchSelector.classList.add('hidden');
+            } else {
+                // 多个匹配，显示选择器
+                showMatchSelector();
+                // 默认选第一个
+                selectMatch(currentMatches[0]);
+            }
+        }
+
+        function showMatchSelector() {
+            matchSelector.classList.remove('hidden');
+            matchButtons.innerHTML = '';
+            
+            currentMatches.forEach((match, index) => {
+                const btn = document.createElement('button');
+                btn.className = `px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${index === 0 ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-white border-stone-200 text-stone-600 hover:border-amber-300'}`;
+                // 显示截断的版本
+                const displayText = match.length > 15 ? match.substring(0, 12) + '...' : match;
+                btn.textContent = displayText;
+                btn.onclick = () => {
+                    // 更新按钮样式
+                    Array.from(matchButtons.children).forEach((b, i) => {
+                        b.className = i === index ? 
+                            'px-3 py-1.5 rounded-lg text-xs font-medium transition-all border bg-amber-100 border-amber-300 text-amber-800' : 
+                            'px-3 py-1.5 rounded-lg text-xs font-medium transition-all border bg-white border-stone-200 text-stone-600 hover:border-amber-300';
+                    });
+                    selectMatch(match);
+                };
+                matchButtons.appendChild(btn);
+            });
+        }
+
+        function selectMatch(match) {
+            selectedMatch = match;
+            outputText.textContent = `${match}`;
+            outputText.classList.remove('text-stone-500');
+            outputText.classList.add('text-amber-300');
+            
+            copyBtn.disabled = false;
+            copyBtn.classList.remove('bg-stone-200', 'text-stone-400');
+            copyBtn.classList.add('bg-stone-800', 'text-white', 'hover:bg-stone-700');
+            
+            matchInfo.textContent = `检测到 ${currentMatches.length} 个口令，已选: ${match.length} 字符`;
+        }
+
+        function resetOutput() {
+            outputText.textContent = '等待提取';
+            outputText.classList.add('text-stone-500');
+            outputText.classList.remove('text-amber-300');
+            copyBtn.disabled = true;
+            copyBtn.classList.remove('bg-stone-800', 'text-white', 'hover:bg-stone-700');
+            copyBtn.classList.add('bg-stone-200', 'text-stone-400');
+            matchInfo.textContent = '等待输入...';
+            matchSelector.classList.add('hidden');
+            currentMatches = [];
+            selectedMatch = '';
+        }
+
+        function clearAll() {
+            inputText.value = '';
+            inputText.focus();
+            resetOutput();
+        }
+
+        async function copyResult() {
+            if (!selectedMatch) return;
+            
+            const formatted = `千 ${selectedMatch} 问`;
+            
+            try {
+                await navigator.clipboard.writeText(formatted);
+                showToast();
+                
+                // 按钮反馈
+                const originalContent = copyBtn.innerHTML;
+                copyBtn.innerHTML = `
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>已复制</span>
+                `;
+                copyBtn.classList.remove('bg-stone-800');
+                copyBtn.classList.add('bg-green-600');
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalContent;
+                    copyBtn.classList.remove('bg-green-600');
+                    copyBtn.classList.add('bg-stone-800');
+                }, 2000);
+                
+            } catch (err) {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = formatted;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast();
+            }
+        }
+
+        function showToast() {
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 2000);
+        }
+
+        // 初始化
+        resetOutput();
+    </script>
+</body>
+</html>
