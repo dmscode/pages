@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>文字卡片生成器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* 自定义字体 */
+        .font-serif-sc { font-family: 'Noto Serif SC', serif; }
+        .font-sans-sc { font-family: 'Noto Sans SC', sans-serif; }
+        
+        /* 卡片预览区域 */
+        #card-preview {
+            width: 375px;
+            min-height: 500px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #faf8f5 0%, #f5f0e8 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        
+        /* 缎带样式 */
+        .ribbon {
+            position: absolute;
+            top: 24px;
+            right: -35px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 6px 40px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            transform: rotate(45deg);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 10;
+            white-space: nowrap;
+        }
+        
+        .ribbon-blue { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+        .ribbon-green { background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); }
+        .ribbon-purple { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); }
+        .ribbon-orange { background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); }
+        .ribbon-gray { background: linear-gradient(135deg, #7f8c8d 0%, #566573 100%); }
+        
+        /* 装饰元素 */
+        .deco-quote {
+            font-size: 120px;
+            line-height: 1;
+            opacity: 0.06;
+            position: absolute;
+            top: 40px;
+            left: 30px;
+            font-family: Georgia, serif;
+            color: #8b7355;
+            pointer-events: none;
+        }
+        
+        .deco-line {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #8b7355, transparent);
+            margin: 20px 0;
+        }
+        
+        .deco-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #8b7355, #d4c4a8, #8b7355);
+        }
+        
+        /* 首行缩进 */
+        .indent-text p {
+            text-indent: 2em;
+            margin-bottom: 1.2em;
+            line-height: 1.8;
+        }
+        
+        .indent-text p:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* 纹理背景 */
+        .texture-bg {
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(139, 115, 85, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 115, 85, 0.03) 0%, transparent 50%);
+        }
+        
+        /* 输入框样式优化 */
+        .input-field {
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        /* 主题色选择 */
+        .theme-btn {
+            transition: all 0.2s;
+        }
+        .theme-btn.active {
+            ring-width: 2px;
+            ring-offset-width: 2px;
+            transform: scale(1.1);
+        }
+        
+        /* 生成按钮动画 */
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .btn-generate {
+            animation: pulse-soft 2s infinite;
+        }
+        .btn-generate:hover {
+            animation: none;
+        }
+        
+        /* 隐藏滚动条但保持功能 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* 加载动画 */
+        .loading-spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 结果展示动画 */
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans-sc">
+
+    <!-- 头部 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-amber-600 to-amber-800 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                    文
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800 tracking-tight">文字卡片生成器</h1>
+                    <p class="text-xs text-gray-500">将文字变成精美的分享卡片</p>
+                </div>
+            </div>
+            <div class="text-xs text-gray-400 hidden sm:block">适合手机分享 · 宽度固定375px</div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-4 lg:p-8">
+        <div class="grid lg:grid-cols-2 gap-8">
+            
+            <!-- 左侧：编辑面板 -->
+            <div class="space-y-6">
+                
+                <!-- 主题设置 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+                        卡片主题
+                    </h2>
+                    <div class="flex gap-3 flex-wrap">
+                        <button onclick="setTheme('warm')" class="theme-btn active w-10 h-10 rounded-full bg-gradient-to-br from-[#faf8f5] to-[#f5f0e8] border-2 border-amber-200 ring-amber-400" title="暖白" data-theme="warm"></button>
+                        <button onclick="setTheme('dark')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-gray-600 ring-gray-400" title="深色" data-theme="dark"></button>
+                        <button onclick="setTheme('blue')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 ring-blue-400" title="淡蓝" data-theme="blue"></button>
+                        <button onclick="setTheme('green')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-200 ring-green-400" title="薄荷" data-theme="green"></button>
+                        <button onclick="setTheme('pink')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-rose-50 to-pink-100 border-2 border-pink-200 ring-pink-400" title="粉色" data-theme="pink"></button>
+                        <button onclick="setTheme('ink')" class="theme-btn w-10 h-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 border-2 border-slate-300 ring-slate-400" title="水墨" data-theme="ink"></button>
+                    </div>
+                </div>
+
+                <!-- 内容编辑 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
+                    <h2 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        卡片内容
+                    </h2>
+                    
+                    <!-- 标题 -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1.5">标题（可选）</label>
+                        <input type="text" id="input-title" placeholder="输入标题..." 
+                            class="input-field w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 text-sm">
+                    </div>
+
+                    <!-- 类别 -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1.5">类别标签</label>
+                        <div class="flex gap-2 flex-wrap mb-2">
+                            <button onclick="setCategory('Default')" class="cat-preset px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs text-gray-600 transition">Default</button>
+                            <button onclick="setCategory('读书笔记')" class="cat-preset px-3 py-1.5 bg-amber-50 hover:bg-amber-100 rounded-lg text-xs text-amber-700 transition">读书笔记</button>
+                            <button onclick="setCategory('每日一句')" class="cat-preset px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-lg text-xs text-blue-700 transition">每日一句</button>
+                            <button onclick="setCategory('随笔')" class="cat-preset px-3 py-1.5 bg-green-50 hover:bg-green-100 rounded-lg text-xs text-green-700 transition">随笔</button>
+                            <button onclick="setCategory('诗词')" class="cat-preset px-3 py-1.5 bg-purple-50 hover:bg-purple-100 rounded-lg text-xs text-purple-700 transition">诗词</button>
+                        </div>
+                        <input type="text" id="input-category" placeholder="自定义类别..." value="Default"
+                            class="input-field w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 text-sm">
+                    </div>
+
+                    <!-- 内容 -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1.5">正文内容</label>
+                        <textarea id="input-content" rows="8" placeholder="在这里输入内容...&#10;支持多段落，自动首行缩进&#10;空行会自动分段"
+                            class="input-field w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 text-sm resize-none leading-relaxed"></textarea>
+                        <p class="text-xs text-gray-400 mt-1.5">提示：使用空行分隔段落，每段自动首行缩进2字符</p>
+                    </div>
+
+                    <!-- 作者和日期 -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1.5">作者</label>
+                            <input type="text" id="input-author" value="稻米鼠" 
+                                class="input-field w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1.5">日期</label>
+                            <input type="date" id="input-date" 
+                                class="input-field w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 生成按钮 -->
+                <button onclick="generateCard()" id="btn-generate"
+                    class="btn-generate w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-semibold py-4 rounded-2xl shadow-lg shadow-amber-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    生成文字卡片
+                </button>
+            </div>
+
+            <!-- 右侧：预览与结果 -->
+            <div class="space-y-6">
+                
+                <!-- 实时预览 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            实时预览
+                        </h2>
+                        <span class="text-xs text-gray-400">375 × 自适应高度</span>
+                    </div>
+                    
+                    <!-- 预览容器 -->
+                    <div class="overflow-x-auto pb-4 no-scrollbar">
+                        <div id="card-preview" class="texture-bg rounded-none">
+                            <!-- 缎带 -->
+                            <div id="preview-ribbon" class="ribbon">DEFAULT</div>
+                            
+                            <!-- 装饰引号 -->
+                            <div class="deco-quote">"</div>
+                            
+                            <!-- 内容区 -->
+                            <div class="relative z-10 px-10 pt-16 pb-12">
+                                <!-- 标题 -->
+                                <h3 id="preview-title" class="font-serif-sc text-2xl font-bold text-gray-800 mb-3 leading-tight hidden"></h3>
+                                
+                                <!-- 装饰线 -->
+                                <div id="preview-deco-line" class="deco-line hidden"></div>
+                                
+                                <!-- 正文 -->
+                                <div id="preview-content" class="indent-text font-serif-sc text-base text-gray-700 leading-relaxed">
+                                    <p class="text-gray-400 italic">在左侧输入内容，预览将实时更新...</p>
+                                </div>
+                                
+                                <!-- 底部信息 -->
+                                <div class="mt-10 pt-6 border-t border-gray-200/60 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center text-white text-xs font-bold">鼠</div>
+                                        <span id="preview-author" class="text-xs text-gray-400 font-medium">稻米鼠</span>
+                                    </div>
+                                    <span id="preview-date" class="text-xs text-gray-400 font-mono"></span>
+                                </div>
+                            </div>
+                            
+                            <!-- 底部装饰线 -->
+                            <div class="deco-bottom"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 生成结果 -->
+                <div id="result-area" class="hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-6 fade-in-up">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            生成成功
+                        </h2>
+                        <button onclick="downloadCard()" class="text-xs bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            下载图片
+                        </button>
+                    </div>
+                    <div id="result-image" class="rounded-xl overflow-hidden shadow-lg border border-gray-200"></div>
+                    <p class="text-xs text-gray-400 mt-3 text-center">长按图片可保存到相册</p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="mt-12 py-6 text-center text-xs text-gray-400 border-t border-gray-200">
+        <p>文字卡片生成器 · 适合手机分享的图片卡片</p>
+    </footer>
+
+    <script>
+        // 当前主题
+        let currentTheme = 'warm';
+        
+        // 主题配置
+        const themes = {
+            warm: {
+                bg: 'linear-gradient(135deg, #faf8f5 0%, #f5f0e8 100%)',
+                text: '#1f2937',
+                textLight: '#4b5563',
+                accent: '#8b7355',
+                ribbon: '',
+                border: 'rgba(139, 115, 85, 0.2)'
+            },
+            dark: {
+                bg: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
+                text: '#f9fafb',
+                textLight: '#d1d5db',
+                accent: '#d1d5db',
+                ribbon: 'ribbon-gray',
+                border: 'rgba(255, 255, 255, 0.1)'
+            },
+            blue: {
+                bg: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+                text: '#1e3a8a',
+                textLight: '#3b82f6',
+                accent: '#3b82f6',
+                ribbon: 'ribbon-blue',
+                border: 'rgba(59, 130, 246, 0.2)'
+            },
+            green: {
+                bg: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+                text: '#064e3b',
+                textLight: '#059669',
+                accent: '#059669',
+                ribbon: 'ribbon-green',
+                border: 'rgba(5, 150, 105, 0.2)'
+            },
+            pink: {
+                bg: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
+                text: '#881337',
+                textLight: '#e11d48',
+                accent: '#e11d48',
+                ribbon: 'ribbon-purple',
+                border: 'rgba(225, 29, 72, 0.2)'
+            },
+            ink: {
+                bg: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+                text: '#0f172a',
+                textLight: '#475569',
+                accent: '#475569',
+                ribbon: 'ribbon-gray',
+                border: 'rgba(71, 85, 105, 0.2)'
+            }
+        };
+
+        // 类别颜色映射
+        const categoryColors = {
+            'Default': '',
+            '读书笔记': 'ribbon-orange',
+            '每日一句': 'ribbon-blue',
+            '随笔': 'ribbon-green',
+            '诗词': 'ribbon-purple'
+        };
+
+        // 初始化日期
+        document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
+        
+        // 更新预览
+        function updatePreview() {
+            const title = document.getElementById('input-title').value.trim();
+            const category = document.getElementById('input-category').value.trim() || 'Default';
+            const content = document.getElementById('input-content').value.trim();
+            const author = document.getElementById('input-author').value.trim() || '稻米鼠';
+            const date = document.getElementById('input-date').value || new Date().toISOString().split('T')[0];
+            
+            const theme = themes[currentTheme];
+            const preview = document.getElementById('card-preview');
+            
+            // 应用主题背景
+            preview.style.background = theme.bg;
+            
+            // 缎带
+            const ribbon = document.getElementById('preview-ribbon');
+            ribbon.textContent = category.toUpperCase();
+            ribbon.className = 'ribbon ' + (categoryColors[category] || theme.ribbon || '');
+            
+            // 标题
+            const titleEl = document.getElementById('preview-title');
+            const decoLine = document.getElementById('preview-deco-line');
+            if (title) {
+                titleEl.textContent = title;
+                titleEl.classList.remove('hidden');
+                titleEl.style.color = theme.text;
+                decoLine.classList.remove('hidden');
+            } else {
+                titleEl.classList.add('hidden');
+                decoLine.classList.add('hidden');
+            }
+            
+            // 内容
+            const contentEl = document.getElementById('preview-content');
+            if (content) {
+                // 按空行分段
+                const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim());
+                if (paragraphs.length === 0) {
+                    contentEl.innerHTML = '<p class="text-gray-400 italic">在左侧输入内容，预览将实时更新...</p>';
+                } else {
+                    contentEl.innerHTML = paragraphs.map(p => 
+                        `<p style="color: ${theme.textLight}">${escapeHtml(p.trim())}</p>`
+                    ).join('');
+                }
+            } else {
+                contentEl.innerHTML = '<p class="text-gray-400 italic">在左侧输入内容，预览将实时更新...</p>';
+            }
+            
+            // 作者和日期
+            document.getElementById('preview-author').textContent = author;
+            document.getElementById('preview-author').style.color = theme.textLight;
+            document.getElementById('preview-date').textContent = date;
+            document.getElementById('preview-date').style.color = theme.textLight;
+            
+            // 装饰元素颜色
+            const decoQuote = preview.querySelector('.deco-quote');
+            if (decoQuote) decoQuote.style.color = theme.accent;
+            
+            const bottomDeco = preview.querySelector('.deco-bottom');
+            if (bottomDeco) {
+                if (currentTheme === 'dark') {
+                    bottomDeco.style.background = `linear-gradient(90deg, ${theme.accent}, transparent, ${theme.accent})`;
+                } else {
+                    bottomDeco.style.background = `linear-gradient(90deg, ${theme.accent}, #d4c4a8, ${theme.accent})`;
+                }
+            }
+            
+            // 底部边框
+            const footerBorder = preview.querySelector('.border-t');
+            if (footerBorder) footerBorder.style.borderColor = theme.border;
+        }
+
+        // 设置主题
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.theme === theme) btn.classList.add('active');
+            });
+            updatePreview();
+        }
+
+        // 设置类别
+        function setCategory(cat) {
+            document.getElementById('input-category').value = cat;
+            updatePreview();
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML.replace(/\n/g, '<br>');
+        }
+
+        // 生成卡片
+        async function generateCard() {
+            const btn = document.getElementById('btn-generate');
+            const originalContent = btn.innerHTML;
+            
+            // 检查内容
+            const content = document.getElementById('input-content').value.trim();
+            if (!content) {
+                alert('请输入内容后再生成卡片');
+                document.getElementById('input-content').focus();
+                return;
+            }
+            
+            // 加载状态
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loading-spinner"></div><span class="ml-2">生成中...</span>';
+            
+            try {
+                const preview = document.getElementById('card-preview');
+                
+                // 使用html2canvas生成
+                const canvas = await html2canvas(preview, {
+                    scale: 3, // 高清
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null,
+                    logging: false,
+                    onclone: (clonedDoc) => {
+                        // 确保克隆的元素样式正确
+                        const clonedPreview = clonedDoc.getElementById('card-preview');
+                        clonedPreview.style.margin = '0';
+                        clonedPreview.style.boxShadow = 'none';
+                    }
+                });
+                
+                // 转换为图片
+                const imageData = canvas.toDataURL('image/png', 1.0);
+                
+                // 显示结果
+                const resultArea = document.getElementById('result-area');
+                const resultImage = document.getElementById('result-image');
+                
+                resultImage.innerHTML = `<img src="${imageData}" alt="文字卡片" class="w-full h-auto block">`;
+                resultArea.classList.remove('hidden');
+                
+                // 滚动到结果
+                resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+            } catch (err) {
+                console.error('生成失败:', err);
+                alert('生成失败，请重试');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        }
+
+        // 下载图片
+        function downloadCard() {
+            const img = document.querySelector('#result-image img');
+            if (!img) return;
+            
+            const link = document.createElement('a');
+            link.download = `文字卡片_${new Date().getTime()}.png`;
+            link.href = img.src;
+            link.click();
+        }
+
+        // 监听输入变化
+        ['input-title', 'input-category', 'input-content', 'input-author', 'input-date'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updatePreview);
+        });
+
+        // 初始化预览
+        updatePreview();
+        
+        // 设置默认示例内容
+        document.getElementById('input-content').value = `生活就像一盒巧克力，你永远不知道下一颗是什么味道。
+
+但正是这种不确定性，让每一天都充满了期待与惊喜。我们不必急于知道结局，只需用心品味当下的每一刻。
+
+愿你在这个喧嚣的世界里，找到属于自己的宁静角落。`;
+        document.getElementById('input-title').value = '生活的滋味';
+        updatePreview();
+    </script>
+</body>
+</html>

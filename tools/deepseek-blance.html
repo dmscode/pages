@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSeek 余额查询工具</title>
+    <style>
+        :root {
+            --bg: #f5f6f8;
+            --card-bg: #ffffff;
+            --primary: #4f6ef7;
+            --primary-hover: #3b54e0;
+            --primary-light: #eef1fe;
+            --text: #1a1d2e;
+            --text-secondary: #5a5f72;
+            --text-muted: #9499ad;
+            --border: #e3e6ed;
+            --danger: #f56c6c;
+            --danger-light: #fef0f0;
+            --success: #67c23a;
+            --success-light: #f0f9eb;
+            --warning: #e6a23c;
+            --warning-light: #fdf6ec;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.10), 0 4px 12px rgba(0, 0, 0, 0.05);
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-image: radial-gradient(ellipse at 30% 20%, rgba(79, 110, 247, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 70%, rgba(79, 110, 247, 0.03) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 50%, rgba(120, 140, 220, 0.02) 0%, transparent 70%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .header .logo-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: var(--primary);
+            margin-bottom: 12px;
+            box-shadow: 0 8px 24px rgba(79, 110, 247, 0.3);
+        }
+        .header .logo-icon svg {
+            width: 26px;
+            height: 26px;
+            fill: #fff;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+        .header .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            transition: box-shadow var(--transition), border-color var(--transition);
+        }
+        .card:hover {
+            box-shadow: var(--shadow);
+            border-color: #d5d9e2;
+        }
+        .card-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .api-key-section .input-group {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+        .api-key-section .input-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .api-key-section input {
+            width: 100%;
+            padding: 12px 40px 12px 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            font-family: var(--font-mono);
+            color: var(--text);
+            background: #fafbfc;
+            transition: all var(--transition);
+            outline: none;
+            letter-spacing: 0.01em;
+        }
+        .api-key-section input:focus {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.08);
+        }
+        .api-key-section input::placeholder {
+            color: #c0c5d0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            letter-spacing: normal;
+            font-size: 0.85rem;
+        }
+        .toggle-visibility {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: 6px;
+            color: var(--text-muted);
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+        .toggle-visibility:hover {
+            color: var(--text);
+            background: #f0f1f5;
+        }
+        .toggle-visibility svg {
+            width: 18px;
+            height: 18px;
+        }
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius);
+            border: 2px solid var(--border);
+            background: #fafbfc;
+            cursor: pointer;
+            transition: all var(--transition);
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+        .btn-icon:hover {
+            background: #fff;
+            border-color: #d0d4de;
+            color: var(--text);
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-icon.danger:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+        .btn-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+        .key-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            min-height: 20px;
+        }
+        .key-status .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #d0d4de;
+            flex-shrink: 0;
+        }
+        .key-status .dot.saved {
+            background: var(--success);
+        }
+        .key-status .masked-key {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.02em;
+        }
+
+        .btn-query {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--primary);
+            color: #fff;
+            transition: all var(--transition);
+            letter-spacing: 0.01em;
+            box-shadow: 0 4px 14px rgba(79, 110, 247, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-query:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 6px 20px rgba(79, 110, 247, 0.35);
+            transform: translateY(-1px);
+        }
+        .btn-query:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(79, 110, 247, 0.2);
+        }
+        .btn-query:disabled {
+            background: #bcc3d8;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .btn-query .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2.5px solid rgba(255, 255, 255, 0.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: none;
+        }
+        .btn-query.loading .spinner {
+            display: inline-block;
+        }
+        .btn-query.loading .btn-text {
+            display: none;
+        }
+        .btn-query .btn-icon-left {
+            width: 20px;
+            height: 20px;
+        }
+        .btn-query.loading .btn-icon-left {
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .result-section {
+            display: none;
+            flex-direction: column;
+            gap: 14px;
+            animation: fadeSlideIn 0.35s ease-out;
+        }
+        .result-section.visible {
+            display: flex;
+        }
+
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes pulseHighlight {
+            0%,
+            100% {
+                box-shadow: var(--shadow-sm);
+                border-color: var(--border);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(79, 110, 247, 0.06);
+                border-color: var(--primary);
+            }
+        }
+
+        .balance-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border);
+            text-align: center;
+            transition: all var(--transition);
+            position: relative;
+        }
+        .balance-card.current {
+            border-color: var(--primary);
+            animation: pulseHighlight 1.8s ease-in-out;
+            background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+        }
+        .balance-card .card-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .balance-card .balance-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text);
+            font-family: var(--font-mono);
+            line-height: 1.2;
+            transition: color var(--transition);
+        }
+        .balance-card .balance-value .currency-symbol {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-right: 2px;
+            vertical-align: top;
+            position: relative;
+            top: 0.3em;
+        }
+        .balance-card .balance-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .balance-card .timestamp {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .balance-card .timestamp svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .diff-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 14px 18px;
+            background: #fafbfc;
+            border-radius: var(--radius);
+            border: 1px dashed var(--border);
+            flex-wrap: wrap;
+        }
+        .diff-indicator .diff-arrow {
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+        .diff-indicator .diff-detail {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .diff-indicator .diff-amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+            font-family: var(--font-mono);
+            letter-spacing: -0.02em;
+        }
+        .diff-indicator .diff-amount.negative {
+            color: var(--success);
+        }
+        .diff-indicator .diff-amount.positive {
+            color: var(--danger);
+        }
+        .diff-indicator .diff-amount.zero {
+            color: var(--text-muted);
+        }
+        .diff-indicator .diff-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+        }
+        .diff-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        .diff-badge.usage {
+            background: var(--danger-light);
+            color: #d45353;
+        }
+        .diff-badge.recharge {
+            background: var(--success-light);
+            color: #4a9e2f;
+        }
+        .diff-badge.neutral {
+            background: #f5f5f5;
+            color: #888;
+        }
+
+        .message-box {
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: none;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.5;
+        }
+        .message-box.visible {
+            display: flex;
+        }
+        .message-box.error {
+            background: var(--danger-light);
+            color: #c0392b;
+            border: 1px solid #f5c6cb;
+        }
+        .message-box.info {
+            background: #f0f4ff;
+            color: #3b54d4;
+            border: 1px solid #d0dafb;
+        }
+        .message-box svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .first-time-notice {
+            text-align: center;
+            padding: 16px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            background: #fafbfc;
+            border-radius: var(--radius);
+            border: 1px dashed var(--border);
+        }
+
+        .history-mini {
+            background: #fafbfc;
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .history-mini .history-balance {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+        .history-mini .history-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .btn-clear-history {
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all var(--transition);
+            white-space: nowrap;
+        }
+        .btn-clear-history:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            letter-spacing: 0.02em;
+        }
+        .footer-note a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .footer-note a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                gap: 14px;
+            }
+            .balance-card .balance-value {
+                font-size: 2.2rem;
+            }
+            .api-key-section .input-group {
+                flex-wrap: wrap;
+            }
+            .btn-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+            }
+            .card {
+                padding: 16px 14px;
+                border-radius: --radius;
+            }
+            .balance-card {
+                padding: 16px 14px;
+            }
+            .diff-indicator {
+                gap: 10px;
+                padding: 10px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z" />
+                </svg>
+            </div>
+            <h1>DeepSeek 余额查询</h1>
+            <p class="subtitle">快速查看账户余额 · 自动计算消耗差额</p>
+        </div>
+
+        <div class="card api-key-section">
+            <div class="card-label">🔑 API Key</div>
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <input
+                    type="password"
+                    id="apiKeyInput"
+                    placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+                    autocomplete="off"
+                    spellcheck="false"
+                    />
+                    <button class="toggle-visibility" id="toggleVisibility" title="显示/隐藏 Key" type="button">
+                        <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                </div>
+                <button class="btn-icon" id="btnSaveKey" title="保存 Key 到本地" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                </button>
+                <button class="btn-icon danger" id="btnClearKey" title="清除已保存的 Key" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="key-status" id="keyStatus">
+                <span class="dot" id="keyStatusDot"></span>
+                <span id="keyStatusText">未保存 Key</span>
+            </div>
+        </div>
+
+        <button class="btn-query" id="btnQuery" type="button">
+            <svg class="btn-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <span class="btn-text">查询余额</span>
+            <div class="spinner"></div>
+        </button>
+
+        <div class="message-box" id="messageBox"></div>
+
+        <div class="result-section" id="resultSection">
+            <div class="balance-card current" id="currentBalanceCard">
+                <div class="card-title">💰 当前余额</div>
+                <div class="balance-value" id="currentBalanceValue">--</div>
+                <div class="balance-meta" id="currentBalanceMeta"></div>
+                <div class="timestamp" id="currentTimestamp"></div>
+            </div>
+
+            <div class="diff-indicator" id="diffIndicator" style="display: none;">
+                <div class="diff-detail">
+                    <span class="diff-label">本次查询</span>
+                    <span style="font-weight:600;font-family:var(--font-mono);" id="diffCurrent">--</span>
+                </div>
+                <span class="diff-arrow">→</span>
+                <div class="diff-detail">
+                    <span class="diff-label">上次查询</span>
+                    <span style="font-weight:600;font-family:var(--font-mono);" id="diffPrevious">--</span>
+                </div>
+                <span class="diff-arrow">=</span>
+                <div class="diff-detail">
+                    <span class="diff-amount" id="diffAmount">--</span>
+                    <span class="diff-label" id="diffLabel">差额</span>
+                </div>
+                <span class="diff-badge neutral" id="diffBadge">无变化</span>
+            </div>
+
+            <div class="first-time-notice" id="firstTimeNotice" style="display: none;">
+                📝 这是首次查询，已保存本次结果。下次查询时将自动对比差额。
+            </div>
+        </div>
+
+        <p class="footer-note">
+            数据仅存储在您的浏览器本地 ·
+            <a href="https://platform.deepseek.com" target="_blank" rel="noopener">DeepSeek 开放平台</a>
+        </p>
+    </div>
+
+    <script>
+        (function() {
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const toggleVisibilityBtn = document.getElementById('toggleVisibility');
+            const eyeIcon = document.getElementById('eyeIcon');
+            const btnSaveKey = document.getElementById('btnSaveKey');
+            const btnClearKey = document.getElementById('btnClearKey');
+            const btnQuery = document.getElementById('btnQuery');
+            const keyStatusDot = document.getElementById('keyStatusDot');
+            const keyStatusText = document.getElementById('keyStatusText');
+            const messageBox = document.getElementById('messageBox');
+            const resultSection = document.getElementById('resultSection');
+            const currentBalanceValue = document.getElementById('currentBalanceValue');
+            const currentBalanceMeta = document.getElementById('currentBalanceMeta');
+            const currentTimestamp = document.getElementById('currentTimestamp');
+            const diffIndicator = document.getElementById('diffIndicator');
+            const diffCurrent = document.getElementById('diffCurrent');
+            const diffPrevious = document.getElementById('diffPrevious');
+            const diffAmount = document.getElementById('diffAmount');
+            const diffLabel = document.getElementById('diffLabel');
+            const diffBadge = document.getElementById('diffBadge');
+            const firstTimeNotice = document.getElementById('firstTimeNotice');
+
+            const STORAGE_KEY_API_KEY = 'deepseek_balance_api_key';
+            const STORAGE_KEY_LAST_RESULT = 'deepseek_balance_last_result';
+
+            const eyeOpenSVG = `
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>`;
+            const eyeClosedSVG = `
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>`;
+
+            let isPasswordVisible = false;
+            let lastQueryResult = null;
+
+            function maskApiKey(key) {
+                if (!key || key.length < 12) return key || '';
+                return key.substring(0, 8) + '•••' + key.substring(key.length - 4);
+            }
+
+            function getApiKeyPrefix(key) {
+                if (!key || key.length < 8) return key || '';
+                return key.substring(0, 8);
+            }
+
+            function formatBalance(value) {
+                if (value === null || value === undefined || isNaN(value)) return '--';
+                return parseFloat(value).toFixed(2);
+            }
+
+            function formatTimestamp(ts) {
+                if (!ts) return '';
+                const date = new Date(ts);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMin = Math.floor(diffMs / 60000);
+                const diffHr = Math.floor(diffMs / 3600000);
+                const diffDay = Math.floor(diffMs / 86400000);
+
+                let relative = '';
+                if (diffMin < 1) relative = '刚刚';
+                else if (diffMin < 60) relative = `${diffMin} 分钟前`;
+                else if (diffHr < 24) relative = `${diffHr} 小时前`;
+                else if (diffDay < 7) relative = `${diffDay} 天前`;
+                else relative = date.toLocaleDateString('zh-CN');
+
+                const absolute = date.toLocaleString('zh-CN', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false,
+                });
+                return `${relative} (${absolute})`;
+            }
+
+            function showMessage(text, type = 'info') {
+                messageBox.textContent = '';
+                messageBox.className = 'message-box';
+                if (text) {
+                    messageBox.classList.add('visible', type);
+                    const iconSvg =
+                        type === 'error' ?
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' :
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+                    messageBox.innerHTML = iconSvg + '<span>' + text + '</span>';
+                }
+            }
+
+            function hideMessage() {
+                messageBox.textContent = '';
+                messageBox.className = 'message-box';
+            }
+
+            function loadApiKey() {
+                try {
+                    return localStorage.getItem(STORAGE_KEY_API_KEY) || '';
+                } catch (e) {
+                    return '';
+                }
+            }
+
+            function saveApiKey(key) {
+                try {
+                    localStorage.setItem(STORAGE_KEY_API_KEY, key.trim());
+                    return true;
+                } catch (e) {
+                    showMessage('无法保存到本地存储，请检查浏览器存储空间。', 'error');
+                    return false;
+                }
+            }
+
+            function clearApiKey() {
+                try {
+                    localStorage.removeItem(STORAGE_KEY_API_KEY);
+                } catch (e) {}
+            }
+
+            function loadLastResult() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY_LAST_RESULT);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (parsed && typeof parsed.balance === 'number' && parsed.timestamp) {
+                            return parsed;
+                        }
+                    }
+                } catch (e) {}
+                return null;
+            }
+
+            function saveLastResult(result) {
+                try {
+                    localStorage.setItem(STORAGE_KEY_LAST_RESULT, JSON.stringify(result));
+                    return true;
+                } catch (e) {
+                    showMessage('无法保存查询结果到本地存储。', 'error');
+                    return false;
+                }
+            }
+
+            function clearLastResult() {
+                try {
+                    localStorage.removeItem(STORAGE_KEY_LAST_RESULT);
+                } catch (e) {}
+            }
+
+            function updateKeyStatusUI() {
+                const savedKey = loadApiKey();
+                if (savedKey) {
+                    keyStatusDot.className = 'dot saved';
+                    keyStatusText.textContent = '已保存: ' + maskApiKey(savedKey);
+                    apiKeyInput.value = savedKey;
+                } else {
+                    keyStatusDot.className = 'dot';
+                    keyStatusText.textContent = '未保存 Key';
+                }
+            }
+
+            function restoreLastResultUI() {
+                lastQueryResult = loadLastResult();
+                if (lastQueryResult) {
+                    resultSection.classList.add('visible');
+                    currentBalanceValue.innerHTML =
+                        '<span class="currency-symbol">¥</span>' + formatBalance(lastQueryResult.balance);
+                    currentBalanceMeta.textContent = '币种: ' + (lastQueryResult.currency || 'CNY');
+                    currentTimestamp.innerHTML =
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+                        '查询时间: ' + formatTimestamp(lastQueryResult.timestamp);
+                    diffIndicator.style.display = 'none';
+                    firstTimeNotice.style.display = 'none';
+                    const currentCard = document.getElementById('currentBalanceCard');
+                    if (currentCard) {
+                        currentCard.style.animation = 'none';
+                        void currentCard.offsetWidth;
+                        currentCard.style.animation = '';
+                    }
+                } else {
+                    resultSection.classList.remove('visible');
+                    diffIndicator.style.display = 'none';
+                    firstTimeNotice.style.display = 'none';
+                }
+            }
+
+            function displayResult(balance, currency, timestamp, previousResult) {
+                resultSection.classList.add('visible');
+                const currentCard = document.getElementById('currentBalanceCard');
+                if (currentCard) {
+                    currentCard.style.animation = 'none';
+                    void currentCard.offsetWidth;
+                    currentCard.style.animation = 'pulseHighlight 1.8s ease-in-out';
+                }
+
+                currentBalanceValue.innerHTML =
+                    '<span class="currency-symbol">¥</span>' + formatBalance(balance);
+                currentBalanceMeta.textContent = '币种: ' + (currency || 'CNY');
+                currentTimestamp.innerHTML =
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+                    '查询时间: ' + formatTimestamp(timestamp);
+
+                if (previousResult && typeof previousResult.balance === 'number') {
+                    diffIndicator.style.display = 'flex';
+                    firstTimeNotice.style.display = 'none';
+                    diffCurrent.textContent = '¥' + formatBalance(balance);
+                    diffPrevious.textContent = '¥' + formatBalance(previousResult.balance);
+
+                    const diff = previousResult.balance - balance;
+                    const absDiff = Math.abs(diff);
+
+                    diffAmount.textContent = (diff >= 0 ? '-' : '+') + '¥' + formatBalance(absDiff);
+                    diffAmount.className = 'diff-amount';
+                    diffBadge.className = 'diff-badge';
+
+                    if (Math.abs(diff) < 0.001) {
+                        diffAmount.classList.add('zero');
+                        diffLabel.textContent = '差额';
+                        diffBadge.classList.add('neutral');
+                        diffBadge.textContent = '无变化';
+                    } else if (diff > 0) {
+                        diffAmount.classList.add('positive');
+                        diffLabel.textContent = '已消耗';
+                        diffBadge.classList.add('usage');
+                        diffBadge.textContent = '消耗 ¥' + formatBalance(absDiff);
+                    } else {
+                        diffAmount.classList.add('negative');
+                        diffLabel.textContent = '已充值';
+                        diffBadge.classList.add('recharge');
+                        diffBadge.textContent = '充值 ¥' + formatBalance(absDiff);
+                    }
+
+                    const currentKeyPrefix = getApiKeyPrefix(apiKeyInput.value.trim());
+                    const previousKeyPrefix = previousResult.apiKeyPrefix || '';
+                    if (currentKeyPrefix && previousKeyPrefix && currentKeyPrefix !== previousKeyPrefix) {
+                        diffLabel.textContent = diffLabel.textContent + ' (Key已更换)';
+                    }
+                } else {
+                    diffIndicator.style.display = 'none';
+                    firstTimeNotice.style.display = 'block';
+                }
+            }
+
+            function extractBalance(data) {
+                if (data === null || data === undefined) return null;
+
+                const searchObj = (obj, depth = 0) => {
+                    if (depth > 8 || obj === null || obj === undefined) return null;
+                    if (typeof obj !== 'object') return null;
+
+                    if ('total_balance' in obj && obj['total_balance'] !== null && obj['total_balance'] !== undefined) {
+                        const val = parseFloat(obj['total_balance']);
+                        if (!isNaN(val)) return { balance: val, currency: obj['currency'] || 'CNY' };
+                    }
+
+                    if ('balance' in obj && typeof obj['balance'] === 'object' && obj['balance'] !== null) {
+                        const result = searchObj(obj['balance'], depth + 1);
+                        if (result) return result;
+                    }
+
+                    if ('data' in obj && typeof obj['data'] === 'object' && obj['data'] !== null) {
+                        const result = searchObj(obj['data'], depth + 1);
+                        if (result) return result;
+                    }
+
+                    for (const key of Object.keys(obj)) {
+                        if (Array.isArray(obj[key])) {
+                            for (const item of obj[key]) {
+                                if (typeof item === 'object' && item !== null) {
+                                    const result = searchObj(item, depth + 1);
+                                    if (result) return result;
+                                }
+                            }
+                        }
+                        if (typeof obj[key] === 'object' && obj[key] !== null && key !== 'balance' && key !== 'data') {
+                            const result = searchObj(obj[key], depth + 1);
+                            if (result) return result;
+                        }
+                    }
+
+                    for (const key of Object.keys(obj)) {
+                        const lowerKey = key.toLowerCase();
+                        if (lowerKey.includes('balance') && typeof obj[key] === 'number' && !isNaN(obj[key])) {
+                            return { balance: obj[key], currency: obj['currency'] || 'CNY' };
+                        }
+                        if (lowerKey.includes('balance') && typeof obj[key] === 'string') {
+                            const val = parseFloat(obj[key]);
+                            if (!isNaN(val)) return { balance: val, currency: obj['currency'] || 'CNY' };
+                        }
+                    }
+
+                    return null;
+                };
+
+                return searchObj(data);
+            }
+
+            async function queryBalance(apiKey) {
+                // 修正后的正确余额查询接口
+                const url = 'https://api.deepseek.com/user/balance';
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + apiKey.trim(),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    let errorDetail = '';
+                    try {
+                        const errorBody = await response.json();
+                        errorDetail = errorBody?.message || errorBody?.msg || errorBody?.error || JSON.stringify(errorBody);
+                    } catch (e) {
+                        try {
+                            errorDetail = await response.text();
+                            if (errorDetail.length > 200) errorDetail = errorDetail.substring(0, 200) + '...';
+                        } catch (e2) {
+                            errorDetail = 'HTTP ' + response.status;
+                        }
+                    }
+                    throw new Error(`请求失败 (${response.status}): ${errorDetail}`);
+                }
+
+                const data = await response.json();
+                const extracted = extractBalance(data);
+
+                if (!extracted || extracted.balance === null || isNaN(extracted.balance)) {
+                    console.log('API Response:', JSON.stringify(data, null, 2));
+                    throw new Error('无法从响应中解析余额信息。响应结构可能已变更，请查看控制台获取原始响应数据。');
+                }
+
+                return {
+                    balance: extracted.balance,
+                    currency: extracted.currency || 'CNY',
+                    timestamp: Date.now(),
+                    rawResponse: data,
+                };
+            }
+
+            async function handleQuery() {
+                const apiKey = apiKeyInput.value.trim();
+                if (!apiKey) {
+                    showMessage('请先输入 API Key。', 'error');
+                    apiKeyInput.focus();
+                    return;
+                }
+                if (!apiKey.startsWith('sk-')) {
+                    showMessage('API Key 格式可能不正确，DeepSeek 的 Key 通常以 "sk-" 开头。请检查后重试。', 'error');
+                    return;
+                }
+
+                btnQuery.disabled = true;
+                btnQuery.classList.add('loading');
+                hideMessage();
+                if (!lastQueryResult) {
+                    resultSection.classList.remove('visible');
+                }
+
+                try {
+                    const result = await queryBalance(apiKey);
+                    const previousResult = loadLastResult();
+
+                    const resultToSave = {
+                        balance: result.balance,
+                        currency: result.currency,
+                        timestamp: result.timestamp,
+                        apiKeyPrefix: getApiKeyPrefix(apiKey),
+                    };
+                    saveLastResult(resultToSave);
+                    lastQueryResult = resultToSave;
+
+                    const savedKey = loadApiKey();
+                    if (savedKey !== apiKey) {
+                        saveApiKey(apiKey);
+                        updateKeyStatusUI();
+                    }
+
+                    displayResult(result.balance, result.currency, result.timestamp, previousResult);
+                    hideMessage();
+
+                    keyStatusDot.className = 'dot saved';
+                    keyStatusText.textContent = '✅ 查询成功 · 余额: ¥' + formatBalance(result.balance);
+                    setTimeout(() => {
+                        updateKeyStatusUI();
+                    }, 3000);
+
+                } catch (error) {
+                    console.error('Query error:', error);
+                    let errorMsg = error.message || '未知错误';
+
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        errorMsg = '网络请求失败，可能是 CORS 跨域限制或网络问题。请尝试：<br>1. 检查网络连接<br>2. 使用 HTTPS 环境打开此页面<br>3. 确认 API Key 是否正确<br>4. 尝试使用浏览器无痕模式';
+                    }
+                    if (errorMsg.includes('Failed to fetch')) {
+                        errorMsg = '无法连接到 DeepSeek API 服务器。可能原因：<br>• 浏览器跨域限制 (CORS)<br>• 网络连接问题<br>• API 服务暂时不可用<br><br>建议：请确保在 HTTPS 环境下使用，或尝试通过后端代理访问。';
+                    }
+
+                    showMessage(errorMsg, 'error');
+                    if (lastQueryResult) {
+                        resultSection.classList.add('visible');
+                    } else {
+                        resultSection.classList.remove('visible');
+                    }
+                } finally {
+                    btnQuery.disabled = false;
+                    btnQuery.classList.remove('loading');
+                }
+            }
+
+            toggleVisibilityBtn.addEventListener('click', () => {
+                isPasswordVisible = !isPasswordVisible;
+                apiKeyInput.type = isPasswordVisible ? 'text' : 'password';
+                eyeIcon.innerHTML = isPasswordVisible ? eyeOpenSVG : eyeClosedSVG;
+                toggleVisibilityBtn.setAttribute('title', isPasswordVisible ? '隐藏 Key' : '显示 Key');
+                apiKeyInput.focus();
+            });
+
+            btnSaveKey.addEventListener('click', () => {
+                const key = apiKeyInput.value.trim();
+                if (!key) {
+                    showMessage('请先输入 API Key 再保存。', 'info');
+                    apiKeyInput.focus();
+                    return;
+                }
+                if (saveApiKey(key)) {
+                    updateKeyStatusUI();
+                    showMessage('✅ API Key 已保存到本地存储。', 'info');
+                    setTimeout(hideMessage, 2000);
+                }
+            });
+
+            btnClearKey.addEventListener('click', () => {
+                clearApiKey();
+                clearLastResult();
+                lastQueryResult = null;
+                apiKeyInput.value = '';
+                apiKeyInput.type = 'password';
+                isPasswordVisible = false;
+                eyeIcon.innerHTML = eyeClosedSVG;
+                toggleVisibilityBtn.setAttribute('title', '显示 Key');
+                updateKeyStatusUI();
+                resultSection.classList.remove('visible');
+                diffIndicator.style.display = 'none';
+                firstTimeNotice.style.display = 'none';
+                hideMessage();
+                showMessage('🗑️ API Key 和历史记录已清除。', 'info');
+                setTimeout(hideMessage, 2000);
+                apiKeyInput.focus();
+            });
+
+            btnQuery.addEventListener('click', handleQuery);
+
+            apiKeyInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleQuery();
+                }
+            });
+
+            apiKeyInput.addEventListener('blur', () => {
+                const currentKey = apiKeyInput.value.trim();
+                const savedKey = loadApiKey();
+                if (currentKey && currentKey !== savedKey) {
+                    saveApiKey(currentKey);
+                    updateKeyStatusUI();
+                }
+            });
+
+            function init() {
+                const savedKey = loadApiKey();
+                if (savedKey) {
+                    apiKeyInput.value = savedKey;
+                }
+                updateKeyStatusUI();
+                restoreLastResultUI();
+
+                apiKeyInput.type = 'password';
+                eyeIcon.innerHTML = eyeClosedSVG;
+                toggleVisibilityBtn.setAttribute('title', '显示 Key');
+                isPasswordVisible = false;
+
+                if (!savedKey) {
+                    apiKeyInput.focus();
+                }
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
