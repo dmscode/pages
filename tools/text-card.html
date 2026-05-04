@@ -96,6 +96,7 @@
             text-indent: 2em;
             margin-bottom: 1.2em;
             line-height: 1.8;
+            text-align: justify;
         }
         
         .indent-text p:last-child {
@@ -296,7 +297,7 @@
                                 <div id="preview-deco-line" class="deco-line hidden"></div>
                                 
                                 <!-- 正文 -->
-                                <div id="preview-content" class="indent-text font-serif-sc text-base text-gray-700 leading-relaxed">
+                                <div id="preview-content" class="indent-text font-serif-sc text-lg text-gray-700 leading-relaxed">
                                     <p class="text-gray-400 italic">在左侧输入内容，预览将实时更新...</p>
                                 </div>
                                 
@@ -598,6 +599,39 @@
             return lines.length ? lines : [''];
         }
 
+        // 绘制两端对齐的一行文字（逐字符定位）
+        // line: 行文字内容
+        // x: 行起始 x 坐标
+        // y: 基线 y 坐标
+        // maxWidth: 行最大宽度（两端对齐的目标宽度）
+        // isLastLine: 是否是段落最后一行（尾行左对齐）
+        function drawJustifiedLine(ctx, line, x, y, maxWidth, isLastLine) {
+            if (isLastLine || line.length <= 1) {
+                // 尾行或单字符行：左对齐
+                ctx.fillText(line, x, y);
+                return;
+            }
+            // 逐字符测量宽度
+            const charWidths = [];
+            let totalWidth = 0;
+            for (let i = 0; i < line.length; i++) {
+                const w = measureText(ctx, line[i]);
+                charWidths.push(w);
+                totalWidth += w;
+            }
+            // 计算需要分配的额外间距
+            const extraSpace = maxWidth - totalWidth;
+            // 在字符之间均匀分配间距
+            const gapCount = line.length - 1;
+            const gap = gapCount > 0 ? extraSpace / gapCount : 0;
+            // 逐字符绘制
+            let curX = x;
+            for (let i = 0; i < line.length; i++) {
+                ctx.fillText(line[i], curX, y);
+                curX += charWidths[i] + gap;
+            }
+        }
+
         // 绘制圆角矩形
         function roundRect(ctx, x, y, w, h, r) {
             ctx.beginPath();
@@ -755,7 +789,7 @@
 
             // 等待字体加载
             await document.fonts.load(`24px "EarlySummerSerif", "Noto Serif SC", serif`);
-            await document.fonts.load(`16px "EarlySummerSerif", "Noto Serif SC", serif`);
+            await document.fonts.load(`18px "EarlySummerSerif", "Noto Serif SC", serif`);
             // 等待头像加载
             await loadAvatar();
 
@@ -794,10 +828,11 @@
 
             // 正文布局
             if (content) {
-                mCtx.font = `400 16px "EarlySummerSerif", "Noto Serif SC", serif`;
-                const lineHeight = 16 * 1.8;
-                const baselineOffset = 16 * 0.8;
-                const indent = 16 * 2;
+                const fontSize = 18; // text-lg = 18px
+                mCtx.font = `400 ${fontSize}px "EarlySummerSerif", "Noto Serif SC", serif`;
+                const lineHeight = fontSize * 1.8;
+                const baselineOffset = fontSize * 0.8;
+                const indent = fontSize * 2; // 2em
                 const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim());
 
                 paragraphs.forEach((para, pIdx) => {
@@ -805,14 +840,14 @@
                     lines.forEach((line, lIdx) => {
                         if (lIdx === 0) currentY += baselineOffset;
                         const x = paddingX + (lIdx === 0 ? indent : 0);
-                        contentLinePositions.push({ x, y: currentY, text: line });
+                        const isLastLine = lIdx === lines.length - 1;
+                        // 首行缩进后可用宽度较小，其他行使用完整内容宽度
+                        const lineMaxWidth = lIdx === 0 ? contentWidth - indent : contentWidth;
+                        contentLinePositions.push({ x, y: currentY, text: line, isLastLine, lineMaxWidth });
                         currentY += lineHeight;
                     });
-                    if (pIdx < paragraphs.length - 1) currentY += 19.2;
+                    if (pIdx < paragraphs.length - 1) currentY += fontSize * 1.2;
                 });
-                // 最后一段 mb-1.2em 与底部 mt-10 折叠，取 max(19.2, 40) = 40
-                // currentY = 最后一行基线 + lineHeight，而行框底部 = currentY - baselineOffset
-                // 所以 footerTop = 行框底部 + 40 = currentY - baselineOffset + 40
                 currentY = currentY - baselineOffset + 40;
             } else {
                 // 无正文时，需要手动添加底部区域的 mt-10 间距
@@ -894,9 +929,9 @@
             // 5. 绘制正文
             if (content) {
                 ctx.fillStyle = theme.textLight;
-                ctx.font = `400 16px "EarlySummerSerif", "Noto Serif SC", serif`;
+                ctx.font = `400 18px "EarlySummerSerif", "Noto Serif SC", serif`;
                 contentLinePositions.forEach(item => {
-                    ctx.fillText(item.text, item.x, item.y);
+                    drawJustifiedLine(ctx, item.text, item.x, item.y, item.lineMaxWidth, item.isLastLine);
                 });
             }
 
