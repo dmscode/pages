@@ -303,7 +303,7 @@
                                 <!-- 底部信息 -->
                                 <div class="mt-10 pt-6 border-t border-gray-200/60 flex items-center justify-between">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center text-white text-xs font-bold">鼠</div>
+                                        <img src="avatar.svg" class="w-8 h-8 rounded-full object-cover" alt="avatar">
                                         <span id="preview-author" class="text-xs text-gray-400 font-medium">稻米鼠</span>
                                     </div>
                                     <span id="preview-date" class="text-xs text-gray-400 font-mono"></span>
@@ -706,10 +706,21 @@
         const avatarImg = new Image();
         avatarImg.src = 'avatar.svg';
 
+        // 等待头像加载完成
+        function loadAvatar() {
+            return new Promise(resolve => {
+                if (avatarImg.complete && avatarImg.naturalWidth > 0) {
+                    resolve(true);
+                } else {
+                    avatarImg.onload = () => resolve(true);
+                    avatarImg.onerror = () => resolve(false);
+                }
+            });
+        }
+
         // 绘制作者头像（使用 avatar.svg）
         function drawAuthorAvatar(ctx, x, y, size) {
             if (avatarImg.complete && avatarImg.naturalWidth > 0) {
-                // 绘制为圆形裁剪
                 ctx.save();
                 ctx.beginPath();
                 ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
@@ -718,7 +729,6 @@
                 ctx.drawImage(avatarImg, x, y, size, size);
                 ctx.restore();
             } else {
-                // 兜底：渐变圆形 + 首字
                 const grad = ctx.createLinearGradient(x, y, x + size, y + size);
                 grad.addColorStop(0, '#d97706');
                 grad.addColorStop(1, '#92400e');
@@ -746,6 +756,8 @@
             // 等待字体加载
             await document.fonts.load(`24px "EarlySummerSerif", "Noto Serif SC", serif`);
             await document.fonts.load(`16px "EarlySummerSerif", "Noto Serif SC", serif`);
+            // 等待头像加载
+            await loadAvatar();
 
             // ===== 第一遍：计算布局位置和总高度 =====
             // 使用临时 canvas 进行文字测量
