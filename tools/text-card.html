@@ -447,7 +447,24 @@
         }
 
         // 初始化日期
-        document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
+        let dateManuallyChanged = false;
+        let lastAutoDate = new Date().toISOString().split('T')[0];
+        document.getElementById('input-date').value = lastAutoDate;
+
+        // 监听用户手动修改日期
+        document.getElementById('input-date').addEventListener('change', () => {
+            dateManuallyChanged = true;
+        });
+
+        // 每分钟检查日期是否变更，若用户未手动修改则自动更新
+        setInterval(() => {
+            const today = new Date().toISOString().split('T')[0];
+            if (today !== lastAutoDate && !dateManuallyChanged) {
+                lastAutoDate = today;
+                document.getElementById('input-date').value = today;
+                updatePreview();
+            }
+        }, 60000);
         
         // 更新预览
         function updatePreview() {
@@ -668,7 +685,6 @@
             const textWidth = measureText(ctx, text.toUpperCase());
             const boxWidth = textWidth + paddingX * 2;
             const boxHeight = fontSize + paddingY * 2;
-            const r = 100 * scale; // 大圆角模拟胶囊
 
             // 阴影
             ctx.save();
@@ -1026,8 +1042,10 @@
             const img = document.querySelector('#result-image img');
             if (!img) return;
             
+            const title = document.getElementById('input-title').value.trim();
+            const fileName = title || `TextCart-${new Date().getTime()}`;
             const link = document.createElement('a');
-            link.download = `文字卡片_${new Date().getTime()}.png`;
+            link.download = `${fileName}.png`;
             link.href = img.src;
             link.click();
         }
