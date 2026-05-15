@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留台单生成器</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <div class="panel">
+        <h2>📝 留台单生成器</h2>
+
+        <div class="size-selector" id="sizeSelector"></div>
+        <div class="custom-width-group" id="customWidthGroup">
+            <label>自定义宽度</label>
+            <input type="number" id="customWidthInput" value="900" min="400" max="2000" onchange="applyCustomWidth()" oninput="applyCustomWidth()">
+            <span>px</span>
+        </div>
+
+        <h2>基本信息</h2>
+        <div class="form-row">
+            <div class="form-group">
+                <label>桌号</label>
+                <input type="text" id="tableNo" oninput="setConfig('tableNo', this.value)">
+            </div>
+            <div class="form-group">
+                <label>人数</label>
+                <input type="text" id="peopleCount" oninput="setConfig('peopleCount', this.value)">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>营业流水</label>
+            <input type="text" id="serialNo" oninput="setConfig('serialNo', this.value)">
+        </div>
+        <div class="form-group">
+            <label>时间</label>
+            <input type="text" id="datetime" oninput="setConfig('datetime', this.value)">
+        </div>
+        <div class="form-group">
+            <label>操作人</label>
+            <input type="text" id="operator" oninput="setConfig('operator', this.value)">
+        </div>
+
+        <h2>品项列表</h2>
+        <div id="itemsContainer"></div>
+        <button class="btn btn-secondary btn-block" onclick="addItem()">+ 添加品项</button>
+
+        <h2 style="margin-top:16px">甜品品项</h2>
+        <div id="dessertContainer"></div>
+        <button class="btn btn-secondary btn-block" onclick="addDessert()">+ 添加甜品</button>
+
+        <h2 style="margin-top:16px">酒水品项</h2>
+        <div id="drinkContainer"></div>
+        <button class="btn btn-secondary btn-block" onclick="addDrink()">+ 添加酒水</button>
+
+        <div class="total-display">
+            合计金额：<span id="totalAmount">0.0</span>
+        </div>
+
+        <h2>备注与标语</h2>
+        <div class="form-group">
+            <label>整单备注</label>
+            <textarea id="note" rows="3" oninput="setConfig('note', this.value)"></textarea>
+        </div>
+        <div class="form-group">
+            <label>底部英文标语</label>
+            <input type="text" id="slogan" oninput="setConfig('slogan', this.value)">
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="showBarcode" onchange="setConfig('showBarcode', this.checked)">
+            <label for="showBarcode" style="margin:0">显示条形码</label>
+        </div>
+
+        <div class="toolbar" style="margin-top:20px">
+            <button class="btn btn-block" onclick="downloadImage()">📥 下载图片 (PNG)</button>
+        </div>
+    </div>
+
+    <div class="preview-area">
+        <div class="canvas-wrapper">
+            <canvas id="receiptCanvas"></canvas>
+        </div>
+        <div style="margin-top:10px;color:#666;font-size:12px;">
+            提示：所有文字均通过 HTML 预览测量后逐字绘制到 Canvas，确保输出精准
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
