@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>图片转 WebP 工具</title>
+<style>
+:root {
+  --primary: #007aff;
+  --primary-light: #e6f2ff;
+  --bg: #f2f2f7;
+  --card: #ffffff;
+  --text: #1c1c1e;
+  --text-secondary: #8e8e93;
+  --border: #e5e5ea;
+  --success: #34c759;
+  --danger: #ff3b30;
+  --radius: 14px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { touch-action: manipulation; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  padding-bottom: 40px;
+}
+
+.container { max-width: 960px; margin: 0 auto; padding: 16px; }
+
+header { text-align: center; padding: 24px 0 16px; }
+header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+header p { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+
+/* 全局设置面板 */
+.settings-panel {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.settings-panel h2 { font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 10px; }
+.row:last-child { margin-bottom: 0; }
+label { font-size: 14px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; flex: 1; min-width: 140px; }
+input[type="number"], input[type="range"], select {
+  font-size: 15px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  outline: none;
+  width: 100%;
+  -webkit-appearance: none;
+}
+input[type="range"] { padding: 0; height: 6px; background: var(--border); border-radius: 3px; }
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--primary); box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+input[type="number"] { width: 90px; flex: 0 0 auto; text-align: center; }
+select { width: auto; min-width: 120px; }
+.checkbox {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  font-size: 14px; color: var(--text);
+}
+.checkbox input { width: 20px; height: 20px; accent-color: var(--primary); }
+
+/* 拖放区 */
+.drop-zone {
+  background: var(--card);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 48px 24px;
+  text-align: center;
+  margin-bottom: 16px;
+  transition: all .2s;
+  cursor: pointer;
+  position: relative;
+}
+.drop-zone.active { border-color: var(--primary); background: var(--primary-light); }
+.drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.drop-icon { font-size: 40px; margin-bottom: 8px; opacity: .6; }
+.drop-text { font-size: 16px; font-weight: 600; }
+.drop-hint { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+/* 工具栏 */
+.toolbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px; padding: 0 4px;
+}
+.toolbar span { font-size: 14px; color: var(--text-secondary); }
+.btn {
+  border: none; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: transform .1s, opacity .2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-secondary { background: var(--card); color: var(--primary); border: 1px solid var(--border); }
+.btn-danger { background: #fff; color: var(--danger); border: 1px solid var(--border); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* 图片网格 */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+  .row { flex-direction: column; align-items: stretch; }
+  label { min-width: auto; justify-content: space-between; }
+}
+
+/* 卡片 */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn .3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.card-thumb {
+  width: 100%; height: 200px; background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.card-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.card-badge {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(0,0,0,0.6); color: #fff; font-size: 11px;
+  padding: 2px 8px; border-radius: 12px; backdrop-filter: blur(4px);
+}
+
+.card-body { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.card-title { font-size: 14px; font-weight: 600; word-break: break-all; }
+.card-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
+.card-meta .saved { color: var(--success); font-weight: 600; }
+
+.card-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.card-controls label { font-size: 12px; flex-direction: column; align-items: stretch; gap: 2px; min-width: auto; }
+.card-controls input { width: 100%; padding: 6px; font-size: 13px; }
+
+.card-actions { display: flex; gap: 8px; margin-top: 4px; }
+.card-actions .btn { flex: 1; justify-content: center; padding: 8px; font-size: 13px; }
+
+.status { font-size: 12px; color: var(--text-secondary); text-align: center; padding: 8px; }
+.status.converting { color: var(--primary); }
+.status.error { color: var(--danger); }
+
+/* 底部批量操作 */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border); padding: 12px 16px;
+  display: flex; gap: 10px; justify-content: center; z-index: 100;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+}
+.bottom-bar .btn { padding: 12px 20px; font-size: 15px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🖼️ 图片转 WebP</h1>
+    <p>拖拽、粘贴或选择图片，快速转换为 WebP 格式</p>
+  </header>
+
+  <!-- 全局设置 -->
+  <div class="settings-panel">
+    <h2>⚙️ 全局设置</h2>
+    <div class="row">
+      <label>压缩模式
+        <select id="globalMode" onchange="updateGlobalUI()">
+          <option value="lossy">有损压缩（体积小）</option>
+          <option value="high">最高质量（近无损）</option>
+        </select>
+      </label>
+      <label id="qualityWrap">质量
+        <input type="range" id="globalQuality" min="1" max="100" value="85" oninput="this.nextElementSibling.value=this.value+'%'; triggerGlobalReconvert()">
+        <output style="min-width:40px;text-align:right;font-weight:600;">85%</output>
+      </label>
+    </div>
+    <div class="row">
+      <label class="checkbox" style="flex:0 0 auto;">
+        <input type="checkbox" id="uniformSize" onchange="toggleUniform()"> 统一所有图片尺寸
+      </label>
+      <label id="uniformTypeWrap" style="display:none;">
+        <select id="uniformType">
+          <option value="width">统一宽度</option>
+          <option value="height">统一高度</option>
+        </select>
+      </label>
+      <label id="uniformValueWrap" style="display:none;flex:0 0 auto;">
+        <input type="number" id="uniformValue" min="1" max="8192" placeholder="像素" onchange="triggerGlobalReconvert()">
+      </label>
+      <button class="btn btn-secondary" onclick="applyGlobalAndReconvert()" style="margin-left:auto;">♻️ 全部重新转换</button>
+    </div>
+  </div>
+
+  <!-- 拖放区 -->
+  <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+    <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFiles(this.files)">
+    <div class="drop-icon">📂</div>
+    <div class="drop-text">点击选择或拖拽图片到此处</div>
+    <div class="drop-hint">支持多文件、批量粘贴（Ctrl+V）</div>
+  </div>
+
+  <!-- 工具栏 -->
+  <div class="toolbar" id="toolbar" style="display:none;">
+    <span id="fileCount">0 张图片</span>
+    <div>
+      <button class="btn btn-secondary" onclick="downloadAll()">⬇️ 全部下载</button>
+      <button class="btn btn-danger" onclick="clearAll()">🗑 清空</button>
+    </div>
+  </div>
+
+  <!-- 图片网格 -->
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- 底部固定操作栏 -->
+<div class="bottom-bar" id="bottomBar" style="display:none;">
+  <button class="btn btn-primary" onclick="downloadAll()">⬇️ 下载全部 WebP</button>
+  <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+</div>
+
+<script>
+// ================= 核心逻辑 =================
+
+const state = {
+  items: new Map(), // id -> { file, blob, url, thumb, settings, el }
+  nextId: 1,
+  converting: new Set()
+};
+
+const $ = id => document.getElementById(id);
+const formatBytes = b => {
+  if (b === 0) return '0 B';
+  const u = ['B','KB','MB','GB'];
+  const i = Math.floor(Math.log2(b)/10);
+  return (b/1024**i).toFixed(i?2:0)+' '+u[i];
+};
+
+// 拖放
+const dz = $('dropZone');
+['dragenter','dragover'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.add('active'); }));
+['dragleave','drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.remove('active'); if(e==='drop') handleFiles(ev.dataTransfer.files); }));
+// 粘贴
+document.addEventListener('paste', e => { if(e.clipboardData.files.length) handleFiles(e.clipboardData.files); });
+
+function updateGlobalUI(){
+  const isLossy = $('globalMode').value === 'lossy';
+  $('qualityWrap').style.display = isLossy ? 'flex' : 'none';
+  if(!isLossy) $('globalQuality').value = 100;
+}
+function toggleUniform(){
+  const on = $('uniformSize').checked;
+  $('uniformTypeWrap').style.display = on ? '' : 'none';
+  $('uniformValueWrap').style.display = on ? '' : 'none';
+}
+
+// 读取文件并创建条目
+function handleFiles(fileList){
+  const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+  if(!files.length) return alert('请选择图片文件');
+  files.forEach(file => addItem(file));
+  updateToolbar();
+}
+
+function addItem(file){
+  const id = state.nextId++;
+  const thumbUrl = URL.createObjectURL(file);
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.dataset.id = id;
+  el.innerHTML = `
+    <div class="card-thumb">
+      <img src="${thumbUrl}" alt="thumb" loading="lazy">
+      <span class="card-badge">转换中…</span>
+    </div>
+    <div class="card-body">
+      <div class="card-title">${escapeHtml(file.name)}</div>
+      <div class="card-meta">
+        <span>原: <b id="orig-${id}">${formatBytes(file.size)}</b></span>
+        <span>新: <b id="new-${id}">-</b></span>
+        <span class="saved" id="save-${id}"></span>
+      </div>
+      <div class="card-controls">
+        <label>宽度<input type="number" id="w-${id}" min="1" placeholder="自动" onchange="reconvertOne(${id})"></label>
+        <label>高度<input type="number" id="h-${id}" min="1" placeholder="自动" onchange="reconvertOne(${id})"></label>
+        <label>质量<input type="range" id="q-${id}" min="1" max="100" value="${$('globalQuality').value}" onchange="reconvertOne(${id})"></label>
+        <label>模式
+          <select id="m-${id}" onchange="reconvertOne(${id})">
+            <option value="lossy">有损</option>
+            <option value="high" ${$('globalMode').value==='high'?'selected':''}>最高质量</option>
+          </select>
+        </label>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-primary" id="dl-${id}" disabled onclick="downloadOne(${id})">下载</button>
+        <button class="btn btn-secondary" onclick="removeItem(${id})">移除</button>
+      </div>
+      <div class="status converting" id="status-${id}">正在转换…</div>
+    </div>
+  `;
+  $('grid').appendChild(el);
+
+  // 应用统一尺寸
+  const settings = getSettingsForItem(id);
+  state.items.set(id, { file, blob: null, url: null, thumb: thumbUrl, settings, el });
+  convert(id);
+}
+
+function getSettingsForItem(id){
+  const uniform = $('uniformSize').checked;
+  const type = $('uniformType').value;
+  const val = parseInt($('uniformValue').value)||0;
+  return {
+    width: uniform && type==='width' ? val : (parseInt($(`w-${id}`).value)||0),
+    height: uniform && type==='height' ? val : (parseInt($(`h-${id}`).value)||0),
+    quality: $(`m-${id}`).value==='high' ? 1.0 : (parseInt($(`q-${id}`).value)||85)/100
+  };
+}
+
+// 转换核心：Canvas -> WebP
+async function convert(id){
+  if(state.converting.has(id)) return;
+  state.converting.add(id);
+  const item = state.items.get(id);
+  if(!item) return;
+
+  const status = $(`status-${id}`);
+  const badge = item.el.querySelector('.card-badge');
+  const dlBtn = $(`dl-${id}`);
+  status.textContent = '正在转换…';
+  status.className = 'status converting';
+  badge.textContent = '转换中…';
+  badge.style.display = '';
+  dlBtn.disabled = true;
+
+  try {
+    // 清理旧 blob
+    if(item.url){ URL.revokeObjectURL(item.url); item.url=null; item.blob=null; }
+
+    const { file, settings } = item;
+    const img = await loadImage(file);
+    let { width, height } = settings;
+
+    // 等比例计算
+    if(width && !height) height = Math.round(img.naturalHeight * (width/img.naturalWidth));
+    else if(height && !width) width = Math.round(img.naturalWidth * (height/img.naturalHeight));
+    else if(!width && !height){ width = img.naturalWidth; height = img.naturalHeight; }
+    else if(width && height){ /* 用户强制指定宽高，允许变形 */ }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, width, height);
+
+    const blob = await new Promise((res,rej)=> canvas.toBlob(b=>b?res(b):rej(new Error('转换失败')), 'image/webp', settings.quality));
+    const url = URL.createObjectURL(blob);
+
+    item.blob = blob; item.url = url;
+    const saved = file.size - blob.size;
+    const pct = file.size ? Math.round((saved/file.size)*100) : 0;
+
+    $(`new-${id}`).textContent = formatBytes(blob.size);
+    const saveEl = $(`save-${id}`);
+    saveEl.textContent = saved>0 ? `↓ ${pct}%` : (saved<<0?`↑ ${Math.abs(pct)}%`:'无变化');
+    saveEl.style.color = saved>0 ? 'var(--success)' : (saved<<0?'var(--danger)':'var(--text-secondary)');
+
+    status.textContent = '转换完成';
+    status.className = 'status';
+    badge.style.display = 'none';
+    dlBtn.disabled = false;
+  } catch(err){
+    console.error(err);
+    status.textContent = '转换失败: '+err.message;
+    status.className = 'status error';
+    badge.textContent = '失败';
+  } finally {
+    state.converting.delete(id);
+  }
+}
+
+function loadImage(file){
+  return new Promise((res,rej)=>{
+    const img = new Image();
+    const u = URL.createObjectURL(file);
+    img.onload = ()=>{ URL.revokeObjectURL(u); res(img); };
+    img.onerror = ()=>{ URL.revokeObjectURL(u); rej(new Error('无法读取图片')); };
+    img.src = u;
+  });
+}
+
+// 重新转换单个（防抖）
+let reconvertTimers = {};
+function reconvertOne(id){
+  clearTimeout(reconvertTimers[id]);
+  reconvertTimers[id] = setTimeout(()=>{
+    const item = state.items.get(id);
+    if(!item) return;
+    item.settings = getSettingsForItem(id);
+    convert(id);
+  }, 400);
+}
+
+// 全局设置变更后提示重新转换
+let globalTimer;
+function triggerGlobalReconvert(){
+  clearTimeout(globalTimer);
+  globalTimer = setTimeout(()=>{
+    if(state.items.size) applyGlobalAndReconvert();
+  }, 500);
+}
+
+function applyGlobalAndReconvert(){
+  state.items.forEach((item,id)=>{
+    // 同步全局设置到控件
+    if($('uniformSize').checked){
+      const type = $('uniformType').value;
+      const val = $('uniformValue').value;
+      if(type==='width'){ $(`w-${id}`).value = val; $(`h-${id}`).value = ''; }
+      else { $(`h-${id}`).value = val; $(`w-${id}`).value = ''; }
+    }
+    $(`q-${id}`).value = $('globalQuality').value;
+    $(`m-${id}`).value = $('globalMode').value;
+    item.settings = getSettingsForItem(id);
+    convert(id);
+  });
+}
+
+function downloadOne(id){
+  const item = state.items.get(id);
+  if(!item || !item.blob) return;
+  const a = document.createElement('a');
+  a.href = item.url;
+  a.download = item.file.name.replace(/\.[^/.]+$/,'') + '.webp';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+function downloadAll(){
+  state.items.forEach((item,id)=>{ if(item.blob) setTimeout(()=>downloadOne(id), 0); });
+}
+
+function removeItem(id){
+  const item = state.items.get(id);
+  if(!item) return;
+  if(item.thumb) URL.revokeObjectURL(item.thumb);
+  if(item.url) URL.revokeObjectURL(item.url);
+  item.el.remove();
+  state.items.delete(id);
+  updateToolbar();
+}
+
+function clearAll(){
+  if(!confirm('确定清空所有图片？')) return;
+  state.items.forEach(item=>{
+    if(item.thumb) URL.revokeObjectURL(item.thumb);
+    if(item.url) URL.revokeObjectURL(item.url);
+    item.el.remove();
+  });
+  state.items.clear();
+  updateToolbar();
+}
+
+function updateToolbar(){
+  const n = state.items.size;
+  const show = n>0;
+  $('toolbar').style.display = show?'flex':'none';
+  $('bottomBar').style.display = show?'flex':'none';
+  $('fileCount').textContent = n+' 张图片';
+}
+
+function escapeHtml(t){
+  const d=document.createElement('div'); d.textContent=t; return d.innerHTML;
+}
+
+// 初始化
+updateGlobalUI();
+</script>
+</body>
+</html>

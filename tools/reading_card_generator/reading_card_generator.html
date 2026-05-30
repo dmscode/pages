@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>读书卡片生成工具</title>
+<!-- 外部字体：汇文明朝体 + 霞鹜文楷 -->
+<link rel="stylesheet" href="https://fontsapi.zeoseven.com/256/main/result.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@callmebill/lxgw-wenkai-web@latest/style.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f0f2f5;
+    color: #333;
+    line-height: 1.6;
+  }
+  .container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+  /* 左侧控制面板 */
+  .panel {
+    width: 400px;
+    min-width: 400px;
+    background: #fff;
+    border-right: 1px solid #e0e0e0;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .panel h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 2px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #c2185b;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+  }
+  .form-group input[type="text"],
+  .form-group input[type="number"],
+  .form-group input[type="url"],
+  .form-group input[type="color"],
+  .form-group select,
+  .form-group textarea {
+    padding: 7px 9px;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    font-size: 13px;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #c2185b;
+  }
+  .form-group textarea {
+    resize: vertical;
+    min-height: 70px;
+  }
+  .form-row {
+    display: flex;
+    gap: 10px;
+  }
+  .form-row .form-group {
+    flex: 1;
+  }
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #c2185b;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed #e0e0e0;
+  }
+  .btn {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  .btn-primary {
+    background: #c2185b;
+    color: white;
+  }
+  .btn-primary:hover { background: #a0154a; }
+  .btn-secondary {
+    background: #f5f5f5;
+    color: #333;
+    border: 1px solid #d0d0d0;
+  }
+  .btn-secondary:hover { background: #e8e8e8; }
+  .btn-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .btn-group .btn {
+    flex: 1;
+  }
+  /* 右侧预览区 */
+  .preview-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+    overflow-y: auto;
+    background: #e8eaf0;
+  }
+  .preview-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+  }
+  .page-label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: -16px;
+  }
+  canvas {
+    background: white;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    border-radius: 4px;
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  .hint {
+    font-size: 11px;
+    color: #888;
+    margin-top: 2px;
+  }
+  .collapsible {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .collapsible-header {
+    padding: 9px 11px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  .collapsible-body {
+    padding: 12px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .collapsible-body.open { display: flex; }
+  .toggle-icon {
+    transition: transform 0.2s;
+    font-size: 10px;
+  }
+  .toggle-icon.open { transform: rotate(90deg); }
+  .status {
+    font-size: 11px;
+    color: #c2185b;
+    padding: 4px 0;
+    min-height: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- 控制面板 -->
+  <div class="panel">
+    <h2>📖 读书卡片生成器</h2>
+
+    <div class="form-group">
+      <label>书籍名称</label>
+      <input type="text" id="bookName" value="百年孤独" placeholder="输入书籍名称">
+    </div>
+
+    <div class="form-group">
+      <label>章节名称</label>
+      <input type="text" id="chapterName" value="第一章：马孔多" placeholder="输入章节名称">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>进度类型</label>
+        <select id="progressType">
+          <option value="percent">百分比</option>
+          <option value="page">页码</option>
+          <option value="chapterPage">章节内页</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>进度值</label>
+        <input type="text" id="progressValue" value="35%" placeholder="如：35% 或 128">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>封面 / Logo 图片 URL（留空使用默认书籍图标）</label>
+      <input type="url" id="coverUrl" placeholder="https://example.com/cover.jpg">
+    </div>
+
+    <div class="form-group">
+      <label>摘抄内容</label>
+      <textarea id="quoteText" placeholder="输入摘抄的原文内容">多年以后，面对行刑队，奥雷里亚诺·布恩迪亚上校将会回想起父亲带他去见识冰块的那个遥远的下午。那时的马孔多是一个二十户人家的村落，泥巴和芦苇盖成的屋子沿河岸排开，湍急的河水清澈见底，河床里卵石洁白光滑宛如史前巨蛋。世界新生伊始，许多事物还没有名字，提到的时候尚需用手指指点点。</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>读书笔记（支持多段落，段落之间空一行）</label>
+      <textarea id="noteText" placeholder="输入你的读书笔记">马孔多的开篇堪称神来之笔。马尔克斯用一句话将过去、现在和未来三个时空交织在一起，创造出一种独特的叙事张力。
+
+这种环形叙事结构让人想起《俄狄浦斯王》的命运感。布恩迪亚家族七代人的命运，似乎从这一刻就已经注定。冰块作为外来文明的象征，预示着这个封闭村落即将被现代性冲击。
+
+摘抄这一段，是因为我近期正在思考时间与记忆的关系。马尔克斯的处理方式给了我很大启发。</textarea>
+    </div>
+
+    <div class="collapsible">
+      <div class="collapsible-header" onclick="toggleCollapse(this)">
+        <span>⚙️ 样式参数设置（全部可调整）</span>
+        <span class="toggle-icon">▶</span>
+      </div>
+      <div class="collapsible-body" id="styleSettings">
+
+        <div class="section-title">页面设置</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>页面宽度 (px)</label>
+            <input type="number" id="pageWidth" value="840" min="400" max="1600">
+          </div>
+          <div class="form-group">
+            <label>上边距 (px)</label>
+            <input type="number" id="marginTop" value="70" min="20" max="200">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>左右边距 (px)</label>
+            <input type="number" id="marginX" value="75" min="20" max="200">
+          </div>
+          <div class="form-group">
+            <label>下边距 (px)</label>
+            <input type="number" id="marginBottom" value="70" min="20" max="200">
+          </div>
+        </div>
+
+        <div class="section-title">顶部图片区域</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>图片区域高度占比 (%)</label>
+            <input type="number" id="imageRatio" value="30" min="10" max="50" step="5">
+          </div>
+          <div class="form-group">
+            <label>图片圆角 (px)</label>
+            <input type="number" id="imgRadius" value="8" min="0" max="40">
+          </div>
+        </div>
+
+        <div class="section-title">书名与章节</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>书名字号 (px)</label>
+            <input type="number" id="titleSize" value="32" min="16" max="64">
+          </div>
+          <div class="form-group">
+            <label>章节字号 (px)</label>
+            <input type="number" id="chapterSize" value="20" min="12" max="40">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>书名/章节颜色</label>
+          <input type="color" id="titleColor" value="#c2185b">
+        </div>
+
+        <div class="section-title">摘抄区域</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>摘抄字号 (px)</label>
+            <input type="number" id="quoteSize" value="17" min="12" max="32">
+          </div>
+          <div class="form-group">
+            <label>摘抄行高</label>
+            <input type="number" id="quoteLineHeight" value="1.8" min="1.2" max="3" step="0.1">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>背景色</label>
+            <input type="color" id="quoteBg" value="#f7f5f0">
+          </div>
+          <div class="form-group">
+            <label>文字色</label>
+            <input type="color" id="quoteColor" value="#4a4a4a">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>背景内边距 (px)</label>
+            <input type="number" id="quotePadding" value="20" min="0" max="60">
+          </div>
+          <div class="form-group">
+            <label>背景圆角 (px)</label>
+            <input type="number" id="quoteRadius" value="6" min="0" max="20">
+          </div>
+        </div>
+
+        <div class="section-title">笔记区域</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>笔记字号 (px)</label>
+            <input type="number" id="noteSize" value="16" min="12" max="32">
+          </div>
+          <div class="form-group">
+            <label>笔记行高</label>
+            <input type="number" id="noteLineHeight" value="1.9" min="1.2" max="3" step="0.1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>笔记文字色</label>
+          <input type="color" id="noteColor" value="#333333">
+        </div>
+        <div class="form-group">
+          <label>段落间距 (px)</label>
+          <input type="number" id="paraGap" value="14" min="0" max="40">
+        </div>
+
+        <div class="section-title">页脚</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>页脚字号 (px)</label>
+            <input type="number" id="footerSize" value="12" min="10" max="20">
+          </div>
+          <div class="form-group">
+            <label>页脚颜色</label>
+            <input type="color" id="footerColor" value="#999999">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="generate()">🎨 生成卡片</button>
+      <button class="btn btn-secondary" onclick="downloadAll()">💾 下载全部</button>
+    </div>
+    <div class="status" id="status"></div>
+    <p class="hint">所有参数均可调整，实时预览。支持多页自动分页。</p>
+  </div>
+
+  <!-- 预览区域 -->
+  <div class="preview-area">
+    <div class="preview-wrapper" id="previewWrapper">
+      <p style="color:#888; margin-top: 40px;">点击左侧「生成卡片」按钮预览效果</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// 默认书籍封面 SVG (data URI)
+const DEFAULT_COVER = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#f5f0e8"/>
+  <rect x="60" y="40" width="280" height="220" rx="4" fill="#fff" stroke="#d4c8b8" stroke-width="2"/>
+  <line x1="80" y1="70" x2="320" y2="70" stroke="#d4c8b8" stroke-width="1"/>
+  <line x1="80" y1="90" x2="280" y2="90" stroke="#d4c8b8" stroke-width="1"/>
+  <line x1="80" y1="110" x2="300" y2="110" stroke="#d4c8b8" stroke-width="1"/>
+  <line x1="80" y1="130" x2="260" y2="130" stroke="#d4c8b8" stroke-width="1"/>
+  <line x1="80" y1="150" x2="290" y2="150" stroke="#d4c8b8" stroke-width="1"/>
+  <rect x="80" y="180" width="100" height="60" rx="2" fill="#e8e0d4"/>
+  <text x="200" y="260" font-family="serif" font-size="14" fill="#a09080" text-anchor="middle">默认封面</text>
+</svg>`)));
+
+let generatedCanvases = [];
+
+function setStatus(msg) {
+  document.getElementById('status').textContent = msg;
+}
+
+function toggleCollapse(header) {
+  const body = header.nextElementSibling;
+  const icon = header.querySelector('.toggle-icon');
+  body.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+
+function getSettings() {
+  return {
+    bookName: document.getElementById('bookName').value,
+    chapterName: document.getElementById('chapterName').value,
+    progressType: document.getElementById('progressType').value,
+    progressValue: document.getElementById('progressValue').value,
+    coverUrl: document.getElementById('coverUrl').value.trim(),
+    quoteText: document.getElementById('quoteText').value,
+    noteText: document.getElementById('noteText').value,
+    pageWidth: parseInt(document.getElementById('pageWidth').value) || 840,
+    marginTop: parseInt(document.getElementById('marginTop').value) || 70,
+    marginX: parseInt(document.getElementById('marginX').value) || 75,
+    marginBottom: parseInt(document.getElementById('marginBottom').value) || 70,
+    imageRatio: (parseInt(document.getElementById('imageRatio').value) || 30) / 100,
+    imgRadius: parseInt(document.getElementById('imgRadius').value) || 8,
+    titleSize: parseInt(document.getElementById('titleSize').value) || 32,
+    chapterSize: parseInt(document.getElementById('chapterSize').value) || 20,
+    titleColor: document.getElementById('titleColor').value || '#c2185b',
+    quoteSize: parseInt(document.getElementById('quoteSize').value) || 17,
+    quoteLineHeight: parseFloat(document.getElementById('quoteLineHeight').value) || 1.8,
+    quoteBg: document.getElementById('quoteBg').value || '#f7f5f0',
+    quoteColor: document.getElementById('quoteColor').value || '#4a4a4a',
+    quotePadding: parseInt(document.getElementById('quotePadding').value) || 20,
+    quoteRadius: parseInt(document.getElementById('quoteRadius').value) || 6,
+    noteSize: parseInt(document.getElementById('noteSize').value) || 16,
+    noteLineHeight: parseFloat(document.getElementById('noteLineHeight').value) || 1.9,
+    noteColor: document.getElementById('noteColor').value || '#333333',
+    paraGap: parseInt(document.getElementById('paraGap').value) || 14,
+    footerSize: parseInt(document.getElementById('footerSize').value) || 12,
+    footerColor: document.getElementById('footerColor').value || '#999999',
+  };
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('图片加载失败: ' + src));
+    img.src = src;
+  });
+}
+
+async function waitFonts() {
+  setStatus('正在加载字体...');
+  try {
+    await document.fonts.load('16px "Huiwen-mincho"');
+    await document.fonts.load('16px "LXGW WenKai"');
+    // 额外等待确保分包字体就绪
+    await new Promise(r => setTimeout(r, 600));
+    setStatus('字体加载完成');
+  } catch (e) {
+    setStatus('字体加载中，使用备用字体...');
+    await new Promise(r => setTimeout(r, 800));
+  }
+}
+
+// 逐字测量文本换行（支持中英文混排）
+function wrapText(ctx, text, maxWidth) {
+  const lines = [];
+  let currentLine = '';
+  let currentWidth = 0;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    // 处理换行符
+    if (char === '
+' || char === '') {
+      if (char === '' && i + 1 < text.length && text[i+1] === '
+') {
+        i++; // skip \n
+      }
+      lines.push(currentLine);
+      currentLine = '';
+      currentWidth = 0;
+      continue;
+    }
+
+    const charWidth = ctx.measureText(char).width;
+
+    // 如果当前行宽度加上这个字符超过最大宽度，且当前行不为空
+    if (currentWidth + charWidth > maxWidth && currentLine.length > 0) {
+      lines.push(currentLine);
+      currentLine = char;
+      currentWidth = charWidth;
+    } else {
+      currentLine += char;
+      currentWidth += charWidth;
+    }
+  }
+
+  if (currentLine.length > 0) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+}
+
+// 段落分行（按段落分割，每段分别wrap）
+function wrapParagraphs(ctx, text, maxWidth) {
+  // 统一换行符为 \n，然后按双换行分段
+  const normalized = text.replace(/\r\n/g, '
+').replace(/\r/g, '
+');
+  const paragraphs = normalized.split(/\n\n+/);
+  const result = [];
+  for (const para of paragraphs) {
+    const trimmed = para.trim();
+    if (!trimmed) continue;
+    const lines = wrapText(ctx, trimmed, maxWidth);
+    result.push({ lines, isParagraph: true });
+  }
+  return result;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawFooter(ctx, s, pageNum, totalPages, pageHeight) {
+  const footerY = pageHeight - s.marginBottom + 28;
+  ctx.font = `${s.footerSize}px "LXGW WenKai", sans-serif`;
+  ctx.fillStyle = s.footerColor;
+  ctx.textAlign = 'center';
+
+  const dateStr = new Date().toLocaleDateString('zh-CN');
+  let progressStr = '';
+  if (s.progressValue) {
+    if (s.progressType === 'percent') progressStr = `进度：${s.progressValue}`;
+    else if (s.progressType === 'page') progressStr = `第 ${s.progressValue} 页`;
+    else progressStr = `章节内第 ${s.progressValue} 页`;
+  }
+
+  const footerText = `${dateStr}  ·  ${progressStr}  ·  第 ${pageNum} 页 / 共 ${totalPages} 页`;
+  ctx.fillText(footerText, s.pageWidth / 2, footerY);
+  ctx.textAlign = 'left';
+}
+
+async function generate() {
+  setStatus('正在生成...');
+  const s = getSettings();
+  const pageWidth = s.pageWidth;
+  const pageHeight = Math.round(pageWidth * 297 / 210);
+  const contentWidth = pageWidth - s.marginX * 2;
+
+  generatedCanvases = [];
+
+  // 加载封面图
+  let coverImg = null;
+  try {
+    const coverSrc = s.coverUrl || DEFAULT_COVER;
+    coverImg = await loadImage(coverSrc);
+  } catch (e) {
+    try {
+      coverImg = await loadImage(DEFAULT_COVER);
+    } catch (e2) {
+      setStatus('默认封面加载失败');
+      return;
+    }
+  }
+
+  // 等待字体
+  await waitFonts();
+
+  // ===== 第一页 =====
+  const canvas1 = document.createElement('canvas');
+  canvas1.width = pageWidth * 2;  // 高分辨率
+  canvas1.height = pageHeight * 2;
+  const ctx1 = canvas1.getContext('2d');
+  ctx1.scale(2, 2);
+
+  // 白色背景
+  ctx1.fillStyle = '#ffffff';
+  ctx1.fillRect(0, 0, pageWidth, pageHeight);
+
+  let currentY = s.marginTop;
+
+  // 1. 顶部图片区域
+  const imgAreaHeight = pageHeight * s.imageRatio;
+  const imgMaxW = contentWidth * 0.55;
+  const imgMaxH = imgAreaHeight * 0.7;
+
+  let imgDrawW, imgDrawH;
+  const imgRatio = coverImg.width / coverImg.height;
+  const maxRatio = imgMaxW / imgMaxH;
+
+  if (imgRatio > maxRatio) {
+    imgDrawW = imgMaxW;
+    imgDrawH = imgMaxW / imgRatio;
+  } else {
+    imgDrawH = imgMaxH;
+    imgDrawW = imgMaxH * imgRatio;
+  }
+
+  const imgX = (pageWidth - imgDrawW) / 2;
+  const imgY = currentY + (imgAreaHeight - imgDrawH) / 2;
+
+  if (s.imgRadius > 0) {
+    ctx1.save();
+    roundRect(ctx1, imgX, imgY, imgDrawW, imgDrawH, s.imgRadius);
+    ctx1.clip();
+    ctx1.drawImage(coverImg, imgX, imgY, imgDrawW, imgDrawH);
+    ctx1.restore();
+  } else {
+    ctx1.drawImage(coverImg, imgX, imgY, imgDrawW, imgDrawH);
+  }
+
+  currentY = s.marginTop + imgAreaHeight + 18;
+
+  // 2. 书名（玫红色，霞鹜文楷）
+  ctx1.font = `bold ${s.titleSize}px "LXGW WenKai", sans-serif`;
+  ctx1.fillStyle = s.titleColor;
+  ctx1.textAlign = 'center';
+  ctx1.fillText(s.bookName, pageWidth / 2, currentY + s.titleSize * 0.85);
+  currentY += s.titleSize + 10;
+
+  // 3. 章节名
+  ctx1.font = `${s.chapterSize}px "LXGW WenKai", sans-serif`;
+  ctx1.fillStyle = s.titleColor;
+  ctx1.fillText(s.chapterName, pageWidth / 2, currentY + s.chapterSize * 0.85);
+  currentY += s.chapterSize + 24;
+
+  // 4. 摘抄内容（淡灰色背景，汇文明朝体）
+  const quoteInnerWidth = contentWidth - s.quotePadding * 2;
+  ctx1.font = `${s.quoteSize}px "Huiwen-mincho", serif`;
+  const quoteLines = wrapText(ctx1, s.quoteText, quoteInnerWidth);
+  const quoteLineH = s.quoteSize * s.quoteLineHeight;
+  const quoteHeight = quoteLines.length * quoteLineH + s.quotePadding * 2;
+
+  const quoteBgY = currentY;
+  ctx1.fillStyle = s.quoteBg;
+  roundRect(ctx1, s.marginX, quoteBgY, contentWidth, quoteHeight, s.quoteRadius);
+  ctx1.fill();
+
+  ctx1.fillStyle = s.quoteColor;
+  let quoteY = quoteBgY + s.quotePadding + s.quoteSize * 0.85;
+  for (const line of quoteLines) {
+    ctx1.fillText(line, s.marginX + s.quotePadding, quoteY);
+    quoteY += quoteLineH;
+  }
+
+  currentY = quoteBgY + quoteHeight + 24;
+
+  // 5. 笔记区域（霞鹜文楷）—— 计算第一页能放多少
+  const footerReserve = s.footerSize + 40;
+  const noteMaxY = pageHeight - s.marginBottom - footerReserve;
+  const noteAvailableHeight = noteMaxY - currentY;
+
+  ctx1.font = `${s.noteSize}px "LXGW WenKai", sans-serif`;
+  const noteParagraphs = wrapParagraphs(ctx1, s.noteText, contentWidth);
+
+  let noteY = currentY;
+  let firstPageNotes = [];
+  let remainingNotes = [];
+  let firstPageFull = false;
+
+  for (let p = 0; p < noteParagraphs.length; p++) {
+    const para = noteParagraphs[p];
+    const paraHeight = para.lines.length * s.noteSize * s.noteLineHeight + (p > 0 ? s.paraGap : 0);
+
+    if (!firstPageFull && noteY + paraHeight <= noteMaxY) {
+      firstPageNotes.push(para);
+      noteY += paraHeight;
+    } else {
+      firstPageFull = true;
+      remainingNotes.push(para);
+    }
+  }
+
+  // 绘制第一页笔记
+  noteY = currentY;
+  ctx1.fillStyle = s.noteColor;
+  for (let p = 0; p < firstPageNotes.length; p++) {
+    if (p > 0) noteY += s.paraGap;
+    const para = firstPageNotes[p];
+    for (const line of para.lines) {
+      ctx1.fillText(line, s.marginX, noteY + s.noteSize * 0.85);
+      noteY += s.noteSize * s.noteLineHeight;
+    }
+  }
+
+  // 页脚
+  const totalPages = remainingNotes.length > 0 ? 2 : 1;
+  drawFooter(ctx1, s, 1, totalPages, pageHeight);
+
+  generatedCanvases.push(canvas1);
+
+  // ===== 第二页（如果有剩余笔记）=====
+  if (remainingNotes.length > 0) {
+    const canvas2 = document.createElement('canvas');
+    canvas2.width = pageWidth * 2;
+    canvas2.height = pageHeight * 2;
+    const ctx2 = canvas2.getContext('2d');
+    ctx2.scale(2, 2);
+
+    ctx2.fillStyle = '#ffffff';
+    ctx2.fillRect(0, 0, pageWidth, pageHeight);
+
+    let page2Y = s.marginTop;
+    ctx2.font = `${s.noteSize}px "LXGW WenKai", sans-serif`;
+    ctx2.fillStyle = s.noteColor;
+
+    for (let p = 0; p < remainingNotes.length; p++) {
+      if (p > 0) page2Y += s.paraGap;
+      const para = remainingNotes[p];
+      for (const line of para.lines) {
+        ctx2.fillText(line, s.marginX, page2Y + s.noteSize * 0.85);
+        page2Y += s.noteSize * s.noteLineHeight;
+      }
+    }
+
+    drawFooter(ctx2, s, 2, totalPages, pageHeight);
+    generatedCanvases.push(canvas2);
+  }
+
+  renderPreview();
+  setStatus(`生成完成，共 ${totalPages} 页 · 分辨率 ${pageWidth*2}×${pageHeight*2}`);
+}
+
+function renderPreview() {
+  const wrapper = document.getElementById('previewWrapper');
+  wrapper.innerHTML = '';
+
+  generatedCanvases.forEach((canvas, idx) => {
+    const label = document.createElement('div');
+    label.className = 'page-label';
+    label.textContent = `第 ${idx + 1} 页 / 共 ${generatedCanvases.length} 页`;
+    wrapper.appendChild(label);
+
+    // 创建预览用低分辨率副本（保持比例）
+    const preview = document.createElement('canvas');
+    const maxPreviewWidth = Math.min(700, window.innerWidth - 480);
+    const scale = maxPreviewWidth / canvas.width;
+    preview.width = maxPreviewWidth;
+    preview.height = canvas.height * scale;
+    const pctx = preview.getContext('2d');
+    pctx.drawImage(canvas, 0, 0, preview.width, preview.height);
+    preview.style.maxWidth = '100%';
+    wrapper.appendChild(preview);
+  });
+}
+
+function downloadAll() {
+  if (generatedCanvases.length === 0) {
+    alert('请先生成卡片');
+    return;
+  }
+  const s = getSettings();
+  const book = s.bookName || '读书卡片';
+  generatedCanvases.forEach((canvas, idx) => {
+    const link = document.createElement('a');
+    link.download = `${book}_卡片_${idx + 1}页.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+  setStatus('下载已开始');
+}
+
+// 监听输入变化，防抖重新生成
+let debounceTimer;
+const inputs = document.querySelectorAll('input, textarea, select');
+inputs.forEach(el => {
+  el.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => generate().catch(console.error), 800);
+  });
+});
+
+// 页面加载后自动展开样式设置并生成
+window.addEventListener('load', () => {
+  const header = document.querySelector('.collapsible-header');
+  if (header) toggleCollapse(header);
+
+  setTimeout(() => {
+    generate().catch(err => {
+      console.error(err);
+      setStatus('首次生成可能需要等待字体加载，请稍后再试');
+    });
+  }, 2000);
+});
+</script>
+</body>
+</html>

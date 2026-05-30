@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片批量处理工具</title>
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #e0e0e0;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin-top: 40px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #a0a0b0;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .drop-zone {
+            border: 3px dashed #4a4a6a;
+            border-radius: 16px;
+            padding: 60px 20px;
+            text-align: center;
+            background: rgba(255,255,255,0.03);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.08);
+            transform: translateY(-2px);
+        }
+        
+        .drop-zone svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+        
+        .drop-zone p {
+            font-size: 16px;
+            color: #b0b0c0;
+            margin-bottom: 8px;
+        }
+        
+        .drop-zone .hint {
+            font-size: 13px;
+            color: #707080;
+        }
+        
+        .settings {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .settings h3 {
+            font-size: 14px;
+            color: #8888a0;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .setting-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+        
+        .setting-row label {
+            min-width: 100px;
+            font-size: 14px;
+            color: #c0c0d0;
+        }
+        
+        .setting-row input[type="number"],
+        .setting-row input[type="text"] {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #4a4a6a;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 120px;
+            outline: none;
+        }
+        
+        .setting-row input[type="text"] {
+            width: 200px;
+        }
+        
+        .setting-row input:focus {
+            border-color: #6c5ce7;
+        }
+        
+        .setting-row span {
+            color: #707080;
+            font-size: 13px;
+        }
+        
+        .progress-area {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-area.active {
+            display: block;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-size: 13px;
+            color: #a0a0b0;
+        }
+        
+        .gallery {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .gallery-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: transform 0.2s;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-3px);
+            border-color: #6c5ce7;
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .gallery-item .info {
+            padding: 10px;
+            font-size: 12px;
+            color: #a0a0b0;
+        }
+        
+        .gallery-item .info .filename {
+            color: #fff;
+            font-weight: 500;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #6c5ce7, #5b4cdb);
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            margin-left: 10px;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2d2d44;
+            color: #fff;
+            padding: 14px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(108, 92, 231, 0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            font-size: 14px;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.success {
+            border-color: #00b894;
+        }
+        
+        .toast.error {
+            border-color: #e74c3c;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #6c5ce7;
+        }
+        
+        .watermark-preview {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            font-size: 13px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ 图片批量处理工具</h1>
+        <p class="subtitle">拖入图片即可自动处理为 WebP 格式并添加水印</p>
+        
+        <div class="drop-zone" id="dropZone">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 16V4m0 0l-4 4m4-4l4 4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+            </svg>
+            <p>拖放图片到此处，或点击选择文件</p>
+            <p class="hint">支持 JPG、PNG、GIF、WebP、HEIC 等格式 · 支持批量处理</p>
+            <input type="file" id="fileInput" multiple accept="image/*,.heic,.heif">
+        </div>
+        
+        <div class="settings">
+            <h3>⚙️ 处理设置</h3>
+            <div class="setting-row">
+                <label>目标宽度</label>
+                <input type="number" id="targetWidth" value="640" min="1"> <span>px</span>
+            </div>
+            <div class="setting-row">
+                <label>组标题</label>
+                <input type="text" id="groupTitle" placeholder="处理前会弹出输入框" readonly style="background: rgba(0,0,0,0.15); cursor: not-allowed;">
+            </div>
+            <div class="setting-row">
+                <label>水印文字</label>
+                <input type="text" id="watermarkText" value="小众微硬评">
+            </div>
+            <div class="setting-row">
+                <label>WebP 质量</label>
+                <input type="number" id="quality" value="75" min="1" max="100"> <span>%</span>
+            </div>
+            <div class="setting-row">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="autoDownload" checked>
+                    <label for="autoDownload" style="min-width: auto; cursor: pointer;">处理完成后自动下载</label>
+                </div>
+            </div>
+            <div class="watermark-preview">
+                💡 水印样式：白色黑体文字 + 阴影，位于右下角，确保在纯白背景可见
+            </div>
+        </div>
+        
+        <div class="progress-area" id="progressArea">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">准备处理...</div>
+        </div>
+        
+        <div class="gallery" id="gallery"></div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const gallery = document.getElementById('gallery');
+        const progressArea = document.getElementById('progressArea');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const toast = document.getElementById('toast');
+        
+        let processedBlobs = [];
+        
+        // 拖放事件
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+        
+        // 判断文件是否为支持的图片格式（包括 HEIC）
+        function isImageFile(file) {
+            if (file.type.startsWith('image/')) return true;
+            const ext = file.name.split('.').pop().toLowerCase();
+            return ext === 'heic' || ext === 'heif';
+        }
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = Array.from(e.dataTransfer.files).filter(isImageFile);
+            if (files.length > 0) {
+                startProcessing(files);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                startProcessing(Array.from(e.target.files));
+            }
+        });
+        
+        async function startProcessing(files) {
+            // 弹出输入框获取组标题
+            const defaultTitle = 'image';
+            const groupTitle = prompt('请输入组标题（将用作文件名前缀）：', defaultTitle);
+            if (groupTitle === null) return; // 用户取消
+            if (!groupTitle.trim()) {
+                showToast('组标题不能为空', 'error');
+                return;
+            }
+            
+            document.getElementById('groupTitle').value = groupTitle;
+            
+            const targetWidth = parseInt(document.getElementById('targetWidth').value) || 640;
+            const watermarkText = document.getElementById('watermarkText').value || '小众微硬评';
+            const quality = parseInt(document.getElementById('quality').value) || 92;
+            const autoDownload = document.getElementById('autoDownload').checked;
+            
+            gallery.innerHTML = '';
+            processedBlobs = [];
+            progressArea.classList.add('active');
+            
+            let completed = 0;
+            const total = files.length;
+            
+            for (let i = 0; i < files.length; i++) {
+                try {
+                    const file = files[i];
+                    const index = i + 1;
+                    const filename = `${groupTitle}-${String(index).padStart(2, '0')}.webp`;
+                    
+                    progressText.textContent = `正在处理: ${file.name} (${index}/${total})`;
+                    
+                    const result = await processImage(file, {
+                        targetWidth,
+                        watermarkText,
+                        quality,
+                        filename
+                    });
+                    
+                    processedBlobs.push({ blob: result.blob, filename });
+                    
+                    // 添加到画廊预览
+                    addGalleryItem(result.previewUrl, filename, result.originalSize, result.newSize);
+                    
+                    if (autoDownload) {
+                        downloadBlob(result.blob, filename);
+                        await new Promise(r => setTimeout(r, 100)); // 避免浏览器阻塞
+                    }
+                    
+                    completed++;
+                    progressFill.style.width = `${(completed / total) * 100}%`;
+                    
+                } catch (err) {
+                    console.error('处理失败:', err);
+                    showToast(`处理失败: ${files[i].name}`, 'error');
+                }
+            }
+            
+            progressText.textContent = `处理完成！共 ${total} 张图片`;
+            showToast(`成功处理 ${total} 张图片`, 'success');
+            
+            if (!autoDownload && processedBlobs.length > 0) {
+                const downloadAllBtn = document.createElement('button');
+                downloadAllBtn.className = 'btn';
+                downloadAllBtn.textContent = '下载全部';
+                downloadAllBtn.style.margin = '20px auto';
+                downloadAllBtn.style.display = 'block';
+                downloadAllBtn.onclick = () => {
+                    processedBlobs.forEach(({blob, filename}, idx) => {
+                        setTimeout(() => downloadBlob(blob, filename), idx * 100);
+                    });
+                };
+                gallery.parentElement.insertBefore(downloadAllBtn, gallery);
+            }
+        }
+        
+        // 将 HEIC/HEIF 文件解码为可读取的 Blob
+        async function decodeHeic(file) {
+            if (typeof heic2any === 'undefined') {
+                throw new Error('HEIC 解码库未加载，请检查网络连接');
+            }
+            const result = await heic2any({
+                blob: file,
+                toType: 'image/jpeg',
+                quality: 0.92
+            });
+            // heic2any 可能返回 Blob 或 Blob[]，取第一个
+            return Array.isArray(result) ? result[0] : result;
+        }
+
+        async function processImage(file, options) {
+            // 如果是 HEIC/HEIF，先解码
+            const ext = file.name.split('.').pop().toLowerCase();
+            let sourceFile = file;
+            if (ext === 'heic' || ext === 'heif') {
+                sourceFile = await decodeHeic(file);
+            }
+
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(sourceFile);
+
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    // 如果宽度大于目标宽度，等比例缩小
+                    if (width > options.targetWidth) {
+                        const ratio = options.targetWidth / width;
+                        width = options.targetWidth;
+                        height = Math.round(height * ratio);
+                    }
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // 绘制图片
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // 添加水印
+                    addWatermark(ctx, width, height, options.watermarkText);
+                    
+                    // 转换为 WebP
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            reject(new Error('转换失败'));
+                            return;
+                        }
+                        
+                        const previewUrl = URL.createObjectURL(blob);
+                        resolve({
+                            blob,
+                            previewUrl,
+                            originalSize: formatSize(file.size),
+                            newSize: formatSize(blob.size)
+                        });
+                    }, 'image/webp', options.quality / 100);
+                };
+                
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    reject(new Error('图片加载失败'));
+                };
+                
+                img.src = url;
+            });
+        }
+        
+        function addWatermark(ctx, width, height, text) {
+            const fontSize = Math.max(14, Math.min(width * 0.04, 24)) * 1.8;
+            ctx.font = `bold ${fontSize}px "Microsoft YaHei", "SimHei", "PingFang SC", sans-serif`;
+            
+            const padding = Math.max(10, width * 0.02);
+            const textMetrics = ctx.measureText(text);
+            const textWidth = textMetrics.width;
+            const textHeight = fontSize;
+            
+            const x = width - textWidth - padding;
+            const y = height - padding;
+            
+            // 多层阴影确保在纯白背景可见
+            ctx.save();
+            
+            // 外发光阴影
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+            ctx.shadowBlur = 6;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.fillText(text, x, y);
+
+            // 底部偏移阴影增加深度
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+            ctx.shadowBlur = 2;
+            ctx.shadowOffsetX = 1;
+            ctx.shadowOffsetY = 1;
+            ctx.fillText(text, x, y);
+
+            // 主文字
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.fillText(text, x, y);
+            
+            ctx.restore();
+        }
+        
+        function addGalleryItem(url, filename, originalSize, newSize) {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.innerHTML = `
+                <img src="${url}" alt="${filename}">
+                <div class="info">
+                    <div class="filename">${filename}</div>
+                    <div>${originalSize} → ${newSize}</div>
+                </div>
+            `;
+            gallery.appendChild(item);
+        }
+        
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+        
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

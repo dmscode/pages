@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>读书卡片生成工具</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <!-- 左侧控制面板 -->
+  <div class="panel" id="panel">
+    <h2>读书卡片生成器</h2>
+
+    <div class="form-group">
+      <label>书籍名称</label>
+      <input type="text" id="bookName" value="百年孤独" placeholder="输入书籍名称">
+    </div>
+
+    <div class="form-group">
+      <label>章节名称</label>
+      <input type="text" id="chapterName" value="第一章：马孔多" placeholder="输入章节名称">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>进度类型</label>
+        <select id="progressType">
+          <option value="percent">百分比</option>
+          <option value="page">页码</option>
+          <option value="chapterPage">章节内页</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>进度值</label>
+        <input type="text" id="progressValue" value="35%" placeholder="如：35% 或 128">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>封面图片</label>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="coverFile" accept="image/*" hidden>
+        <p>点击选择图片，或拖拽图片到此处</p>
+        <p class="hint">支持 jpg、png、gif、webp</p>
+      </div>
+      <input type="url" id="coverUrl" placeholder="或输入图片URL">
+    </div>
+
+    <div class="form-group">
+      <label>摘抄内容</label>
+      <textarea id="quoteText" placeholder="输入摘抄的原文内容">多年以后，面对行刑队，奥雷里亚诺·布恩迪亚上校将会回想起父亲带他去见识冰块的那个遥远的下午。那时的马孔多是一个二十户人家的村落，泥巴和芦苇盖成的屋子沿河岸排开，湍急的河水清澈见底，河床里卵石洁白光滑宛如史前巨蛋。世界新生伊始，许多事物还没有名字，提到的时候尚需用手指指点点。</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>读书笔记（支持多段落，段落之间空一行）</label>
+      <textarea id="noteText" placeholder="输入你的读书笔记">马孔多的开篇堪称神来之笔。马尔克斯用一句话将过去、现在和未来三个时空交织在一起，创造出一种独特的叙事张力。
+
+这种环形叙事结构让人想起《俄狄浦斯王》的命运感。布恩迪亚家族七代人的命运，似乎从这一刻就已经注定。冰块作为外来文明的象征，预示着这个封闭村落即将被现代性冲击。
+
+摘抄这一段，是因为我近期正在思考时间与记忆的关系。马尔克斯的处理方式给了我很大启发。</textarea>
+    </div>
+
+    <div class="collapsible">
+      <div class="collapsible-header" id="styleHeader">
+        <span>样式参数设置（全部可调整）</span>
+        <span class="toggle-icon" id="styleToggleIcon">▶</span>
+      </div>
+      <div class="collapsible-body" id="styleSettings">
+
+        <div class="section-title">基准字号（所有字号以此为比例缩放）</div>
+        <div class="form-group">
+          <label>基准字号 (px)</label>
+          <input type="number" id="baseSize" value="42" min="12" max="80">
+        </div>
+
+        <div class="section-title">页面设置</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>页面宽度 (px)</label>
+            <input type="number" id="pageWidth" value="1200" min="400" max="2400">
+          </div>
+          <div class="form-group">
+            <label>上边距 (px)</label>
+            <input type="number" id="marginTop" value="100" min="20" max="300">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>左右边距 (px)</label>
+            <input type="number" id="marginX" value="140" min="20" max="300">
+          </div>
+          <div class="form-group">
+            <label>下边距 (px)</label>
+            <input type="number" id="marginBottom" value="100" min="20" max="300">
+          </div>
+        </div>
+
+        <div class="section-title">顶部图片区域</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>图片区域高度占比 (%)</label>
+            <input type="number" id="imageRatio" value="24" min="10" max="50" step="5">
+          </div>
+          <div class="form-group">
+            <label>图片圆角 (px)</label>
+            <input type="number" id="imgRadius" value="8" min="0" max="40">
+          </div>
+        </div>
+
+        <div class="section-title">书名与章节</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>书名字号倍率</label>
+            <input type="number" id="titleRatio" value="1.6" min="0.5" max="3" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>章节字号倍率</label>
+            <input type="number" id="chapterRatio" value="1.0" min="0.5" max="3" step="0.1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>书名/章节颜色</label>
+          <input type="color" id="titleColor" value="#c5213d">
+        </div>
+
+        <div class="section-title">摘抄区域</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>摘抄字号倍率</label>
+            <input type="number" id="quoteRatio" value="0.85" min="0.3" max="2" step="0.05">
+          </div>
+          <div class="form-group">
+            <label>摘抄行高</label>
+            <input type="number" id="quoteLineHeight" value="1.8" min="1.2" max="3" step="0.1">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>背景色</label>
+            <input type="color" id="quoteBg" value="#f7f5f0">
+          </div>
+          <div class="form-group">
+            <label>文字色</label>
+            <input type="color" id="quoteColor" value="#4a4a4a">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>背景左右内边距倍率</label>
+            <input type="number" id="quotePaddingXRatio" value="1.0" min="0" max="3" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>背景上下内边距倍率</label>
+            <input type="number" id="quotePaddingYRatio" value="1.5" min="0" max="3" step="0.1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>背景圆角 (px)</label>
+          <input type="number" id="quoteRadius" value="6" min="0" max="20">
+        </div>
+
+        <div class="section-title">笔记区域</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>笔记字号倍率</label>
+            <input type="number" id="noteRatio" value="0.8" min="0.3" max="2" step="0.05">
+          </div>
+          <div class="form-group">
+            <label>笔记行高</label>
+            <input type="number" id="noteLineHeight" value="1.9" min="1.2" max="3" step="0.1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>笔记文字色</label>
+          <input type="color" id="noteColor" value="#333333">
+        </div>
+        <div class="form-group">
+          <label>段落间距倍率</label>
+          <input type="number" id="paraGapRatio" value="0.7" min="0" max="2" step="0.1">
+        </div>
+
+        <div class="section-title">页脚</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>页脚字号倍率</label>
+            <input type="number" id="footerRatio" value="0.6" min="0.3" max="2" step="0.05">
+          </div>
+          <div class="form-group">
+            <label>页脚颜色</label>
+            <input type="color" id="footerColor" value="#999999">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" id="btnGenerate">生成卡片</button>
+      <button class="btn btn-secondary" id="btnDownload">下载全部</button>
+    </div>
+    <div class="status" id="status"></div>
+    <p class="hint">所有参数均可调整，实时预览。支持多页自动分页。</p>
+  </div>
+
+  <!-- 预览区域 -->
+  <div class="preview-area" id="previewArea">
+    <div class="preview-wrapper" id="previewWrapper">
+      <p style="color:#888; margin-top: 40px;">点击左侧「生成卡片」按钮预览效果</p>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

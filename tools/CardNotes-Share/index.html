@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>笔记分享卡片生成器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f0f2f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+}
+h1 {
+  font-size: 24px;
+  color: #1a1a2e;
+  margin-bottom: 24px;
+}
+.main-container {
+  display: flex;
+  gap: 32px;
+  max-width: 1400px;
+  width: 100%;
+  align-items: flex-start;
+}
+.input-panel {
+  flex: 0 0 360px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+.input-panel label {
+  display: block;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.input-panel input,
+.input-panel textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: border-color 0.2s;
+  outline: none;
+  font-family: inherit;
+}
+.input-panel input:focus,
+.input-panel textarea:focus {
+  border-color: #4a6fa5;
+}
+.input-panel .field { margin-bottom: 16px; }
+.input-panel textarea {
+  height: 200px;
+  resize: vertical;
+  line-height: 1.6;
+}
+.btn-generate {
+  width: 100%;
+  padding: 12px;
+  background: #4a6fa5;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 8px;
+}
+.btn-generate:hover { background: #3a5a8a; }
+.btn-generate:disabled { background: #aaa; cursor: not-allowed; }
+.preview-panel {
+  flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  min-height: 400px;
+}
+.preview-panel h2 {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 16px;
+}
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.preview-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.preview-card img {
+  width: 100%;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.preview-card .card-label {
+  text-align: center;
+  font-size: 13px;
+  color: #888;
+  margin-top: 8px;
+}
+.btn-download {
+  margin-top: 8px;
+  padding: 6px 16px;
+  background: #5a9a6a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.btn-download:hover { background: #4a8a5a; }
+.btn-download-all {
+  margin-top: 16px;
+  padding: 10px 20px;
+  background: #5a9a6a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.btn-download-all:hover { background: #4a8a5a; }
+.loading-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+}
+.loading-overlay.active { display: flex; }
+.loading-box {
+  background: #fff;
+  padding: 32px 48px;
+  border-radius: 12px;
+  font-size: 16px;
+  color: #333;
+}
+.empty-hint {
+  color: #aaa;
+  font-size: 14px;
+  text-align: center;
+  padding: 80px 0;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  body { padding: 12px; }
+  h1 { font-size: 20px; margin-bottom: 16px; }
+  .main-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .input-panel {
+    flex: none;
+    width: 100%;
+    padding: 16px;
+  }
+  .input-panel textarea { height: 120px; }
+  .preview-panel {
+    width: 100%;
+    padding: 16px;
+    min-height: auto;
+  }
+  .preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+}
+</style>
+</head>
+<body>
+
+<h1>📝 笔记分享卡片生成器</h1>
+
+<div class="main-container">
+  <div class="input-panel">
+    <div class="field">
+      <label>笔记标题</label>
+      <input type="text" id="inputTitle" placeholder="输入笔记标题" />
+    </div>
+    <div class="field">
+      <label>笔记分类</label>
+      <input type="text" id="inputCategory" placeholder="输入分类名称" />
+    </div>
+    <div class="field">
+      <label>笔记编号</label>
+      <input type="text" id="inputNumber" placeholder="如：2026-05-30 15:30:39" />
+    </div>
+    <div class="field">
+      <label>笔记内容</label>
+      <textarea id="inputContent" placeholder="输入笔记内容，支持多行文本"></textarea>
+    </div>
+    <button class="btn-generate" id="btnGenerate" onclick="handleGenerate()">生成卡片</button>
+  </div>
+
+  <div class="preview-panel">
+    <h2>预览区域</h2>
+    <div id="previewArea">
+      <div class="empty-hint">填写左侧信息后点击"生成卡片"</div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box">正在生成卡片，请稍候...</div>
+</div>
+
+<script>
+// ==================== 配置参数（顶部，方便微调） ====================
+
+const CONFIG = {
+  canvasWidth: 1200,
+  canvasHeight: 1600,
+
+  bgImage: '卡片笔记-分享卡-背景.png',
+  cardImage: '卡片笔记-分享卡-卡片.png',
+  noiseImage: '卡片笔记-分享卡-杂色.png',
+  fontHuiwen: '汇文明朝体.otf',
+  fontLxgw: '霞鹜文楷等宽.ttf',
+
+  title: {
+    rect: { x: 60, y: 80, w: 1080, h: 270 },
+    fontSize: 128,
+    lineHeight: 1.4,
+    align: 'right',
+    baseline: 'bottom',
+    anchorX: 1140,
+    anchorY: 350,
+    color: '#ffffff',
+    opacity: 0.9,
+    fontName: '汇文明朝体',
+  },
+
+  category: {
+    rect: { x: 60, y: 320, w: 240, h: 50 },
+    fontSize: 36,
+    color: '#272a2f',
+    opacity: 0.9,
+    fontName: '汇文明朝体',
+  },
+
+  number: {
+    rect: { x: 88, y: 1450, w: 512, h: 70 },
+    fontSize: 36,
+    color: '#264964',
+    opacity: 0.9,
+    fontName: '汇文明朝体',
+  },
+
+  content: {
+    rect: { x: 160, y: 450, w: 880, h: 910 },
+    fontSize: 60,
+    lineHeight: 1.8,
+    color: '#32384b',
+    opacity: 1.0,
+    fontName: '霞鹜文楷等宽',
+  },
+};
+
+// ==================== 全局状态 ====================
+
+let loadedFonts = false;
+let loadedImages = {};
+let generatedBlobs = [];
+
+// ==================== 字体加载（含本地缓存） ====================
+
+const FONT_CACHE_NAME = 'note-card-fonts-v1';
+
+async function getCachedFont(fontPath) {
+  // 尝试从 Cache API 读取
+  try {
+    const cache = await caches.open(FONT_CACHE_NAME);
+    const cached = await cache.match(fontPath);
+    if (cached) {
+      const blob = await cached.blob();
+      return blob;
+    }
+  } catch (_) {}
+  // 缓存未命中，从网络获取并存入缓存
+  const resp = await fetch(fontPath);
+  const blob = await resp.blob();
+  try {
+    const cache = await caches.open(FONT_CACHE_NAME);
+    await cache.put(fontPath, new Response(blob));
+  } catch (_) {}
+  return blob;
+}
+
+async function loadFonts() {
+  if (loadedFonts) return;
+  // 并行加载两个字体文件（优先读缓存）
+  const [huiwenBlob, lxgwBlob] = await Promise.all([
+    getCachedFont(CONFIG.fontHuiwen),
+    getCachedFont(CONFIG.fontLxgw),
+  ]);
+  // 从 Blob 创建 FontFace
+  const fontHuiwen = new FontFace(
+    CONFIG.title.fontName,
+    await huiwenBlob.arrayBuffer()
+  );
+  const fontLxgw = new FontFace(
+    CONFIG.content.fontName,
+    await lxgwBlob.arrayBuffer()
+  );
+  await Promise.all([fontHuiwen.load(), fontLxgw.load()]);
+  document.fonts.add(fontHuiwen);
+  document.fonts.add(fontLxgw);
+  // 确保字体完全可用于渲染
+  await document.fonts.ready;
+  loadedFonts = true;
+}
+
+// ==================== 图片加载（转为 Blob URL 避免跨域污染） ====================
+
+async function loadImages() {
+  const keys = ['bg', 'card', 'noise'];
+  const paths = [CONFIG.bgImage, CONFIG.cardImage, CONFIG.noiseImage];
+  await Promise.all(
+    keys.map(async (key, i) => {
+      const resp = await fetch(paths[i]);
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => { loadedImages[key] = img; resolve(); };
+        img.onerror = reject;
+        img.src = url;
+      });
+    })
+  );
+}
+
+// ==================== 标题智能拆行 ====================
+
+function splitTitleAtSpaces(title) {
+  // 找出所有连续空格组的位置和长度
+  const groups = [];
+  const regex = /[ \u3000]+/g;
+  let match;
+  while ((match = regex.exec(title)) !== null) {
+    groups.push({ index: match.index, length: match[0].length });
+  }
+  if (groups.length === 0) return null;
+  // 选取空格最多的一处作为换行点
+  groups.sort((a, b) => b.length - a.length);
+  const best = groups[0];
+  const line1 = title.slice(0, best.index);
+  const line2 = title.slice(best.index + best.length);
+  if (!line1 || !line2) return null;
+  return [line1, line2];
+}
+
+// ==================== 分类文字处理 ====================
+
+function formatCategory(text) {
+  const len = text.length;
+  if (len === 2) return text[0] + '  ' + text[1];
+  if (len === 3) return text[0] + ' ' + text[1] + ' ' + text[2];
+  return text;
+}
+
+// ==================== 文字换行计算 ====================
+
+function wrapText(ctx, text, maxWidth, fontSize, fontName) {
+  ctx.font = `${fontSize}px "${fontName}"`;
+  const lines = [];
+  const paragraphs = text.split('\n');
+
+  for (const para of paragraphs) {
+    if (para.length === 0) {
+      lines.push('');
+      continue;
+    }
+    let currentLine = '';
+    for (let i = 0; i < para.length; i++) {
+      const ch = para[i];
+      const testLine = currentLine + ch;
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && currentLine.length > 0) {
+        lines.push(currentLine);
+        currentLine = ch;
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+  }
+  return lines;
+}
+
+// ==================== 两端对齐绘制 ====================
+
+function drawJustifiedLine(ctx, line, x, y, maxWidth) {
+  if (line.length <= 1) {
+    ctx.fillText(line, x, y);
+    return;
+  }
+
+  const lastChar = line[line.length - 1];
+  const punctuationMarks = '\u201C\u201D\u2018\u2019\uFF0C\u3002\u3001\uFF1B\uFF1A\uFF01\uFF1F,\u2026\u2014\u300B\u300A\uFF09\uFF08\u300D\u300C\u300F\u300E\u3011\u3010';
+  const isEndOfParagraph = !punctuationMarks.includes(lastChar);
+  const totalWidth = ctx.measureText(line).width;
+
+  if (isEndOfParagraph || totalWidth < maxWidth * 0.85) {
+    ctx.fillText(line, x, y);
+    return;
+  }
+
+  const charWidths = [];
+  let totalCharWidth = 0;
+  for (let i = 0; i < line.length; i++) {
+    const w = ctx.measureText(line[i]).width;
+    charWidths.push(w);
+    totalCharWidth += w;
+  }
+
+  const totalGap = maxWidth - totalCharWidth;
+  const gapCount = line.length - 1;
+  const gapWidth = totalGap / gapCount;
+
+  let currentX = x;
+  for (let i = 0; i < line.length; i++) {
+    ctx.fillText(line[i], currentX, y);
+    currentX += charWidths[i] + gapWidth;
+  }
+}
+
+// ==================== 内容分页 ====================
+
+function paginateContent(ctx, content, config) {
+  const { rect, fontSize, lineHeight, fontName } = config;
+  const maxWidth = rect.w;
+  const lineSpacing = fontSize * lineHeight;
+  const maxLinesPerPage = Math.floor(rect.h / lineSpacing);
+
+  const allLines = wrapText(ctx, content, maxWidth, fontSize, fontName);
+  const pages = [];
+
+  for (let i = 0; i < allLines.length; i += maxLinesPerPage) {
+    pages.push(allLines.slice(i, i + maxLinesPerPage));
+  }
+
+  return pages;
+}
+
+// ==================== 绘制单张卡片 ====================
+
+function drawCard({ title, category, number, contentLines, pageIndex, totalPages }) {
+  const { canvasWidth, canvasHeight } = CONFIG;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
+  const ctx = canvas.getContext('2d');
+
+  // 1. 绘制背景
+  ctx.drawImage(loadedImages.bg, 0, 0, canvasWidth, canvasHeight);
+
+  // 2. 绘制标题（支持多行，右下角对齐）
+  const tc = CONFIG.title;
+  ctx.save();
+  ctx.globalAlpha = tc.opacity;
+  ctx.font = `${tc.fontSize}px "${tc.fontName}"`;
+  ctx.fillStyle = tc.color;
+  ctx.textAlign = tc.align;
+  ctx.textBaseline = tc.baseline;
+  const titleMaxWidth = tc.rect.w;
+  const titleTextWidth = ctx.measureText(title).width;
+  if (titleTextWidth <= titleMaxWidth) {
+    // 单行：直接绘制在锚点
+    ctx.fillText(title, tc.anchorX, tc.anchorY);
+  } else {
+    // 多行：优先从空格最多处拆行，否则逐字换行
+    const titleLineHeight = tc.fontSize * tc.lineHeight;
+    let titleLines;
+    const spaceSplit = splitTitleAtSpaces(title);
+    if (spaceSplit) {
+      // 检查空格拆行后每行是否都不溢出，若有行仍溢出则对其再逐字换行
+      titleLines = [];
+      for (const part of spaceSplit) {
+        const partWidth = ctx.measureText(part).width;
+        if (partWidth <= titleMaxWidth) {
+          titleLines.push(part);
+        } else {
+          titleLines.push(...wrapText(ctx, part, titleMaxWidth, tc.fontSize, tc.fontName));
+        }
+      }
+    } else {
+      titleLines = wrapText(ctx, title, titleMaxWidth, tc.fontSize, tc.fontName);
+    }
+    for (let i = titleLines.length - 1; i >= 0; i--) {
+      const lineIndex = titleLines.length - 1 - i;
+      const y = tc.anchorY - lineIndex * titleLineHeight;
+      ctx.fillText(titleLines[i], tc.anchorX, y);
+    }
+  }
+  ctx.restore();
+
+  // 3. 绘制卡片图片
+  ctx.drawImage(loadedImages.card, 0, 0, canvasWidth, canvasHeight);
+
+  // 4. 绘制分类
+  const cc = CONFIG.category;
+  const catText = formatCategory(category);
+  ctx.save();
+  ctx.globalAlpha = cc.opacity;
+  ctx.font = `${cc.fontSize}px "${cc.fontName}"`;
+  ctx.fillStyle = cc.color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const catCenterX = cc.rect.x + cc.rect.w / 2;
+  const catCenterY = cc.rect.y + cc.rect.h / 2;
+  ctx.fillText(catText, catCenterX, catCenterY);
+  ctx.restore();
+
+  // 5. 绘制内容
+  const cntCfg = CONFIG.content;
+  const lineSpacing = cntCfg.fontSize * cntCfg.lineHeight;
+  ctx.save();
+  ctx.globalAlpha = cntCfg.opacity;
+  ctx.font = `${cntCfg.fontSize}px "${cntCfg.fontName}"`;
+  ctx.fillStyle = cntCfg.color;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+
+  const contentStartY = cntCfg.rect.y;
+  for (let i = 0; i < contentLines.length; i++) {
+    const y = contentStartY + i * lineSpacing;
+    drawJustifiedLine(ctx, contentLines[i], cntCfg.rect.x, y, cntCfg.rect.w);
+  }
+  ctx.restore();
+
+  // 6. 绘制编号
+  const nc = CONFIG.number;
+  let numberText = `No.${number}`;
+  if (totalPages > 1) {
+    numberText += `-${pageIndex + 1}`;
+  }
+  ctx.save();
+  ctx.globalAlpha = nc.opacity;
+  ctx.font = `${nc.fontSize}px "${nc.fontName}"`;
+  ctx.fillStyle = nc.color;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  const numCenterY = nc.rect.y + nc.rect.h / 2;
+  ctx.fillText(numberText, nc.rect.x, numCenterY);
+  ctx.restore();
+
+  // 7. 绘制杂色
+  ctx.drawImage(loadedImages.noise, 0, 0, canvasWidth, canvasHeight);
+
+  return canvas;
+}
+
+// ==================== Canvas 转 Blob ====================
+
+function canvasToBlob(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error('Canvas 转 Blob 失败'));
+    }, 'image/png');
+  });
+}
+
+// ==================== 生成入口 ====================
+
+async function handleGenerate() {
+  const title = document.getElementById('inputTitle').value.trim();
+  const category = document.getElementById('inputCategory').value.trim();
+  const number = document.getElementById('inputNumber').value.trim();
+  const content = document.getElementById('inputContent').value.trim();
+
+  if (!title || !category || !number || !content) {
+    alert('请填写所有字段');
+    return;
+  }
+
+  const btn = document.getElementById('btnGenerate');
+  btn.disabled = true;
+  document.getElementById('loadingOverlay').classList.add('active');
+
+  try {
+    await loadFonts();
+    await loadImages();
+
+    const measureCanvas = document.createElement('canvas');
+    measureCanvas.width = CONFIG.canvasWidth;
+    measureCanvas.height = CONFIG.canvasHeight;
+    const measureCtx = measureCanvas.getContext('2d');
+
+    const pages = paginateContent(measureCtx, content, CONFIG.content);
+    const totalPages = pages.length;
+
+    // 逐页绘制并转为 Blob
+    generatedBlobs = [];
+    for (let i = 0; i < totalPages; i++) {
+      const canvas = drawCard({
+        title,
+        category,
+        number,
+        contentLines: pages[i],
+        pageIndex: i,
+        totalPages,
+      });
+      const blob = await canvasToBlob(canvas);
+      const url = URL.createObjectURL(blob);
+      generatedBlobs.push({ blob, url, index: i });
+    }
+
+    renderPreview();
+  } catch (err) {
+    console.error(err);
+    alert('生成失败：' + err.message);
+  } finally {
+    btn.disabled = false;
+    document.getElementById('loadingOverlay').classList.remove('active');
+  }
+}
+
+// ==================== 预览渲染 ====================
+
+function renderPreview() {
+  const area = document.getElementById('previewArea');
+  area.innerHTML = '';
+
+  if (generatedBlobs.length === 0) {
+    area.innerHTML = '<div class="empty-hint">填写左侧信息后点击"生成卡片"</div>';
+    return;
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'preview-grid';
+
+  generatedBlobs.forEach(({ url, index }) => {
+    const card = document.createElement('div');
+    card.className = 'preview-card';
+
+    const img = document.createElement('img');
+    img.src = url;
+    card.appendChild(img);
+
+    const label = document.createElement('div');
+    label.className = 'card-label';
+    label.textContent = generatedBlobs.length > 1 ? `第 ${index + 1} 页` : '卡片预览';
+    card.appendChild(label);
+
+    const btnDl = document.createElement('button');
+    btnDl.className = 'btn-download';
+    btnDl.textContent = '下载此页';
+    btnDl.onclick = () => downloadBlob(index);
+    card.appendChild(btnDl);
+
+    grid.appendChild(card);
+  });
+
+  area.appendChild(grid);
+
+  if (generatedBlobs.length > 1) {
+    const btnAll = document.createElement('button');
+    btnAll.className = 'btn-download-all';
+    btnAll.textContent = '下载全部';
+    btnAll.onclick = downloadAll;
+    area.appendChild(btnAll);
+  }
+}
+
+// ==================== 下载功能（使用 Blob URL） ====================
+
+function downloadBlob(index) {
+  const item = generatedBlobs[index];
+  if (!item) return;
+  const link = document.createElement('a');
+  link.href = item.url;
+  link.download = `笔记卡片-${index + 1}.png`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function downloadAll() {
+  generatedBlobs.forEach((_, i) => {
+    setTimeout(() => downloadBlob(i), i * 300);
+  });
+}
+</script>
+
+</body>
+</html>
