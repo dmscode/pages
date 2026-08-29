@@ -197,7 +197,7 @@ h1 {
     </div>
     <div class="field">
       <label>笔记分类</label>
-      <input type="text" id="inputCategory" placeholder="输入分类名称" />
+      <input type="text" id="inputCategory" value="笔记随感" placeholder="输入分类名称" />
     </div>
     <div class="field">
       <label>笔记编号</label>
@@ -279,6 +279,32 @@ const CONFIG = {
 let loadedFonts = false;
 let loadedImages = {};
 let generatedBlobs = [];
+let generatedMeta = { title: '', number: '' };
+
+// ==================== 文件名特殊字符过滤 ====================
+
+function sanitizeFilename(str) {
+  // 替换 Windows 文件名非法字符 \ / : * ? " < > | 为连字符
+  let result = str.replace(/[\\/:*?"<>|]/g, '-');
+  // 将空格替换为连字符
+  result = result.replace(/\s+/g, '-');
+  // 合并连续多个连字符为单个
+  result = result.replace(/-+/g, '-');
+  // 去除首尾连字符
+  result = result.replace(/^-+|-+$/g, '');
+  return result;
+}
+
+// ==================== 时间格式化 ====================
+
+function formatNow() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+// 页面加载时填充当前时间作为默认编号
+document.getElementById('inputNumber').value = formatNow();
 
 // ==================== 字体加载（含本地缓存） ====================
 
@@ -583,9 +609,13 @@ function canvasToBlob(canvas) {
 // ==================== 生成入口 ====================
 
 async function handleGenerate() {
+  // 每次生成时刷新编号为当前时间
+  const numberInput = document.getElementById('inputNumber');
+  numberInput.value = formatNow();
+
   const title = document.getElementById('inputTitle').value.trim();
   const category = document.getElementById('inputCategory').value.trim();
-  const number = document.getElementById('inputNumber').value.trim();
+  const number = numberInput.value.trim();
   const content = document.getElementById('inputContent').value.trim();
 
   if (!title || !category || !number || !content) {
@@ -611,6 +641,7 @@ async function handleGenerate() {
 
     // 逐页绘制并转为 Blob
     generatedBlobs = [];
+    generatedMeta = { title, number };
     for (let i = 0; i < totalPages; i++) {
       const canvas = drawCard({
         title,
@@ -687,9 +718,14 @@ function renderPreview() {
 function downloadBlob(index) {
   const item = generatedBlobs[index];
   if (!item) return;
+  // 文件名格式：标题-编号-页码.png，过滤特殊字符
+  const safeTitle = sanitizeFilename(generatedMeta.title);
+  const safeNumber = sanitizeFilename(generatedMeta.number);
+  const pageSuffix = generatedBlobs.length > 1 ? `-${index + 1}` : '';
+  const filename = `${safeTitle}-${safeNumber}${pageSuffix}.png`;
   const link = document.createElement('a');
   link.href = item.url;
-  link.download = `笔记卡片-${index + 1}.png`;
+  link.download = filename;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
