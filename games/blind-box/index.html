@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>盲盒小铺</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  </style>
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- 页面 1：主界面 -->
+    <section id="view-home" class="view">
+      <header class="topbar">
+        <div class="topbar-title">盲盒小铺</div>
+        <div class="coin-chip" id="coin-chip"><span class="coin-icon">🪙</span><span id="coin-balance">0</span></div>
+      </header>
+
+      <section class="claim-card">
+        <div class="claim-info">
+          <div class="claim-title">待领取代币</div>
+          <div class="claim-amount"><span id="claim-pending">0</span> 枚</div>
+          <div class="claim-next" id="claim-next">下一枚 10:00</div>
+        </div>
+        <button type="button" id="btn-claim" class="btn-claim">领取</button>
+      </section>
+
+      <section class="boxes-section">
+        <div class="section-hint">每 10 分钟攒 1 枚 · 12 枚撕开 1 个盲盒 · 每个盒子概率相同</div>
+        <div id="box-grid" class="box-grid"></div>
+        <div id="box-status" class="box-status">—</div>
+      </section>
+
+      <nav class="bottom-bar">
+        <button type="button" id="btn-shelf" class="btn-shelf">🎁 我的展示架（<span id="shelf-count">0</span>）</button>
+      </nav>
+    </section>
+
+    <!-- 页面 3：展示架 -->
+    <section id="view-shelf" class="view view-hidden">
+      <header class="topbar">
+        <button type="button" id="btn-back" class="btn-back">‹ 返回</button>
+        <div class="topbar-title">展示架</div>
+        <div class="topbar-spacer"></div>
+      </header>
+      <div id="shelf-tabs" class="shelf-tabs"></div>
+      <div id="shelf-grid" class="shelf-grid"></div>
+    </section>
+
+    <!-- 页面 2：开盒仪式（易撕条） -->
+    <div id="tear-overlay" class="overlay tear-overlay overlay-hidden">
+      <div class="tear-stage">
+        <div class="tear-box" id="tear-box">
+          <div class="box-body">
+            <div class="box-face">🎁</div>
+            <div class="box-label">盲盒小铺</div>
+          </div>
+          <div class="box-lid" id="box-lid">🎀</div>
+          <div class="torn-edge" id="torn-edge"></div>
+          <div class="tear-strip" id="tear-strip">
+            <div class="strip-dashes"></div>
+            <div class="strip-pull" id="strip-pull">撕开 ➜</div>
+          </div>
+          <div class="prize-pop" id="prize-pop"></div>
+          <div class="confetti-layer" id="confetti-layer"></div>
+        </div>
+        <div class="tear-hint" id="tear-hint">按住拉环，轻轻向右撕开</div>
+      </div>
+    </div>
+
+    <!-- 开盒结果 -->
+    <div id="result-modal" class="overlay result-modal overlay-hidden">
+      <div class="result-card">
+        <div class="result-label">获得</div>
+        <div class="result-visual" id="result-visual"></div>
+        <div class="rarity-chip" id="result-rarity"></div>
+        <div class="result-name" id="result-name"></div>
+        <div class="result-count" id="result-count"></div>
+        <button type="button" id="btn-continue" class="btn-continue">继续</button>
+      </div>
+    </div>
+
+    <!-- 隐藏功能：兑换码（连点金币 7 次触发） -->
+    <div id="redeem-modal" class="overlay result-modal overlay-hidden">
+      <div class="result-card">
+        <div class="result-label">兑换码</div>
+        <input type="text" id="redeem-input" class="redeem-input" maxlength="40" placeholder="输入兑换码" />
+        <div class="redeem-hint">每个兑换码仅可使用一次</div>
+        <div class="redeem-btns">
+          <button type="button" id="btn-redeem-cancel" class="btn-redeem-cancel">取消</button>
+          <button type="button" id="btn-redeem-ok" class="btn-redeem-ok">兑换</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <!-- 经典脚本按依赖顺序加载；模块经 window.BlindBox 协作（容器禁 module/import） -->
+  <script src="./assets/js/config.js"></script>
+  <script src="./assets/js/storage.js"></script>
+  <script src="./assets/js/tokens.js"></script>
+  <script src="./assets/js/lottery.js"></script>
+  <script src="./assets/js/collection.js"></script>
+  <script src="./assets/js/feedback.js"></script>
+  <script src="./assets/js/tear.js"></script>
+  <script src="./assets/js/state.js"></script>
+  <script src="./assets/js/views.js"></script>
+  <script src="./assets/js/main.js"></script>
+</body>
+</html>
