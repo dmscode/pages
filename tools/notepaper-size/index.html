@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>手帐尺寸速查 · 网页版</title>
+  <meta name="description" content="28 种手帐纸张尺寸速查：活页孔位、联动兼容、尺寸对比、孔标尺、A4 拼版打印。离线可用，数据经核验。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%8F%3C/text%3E%3C/svg%3E" />
+  <style>
+    /* 关键内联样式：仅防白屏闪烁，主体样式在 style.css */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: #fff7ef;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  </style>
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1 class="app-title">📏 手帐尺寸速查</h1>
+    <p class="app-sub">活页孔位 · 联动兼容 · 新手入坑</p>
+  </header>
+
+  <nav class="tabs" id="tabs" aria-label="分组切换"></nav>
+
+  <main class="views" id="views"></main>
+
+  <footer class="app-footer">
+    <p class="app-footer-line">整理自公开资料 · 不同品牌制作略有误差 · 购买前以商品页为准</p>
+    <p class="app-footer-line app-footer-dim">⚖️ 尺寸对比 · 📐 孔标尺 · 🖨️ 拼版打印 已上线</p>
+  </footer>
+
+  <script src="./assets/data.js"></script>
+  <script src="./assets/app.js"></script>
+</body>
+</html>
